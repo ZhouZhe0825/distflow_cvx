@@ -234,8 +234,7 @@ if length(nVW) == lenWN && isSymT
         
 
 		%% Declaracion de variables y expresiones
-		expression tvEqL(n,n,Config.Etapas);
-		expression tvEqR(n,n,Config.Etapas);
+		expression tvExpr(n,n,Config.Etapas);
 		expression CapDif(n,1,Config.Etapas);
 		expression TapDif(n,1,Config.Etapas);
 
@@ -411,39 +410,40 @@ if length(nVW) == lenWN && isSymT
 		end
 
 		% Restricciones de la corriente
-		lQoL(:,:,:,1) = 2*P.*Data.Red.Branch.T;
-		lQoL(:,:,:,2) = 2*Q.*Data.Red.Branch.T;
-		lQoL(:,:,:,3) =  (l - repmat(v, [1 n 1])).*Data.Red.Branch.T;
-		norms(lQoL,2,4) - (l + repmat(v, [1 n 1])).*Data.Red.Branch.T <= 0;
+		lQoL(:,:,:,1) = 2*P;
+		lQoL(:,:,:,2) = 2*Q;
+		lQoL(:,:,:,3) =  (l - repmat(v, [1 n 1]));
+		norms(lQoL,2,4) <= (l + repmat(v, [1 n 1]));
 
-		lNorm(:,:,:,1) = 2*P.*Data.Red.Branch.T;
-		lNorm(:,:,:,2) = 2*Q.*Data.Red.Branch.T;
-		lNorm(:,:,:,3) =  (l- z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1])).*Data.Red.Branch.T;
-		norms(lNorm,2,4) - (l + z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1])).*Data.Red.Branch.T <= 0;
+		lNorm(:,:,:,1) = 2*P;
+		lNorm(:,:,:,2) = 2*Q;
+		lNorm(:,:,:,3) =  (l- z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
+		norms(lNorm,2,4) <= (l + z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
 
-		Data.Red.Branch.T.*l <= Data.Red.Branch.T.*Data.Red.Branch.lTop.*z;
+		l <= Data.Red.Branch.lTop.*z;
 
 		% Restricciones de voltaje
 
-% % % % % % % % % % % 		nn >= (1 + Tap.*Data.Red.Bus.Ntr).^2;
-% % % % % % % % % % % 		nn <= (tnnTop + tnnLow).*(1 + Tap.*Data.Red.Bus.Ntr) - (tnnTop.*tnnLow);
-% % % % % % % % % % % 
-% % % % % % % % % % % 		nv >= nn.*(Data.Red.Bus.uLow.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uLow.^2);
-% % % % % % % % % % % 		nv >= nn.*(Data.Red.Bus.uTop.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uTop.^2);
-% % % % % % % % % % % 
-% % % % % % % % % % % 		nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
-% % % % % % % % % % % 		nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
-% % % % % % % % % % 
-% % % % % % % % % % % 		Tap >= Data.Red.Bus.TapLow;
-% % % % % % % % % % % 		Tap <= Data.Red.Bus.TapTop;
-% % % % % % % % % % 
-% % % % % % % % % % % 		tvEqL = (repmat(nv, [1 n 1]) - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T;
-		tvEqL = (repmat(v, [1 n 1]) - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T;
-		tvEqR = - 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
+% 		nn >= (1 + Tap.*Data.Red.Bus.Ntr).^2;
+% 		nn <= (tnnTop + tnnLow).*(1 + Tap.*Data.Red.Bus.Ntr) - (tnnTop.*tnnLow);
+% 
+% 		nv >= nn.*(Data.Red.Bus.uLow.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uLow.^2);
+% 		nv >= nn.*(Data.Red.Bus.uTop.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uTop.^2);
+% 
+% 		nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
+% 		nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
+% 
+% 		Tap >= Data.Red.Bus.TapLow;
+% 		Tap <= Data.Red.Bus.TapTop;
+% 
+% 		tvExpr = (repmat(nv, [1 n 1]) - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T ...
+% 			- 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
+		tvExpr = (repmat(v, [1 n 1]) - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T ...
+			- 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 
 
-		0 >= (tvEqL + tvEqR - repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n]).*(1-z)).*TnoG;
-		0 <= (tvEqL + tvEqR + repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n]).*(1-z)).*TnoG;
+		0 >= (tvExpr - repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+		0 <= (tvExpr + repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
 
 % 		0 == (1 + repmat(2* Tap .* Data.Red.Bus.Ntr .* Data.Red.Bus.uLow.^2, [1 n 1]) ...
 % 			- repmat(permute(v, [2 1 3]), [n 1 1]) + tvEqR).*TSalientesG;
@@ -467,19 +467,21 @@ if length(nVW) == lenWN && isSymT
 		Data.Red.Branch.T .* z >= 0;
 		Data.Red.Branch.T .* z <= 1;
 		
-		FixY .* y == FixY;
-		FreeY .* y <= FreeY .* Data.Red.Branch.yTop;
-		FreeY .* y >= FreeY .* Data.Red.Branch.yLow;
+% 		FixY .* y == FixY;
+% 		FreeY .* y <= FreeY .* Data.Red.Branch.yTop;
+% 		FreeY .* y >= FreeY .* Data.Red.Branch.yLow;
+		y <= Data.Red.Branch.yTop;
+		y >= Data.Red.Branch.yLow;
 
 		% Restricciones de nodo 0
-		PTras(G,1,:) == sum(Data.Red.Branch.T(G,:,:).*P(G,:,:),2);
-		QTras(G,1,:) == sum(Data.Red.Branch.T(G,:,:).*Q(G,:,:),2);
-		PTras(NnoG,1,:) == 0;
-		QTras(NnoG,1,:) == 0;
-		PTras(G,1,:) >= Data.Red.Bus.P0Low(G,1,:);
-		PTras(G,1,:) <= Data.Red.Bus.P0Top(G,1,:);
-		QTras(G,1,:) >= Data.Red.Bus.Q0Low(G,1,:);
-		QTras(G,1,:) <= Data.Red.Bus.Q0Top(G,1,:);
+		% PTras(G,1,:) == sum(Data.Red.Branch.T(G,:,:).*P(G,:,:),2);
+		% QTras(G,1,:) == sum(Data.Red.Branch.T(G,:,:).*Q(G,:,:),2);
+		% PTras(NnoG,1,:) == 0;
+		% QTras(NnoG,1,:) == 0;
+		PTras >= Data.Red.Bus.P0Low;
+		PTras <= Data.Red.Bus.P0Top;
+		QTras >= Data.Red.Bus.Q0Low;
+		QTras <= Data.Red.Bus.Q0Top;
 
 		% Restricciones de dominio
 		v >= Data.Red.Bus.uLow.^2;

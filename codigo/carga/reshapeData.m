@@ -90,11 +90,18 @@ function [DataM] = reshapeData(Data, Config)
 	DataM.Cost.piPTras	 = 	replicateMat3_2(	Data.Cost.piPTras	,1);
 	DataM.Cost.piQmtras	 = 	replicateMat3_2(	Data.Cost.piQmtras	,1);
 	DataM.Cost.piQMtras	 = 	replicateMat3_2(	Data.Cost.piQMtras	,1);
-	DataM.Red.Bus.P0Low	 = 	ones(Buses,1,Config.Etapas)*	Data.Red.Bus.P0Low	;
-	DataM.Red.Bus.P0Top	 = 	ones(Buses,1,Config.Etapas)*	Data.Red.Bus.P0Top	;
-	DataM.Red.Bus.Q0Low	 = 	ones(Buses,1,Config.Etapas)*	Data.Red.Bus.Q0Low	;
-	DataM.Red.Bus.Q0Top	 = 	ones(Buses,1,Config.Etapas)*	Data.Red.Bus.Q0Top	;
-	DataM.Cost.m	 = 	replicateMat3_1(	Data.Cost.m	,Buses);
+	
+    DataM.Red.Bus.P0Low = zeros(Buses,1,Config.Etapas);
+	DataM.Red.Bus.P0Top = zeros(Buses,1,Config.Etapas);
+	DataM.Red.Bus.Q0Low = zeros(Buses,1,Config.Etapas);
+	DataM.Red.Bus.Q0Top = zeros(Buses,1,Config.Etapas);
+
+	DataM.Red.Bus.P0Low(DataM.Red.Bus.v0,:,:) = Data.Red.Bus.P0Low;
+	DataM.Red.Bus.P0Top(DataM.Red.Bus.v0,:,:) = Data.Red.Bus.P0Top;
+	DataM.Red.Bus.Q0Low(DataM.Red.Bus.v0,:,:) = Data.Red.Bus.Q0Low;
+	DataM.Red.Bus.Q0Top(DataM.Red.Bus.v0,:,:) = Data.Red.Bus.Q0Top;
+    
+    DataM.Cost.m	 = 	replicateMat3_1(	Data.Cost.m	,Buses);
 	DataM.Gen.DFIG.n_	 = 	replicateMat3_1(	Data.Gen.DFIG.n_	,Buses);
 	DataM.Gen.DFIG.P_mec	 = 	replicateMat3_1(	Data.Gen.DFIG.P_mec	,Buses);
 	DataM.Gen.DFIG.Tg	 = 	replicateMat3_3(	Data.Gen.DFIG.Tg	, Config.Etapas);
@@ -125,6 +132,10 @@ function [DataM] = reshapeData(Data, Config)
 	DataM.Util.pzCnPrefE	 = 	replicateMat3_3(	Data.Util.pzCnPrefE	,Config.Etapas);
 	DataM.Util.pzCnLowE	 = 	replicateMat3_3(	Data.Util.pzCnLowE	,Config.Etapas);
 	DataM.Util.pzCnTopE	 = 	replicateMat3_3(	Data.Util.pzCnTopE	,Config.Etapas);
+
+	DataM.Util.qzCnPrefE	 = 	replicateMat3_3(	Data.Util.qzCnPrefE	,Config.Etapas);
+	DataM.Util.qzCnLowE	 = 	replicateMat3_3(	Data.Util.qzCnLowE	,Config.Etapas);
+	DataM.Util.qzCnTopE	 = 	replicateMat3_3(	Data.Util.qzCnTopE	,Config.Etapas);
 
 	DataM.St.Bat.I	 = 	replicateMat3_3(	Data.St.Bat.I	,Config.Etapas);
 	DataM.Gen.Pv.I	 = 	replicateMat3_3(	Data.Gen.Pv.I	,Config.Etapas);
