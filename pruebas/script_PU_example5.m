@@ -12,7 +12,7 @@ minr = 0;
 tol = 5e-8;
 delta = 0.004;
 m = .01;
-CantHorasEtapa = .5;
+CantHorasEtapa = .25;
 iniEtapa = 1; %7:00
 
 factorReducEol = .25;

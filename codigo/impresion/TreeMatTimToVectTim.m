@@ -14,8 +14,12 @@ function [VT] = TreeMatTimToVectTim(AT, Et, Tree)
 	W(indW) = 1;
 	m = size(M,1);
     VT = zeros(m,Et);
-    for i = 1:Et
-        VT(:,i) = (M*AT(:,:,i)*W).*eye(m)*ones(m,1);
+    if Et > 1
+        for i = 1:Et
+            VT(:,i) = (M*AT(:,:,i)*W).*eye(m)*ones(m,1);
+        end
+    else
+        VT(:,1) = (M*AT(:,:)*W).*eye(m)*ones(m,1);
     end
 	
 end

@@ -189,20 +189,19 @@ cvx_begin
     
 	
 	% Restriccion de la tension
-%     nn >= (1 + Tap.*Data.Red.Bus.Ntr).^2;
-%     nn <= (tnnTop + tnnLow).*(1 + Tap.*Data.Red.Bus.Ntr) - (tnnTop.*tnnLow);
-% 
-%     nv >= nn.*(Data.Red.Bus.uLow.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uLow.^2);
-%     nv >= nn.*(Data.Red.Bus.uTop.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uTop.^2);
-% 
-%     nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
-%     nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
-%     
-%     Tap >= Data.Red.Bus.TapLow;
-%     Tap <= Data.Red.Bus.TapTop;
-%     
-%     vExpr = VertI*nv - VertJ*v - 2 * (Data.Red.Branch.rm.*P + Data.Red.Branch.xm.*Q) + ((Data.Red.Branch.rm).^2 + (Data.Red.Branch.xm).^2) .* l;
-    vExpr = VertI*v - VertJ*v - 2 * (Data.Red.Branch.rm.*P + Data.Red.Branch.xm.*Q) + ((Data.Red.Branch.rm).^2 + (Data.Red.Branch.xm).^2) .* l;
+    nn >= (1 + Tap.*Data.Red.Bus.Ntr).^2;
+    nn <= (tnnTop + tnnLow).*(1 + Tap.*Data.Red.Bus.Ntr) - (tnnTop.*tnnLow);
+
+    nv >= nn.*(Data.Red.Bus.uLow.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uLow.^2);
+    nv >= nn.*(Data.Red.Bus.uTop.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uTop.^2);
+
+    nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
+    nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
+    
+    Tap >= Data.Red.Bus.TapLow;
+    Tap <= Data.Red.Bus.TapTop;
+    
+    vExpr = VertI*nv - VertJ*v - 2 * (Data.Red.Branch.rm.*P + Data.Red.Branch.xm.*Q) + ((Data.Red.Branch.rm).^2 + (Data.Red.Branch.xm).^2) .* l;
     
     0 >= vExpr - (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
     0 <= vExpr + (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
@@ -240,41 +239,43 @@ cvx_begin
 	v <= Data.Red.Bus.uTop.^2;
 %     pC >= Data.Red.Bus.pCLowm;
 %     qC >= Data.Red.Bus.qCLowm;
-	l <= Data.Red.Branch.lTopm;
+	l <= Data.Red.Branch.lTopm.*z;
     z >= 0;
     z <= 1;
     y >= Data.Red.Branch.yLowm;
     y <= Data.Red.Branch.yTopm;
 
     %% Clientes no interrumpibles
-% % %     pzCClNI >= Data.Red.Bus.alpha(ClNI,:,1).*(pLClNI.*v(ClNI,:) + pCnClNI.*vLClNI - pLClNI.*vLClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
-% % %     pzCClNI >= Data.Red.Bus.alpha(ClNI,:,1).*(pTClNI.*v(ClNI,:) + pCnClNI.*vTClNI - pTClNI.*vTClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
-% % %     pzCClNI <= Data.Red.Bus.alpha(ClNI,:,1).*(pTClNI.*v(ClNI,:) + pCnClNI.*vLClNI - pTClNI.*vLClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
-% % %     pzCClNI <= Data.Red.Bus.alpha(ClNI,:,1).*(pLClNI.*v(ClNI,:) + pCnClNI.*vTClNI - pLClNI.*vTClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
-% % % 
-% % %     pLClNI.*onClNI <= pCnClNI;
-% % %     pCnClNI <= pTClNI.*onClNI;
-% % % 
-% % %     qLClNI.*onClNI <= qCClNI;
-% % %     qCClNI <= qTClNI.*onClNI;
-% % % 
-% % %     pCClNI >= pzCClNI;
-% % %     qCClNI <= pCClNI.*Data.Util.tgPhi;
-% % % 
-% % %     pClNI(:,:) = 0;
-% % %     qClNI(:,:) = 0;
-% % % 
-% % %     pClNI(ClNI,:) = pCClNI;
-% % %     qClNI(ClNI,:) = qCClNI;
-% % % 
-% % % 
-% % %     sum(stClNI,2) == 1;
-% % %     sum(onClNI,2) == Data.ClNI.d(ClNI);
-% % %     stClNI(:,1) == onClNI(:,1);
-% % % 
-% % %     onNext(:,(1:Config.Etapas-1)) = onClNI(:,(2:Config.Etapas));
-% % %     onNext(:,Config.Etapas) = 0;
-% % %     stClNI - onNext + onClNI >= 0;
+    if nClNI > 0
+        pzCClNI >= Data.Red.Bus.alpha(ClNI,:,1).*(pLClNI.*v(ClNI,:) + pCnClNI.*vLClNI - pLClNI.*vLClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
+        pzCClNI >= Data.Red.Bus.alpha(ClNI,:,1).*(pTClNI.*v(ClNI,:) + pCnClNI.*vTClNI - pTClNI.*vTClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
+        pzCClNI <= Data.Red.Bus.alpha(ClNI,:,1).*(pTClNI.*v(ClNI,:) + pCnClNI.*vLClNI - pTClNI.*vLClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
+        pzCClNI <= Data.Red.Bus.alpha(ClNI,:,1).*(pLClNI.*v(ClNI,:) + pCnClNI.*vTClNI - pLClNI.*vTClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
+
+        pLClNI.*onClNI <= pCnClNI;
+        pCnClNI <= pTClNI.*onClNI;
+
+        qLClNI.*onClNI <= qCClNI;
+        qCClNI <= qTClNI.*onClNI;
+
+        pCClNI >= pzCClNI;
+        qCClNI <= pCClNI.*Data.Util.tgPhi;
+
+        pClNI(:,:) = 0;
+        qClNI(:,:) = 0;
+
+        pClNI(ClNI,:) = pCClNI;
+        qClNI(ClNI,:) = qCClNI;
+
+
+        sum(stClNI,2) == 1;
+        sum(onClNI,2) == Data.ClNI.d(ClNI);
+        stClNI(:,1) == onClNI(:,1);
+
+        onNext(:,(1:Config.Etapas-1)) = onClNI(:,(2:Config.Etapas));
+        onNext(:,Config.Etapas) = 0;
+        stClNI - onNext + onClNI >= 0;
+    end
     
 
     %% Cliente Residencial
