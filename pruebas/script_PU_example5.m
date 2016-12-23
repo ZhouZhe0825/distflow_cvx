@@ -184,7 +184,6 @@ end
 Data.temp = temp;
 
 % Fotovoltaicos
-
 % Trasmision
 % Data.Red.Bus.Q0Top = .0955;
 % Data.Red.Bus.Q0Low = 0;
@@ -241,8 +240,8 @@ Data.temp = temp;
 % Configuraciones manuales
 
 utilCarg = utilidadCarga();
-if util
-    Data.Util.Func = 2;
+% if util
+%     Data.Util.Func = 2;
 
     Data.Util.betaT = zeros(size(Data.Red.Bus.pCLow,1),1);
     Data.Util.betaT(Data.Red.Bus.indCons) = .2;
@@ -260,11 +259,11 @@ if util
     Data.Util.nMultipLow = .95;
     Data.Util.tgPhi = .2;
     
-else
-    Data.Util.Func = 0;
-end
+% else
+%     Data.Util.Func = 0;
+% end
 
-if Data.Util.Func ~= 0
+% if Data.Util.Func ~= 0
 	Data.Util.pzCnPref = repmat(full(Data.Red.Bus.pCLow), [1,1,2]);		
 	Data.Util.pzCnLow = repmat(full(Data.Red.Bus.pCLow), [1,1,2]) * Data.Util.nMultipLow;
 	Data.Util.pzCnTop = repmat(full(Data.Red.Bus.pCLow), [1,1,2]) * Data.Util.nMultipTop;
@@ -292,7 +291,7 @@ if Data.Util.Func ~= 0
 	Data.Util.qzCnPrefE = Data.ClNI.qC;
 	Data.Util.qzCnLowE = Data.ClNI.qC*.75;
 	Data.Util.qzCnTopE = Data.ClNI.qC*1.1;
-end
+% end
 
 %% Parametros de Storage
 
