@@ -120,10 +120,6 @@ cvx_begin
     variable qCApp(n, Config.Etapas, 2); % real power demand in i
     expression vApp(n, Config.Etapas, 2);
     variable pCn(n, Config.Etapas, 2); % real power demand in i
-    variable Tvar(n,Config.Etapas);
-    expression TvarAnt(n,Config.Etapas);
-    expression pCAC(n,Config.Etapas);
-
     
     
     variable pCClRes(n, Config.Etapas); % real power demand in i
@@ -298,25 +294,13 @@ cvx_begin
 
     pCClRes >= sum(pCApp,3);
 
-    qCClRes >= pCClRes.*Data.Util.tgPhi;
+    qCClRes >= sum(qCApp,3);
     
-    % Aire acondicionado
-    TvarAnt(:,1) = Data.St.AC.tempIni;
-    TvarAnt(:,(2:Config.Etapas)) = Tvar(:,(1:Config.Etapas-1));
-    pCAC(:,:) = 0;
-    pCAC(iC,:) = pCApp(iC,:,2);
-
-    Tvar(iC,:) - TvarAnt(iC,:) + Data.St.AC.epsilon(iC,:).*(TvarAnt(iC,:) - Data.temp(iC,:))*Data.dt - Data.St.AC.eta(iC,:).*pCAC(iC,:)*Data.dt == 0;
-
-    Tvar(iC,:) >= Data.St.AC.tempLow(iC,:);
-    Tvar(iC,:) <= Data.St.AC.tempTop(iC,:);
-
     minimize fopt_expr
 
     
 cvx_end
 cvx_status
-cvx_clear
 toc
 
 %% Reconstruccion de la solucion
@@ -346,12 +330,8 @@ toc
 	Var.Red.Branch.z = MxT2NxNxT(VertI,VertJ,z);
 	Var.Red.Bus.w = permute(full(w), [1 3 2]);
 
-% 	Var.Red.Branch.lNorm = lNorm;
-% 	Var.Red.Branch.lQoL = lQoL;
-    
     Var.ClRes.pC = permute(full(pCClRes), [1 3 2]);
     Var.ClRes.qC = permute(full(qCClRes), [1 3 2]);
-    Var.ClRes.Tvar = permute(full(Tvar), [1 3 2]);
 
     Var.ClRes.pCApp = permute(full(pCApp), [1 4 2 3]);
     Var.ClRes.qCApp = permute(full(qCApp), [1 4 2 3]);
@@ -363,4 +343,5 @@ toc
 
     
 opt = fopt_expr;
+cvx_clear
 end
