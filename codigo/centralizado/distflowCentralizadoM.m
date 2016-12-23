@@ -46,20 +46,8 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
 
 
-ClNI = find(Data.ClNI.I == 1);
-nClNI = length(ClNI);
-
-pLClNI = Data.Util.pzCnLowE(ClNI,:);
-pTClNI = Data.Util.pzCnTopE(ClNI,:);
-qLClNI = Data.Util.qzCnLowE(ClNI,:);
-qTClNI = Data.Util.qzCnTopE(ClNI,:);
-vLClNI = Data.Red.Bus.uLow(ClNI,:).^2;
-vTClNI = Data.Red.Bus.uTop(ClNI,:).^2;
-
 uLowApp = zeros(size(Data.Red.Bus.uLow,1),size(Data.Red.Bus.uLow,2), 2);
 uTopApp = uLowApp;
-
-iC = Data.Red.Bus.indCons;
 
 tic
 cvx_begin
@@ -102,28 +90,10 @@ cvx_begin
     expression CapDif(n,Config.Etapas);
     expression TapDif(n,Config.Etapas);
 
-    variable pCnClNI(nClNI,Config.Etapas); % real power demand in i
-    variable pzCClNI(nClNI,Config.Etapas); % real power demand in i
-
-    variable onClNI(nClNI,Config.Etapas) binary;
-    variable stClNI(nClNI,Config.Etapas) binary;
-
-    expression onNext(nClNI,Config.Etapas)
-
-    variable pCClNI(nClNI,Config.Etapas); % real power demand in i
-    variable qCClNI(nClNI,Config.Etapas); % reactive power demand in i
-
-    expression pClNI(n, Config.Etapas);
-    expression qClNI(n, Config.Etapas);
-
     variable pCApp(n, Config.Etapas, 2); % real power demand in i
     variable qCApp(n, Config.Etapas, 2); % real power demand in i
     expression vApp(n, Config.Etapas, 2);
     variable pCn(n, Config.Etapas, 2); % real power demand in i
-    variable Tvar(n,Config.Etapas);
-    expression TvarAnt(n,Config.Etapas);
-    expression pCAC(n,Config.Etapas);
-
     
     
     variable pCClRes(n, Config.Etapas); % real power demand in i
@@ -143,7 +113,6 @@ cvx_begin
         + sum(cQG) ...
         + sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2)) ...
         + sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2)) ...
-        + sum(Data.Util.betaE.*((pClNI - Data.Util.pzCnPrefE).^2)) ...
         + sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2)) ...
         );
 
@@ -162,8 +131,8 @@ cvx_begin
     pN - pC + pG == 0;
     qN - qC + qG + qCp == 0;
     
-    pC == pCClRes + pClNI;
-    qC == qCClRes + qClNI;
+    pC == pCClRes;
+    qC == qCClRes;
     
     % Restricciones de capacitores
     Cap >= Data.Red.Bus.CapLow;
@@ -245,38 +214,6 @@ cvx_begin
     y >= Data.Red.Branch.yLowm;
     y <= Data.Red.Branch.yTopm;
 
-    %% Clientes no interrumpibles
-    if nClNI > 0
-        pzCClNI >= Data.Red.Bus.alpha(ClNI,:,1).*(pLClNI.*v(ClNI,:) + pCnClNI.*vLClNI - pLClNI.*vLClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
-        pzCClNI >= Data.Red.Bus.alpha(ClNI,:,1).*(pTClNI.*v(ClNI,:) + pCnClNI.*vTClNI - pTClNI.*vTClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
-        pzCClNI <= Data.Red.Bus.alpha(ClNI,:,1).*(pTClNI.*v(ClNI,:) + pCnClNI.*vLClNI - pTClNI.*vLClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
-        pzCClNI <= Data.Red.Bus.alpha(ClNI,:,1).*(pLClNI.*v(ClNI,:) + pCnClNI.*vTClNI - pLClNI.*vTClNI) + (1-Data.Red.Bus.alpha(ClNI,:,1)).* pCnClNI;
-
-        pLClNI.*onClNI <= pCnClNI;
-        pCnClNI <= pTClNI.*onClNI;
-
-        qLClNI.*onClNI <= qCClNI;
-        qCClNI <= qTClNI.*onClNI;
-
-        pCClNI >= pzCClNI;
-        qCClNI <= pCClNI.*Data.Util.tgPhi;
-
-        pClNI(:,:) = 0;
-        qClNI(:,:) = 0;
-
-        pClNI(ClNI,:) = pCClNI;
-        qClNI(ClNI,:) = qCClNI;
-
-
-        sum(stClNI,2) == 1;
-        sum(onClNI,2) == Data.ClNI.d(ClNI);
-        stClNI(:,1) == onClNI(:,1);
-
-        onNext(:,(1:Config.Etapas-1)) = onClNI(:,(2:Config.Etapas));
-        onNext(:,Config.Etapas) = 0;
-        stClNI - onNext + onClNI >= 0;
-    end
-    
 
     %% Cliente Residencial
     for app = 1:2
@@ -298,25 +235,13 @@ cvx_begin
 
     pCClRes >= sum(pCApp,3);
 
-    qCClRes >= pCClRes.*Data.Util.tgPhi;
+    qCClRes >= sum(qCApp,3);
     
-    % Aire acondicionado
-    TvarAnt(:,1) = Data.St.AC.tempIni;
-    TvarAnt(:,(2:Config.Etapas)) = Tvar(:,(1:Config.Etapas-1));
-    pCAC(:,:) = 0;
-    pCAC(iC,:) = pCApp(iC,:,2);
-
-    Tvar(iC,:) - TvarAnt(iC,:) + Data.St.AC.epsilon(iC,:).*(TvarAnt(iC,:) - Data.temp(iC,:))*Data.dt - Data.St.AC.eta(iC,:).*pCAC(iC,:)*Data.dt == 0;
-
-    Tvar(iC,:) >= Data.St.AC.tempLow(iC,:);
-    Tvar(iC,:) <= Data.St.AC.tempTop(iC,:);
-
     minimize fopt_expr
 
     
 cvx_end
 cvx_status
-cvx_clear
 toc
 
 %% Reconstruccion de la solucion
@@ -346,12 +271,8 @@ toc
 	Var.Red.Branch.z = MxT2NxNxT(VertI,VertJ,z);
 	Var.Red.Bus.w = permute(full(w), [1 3 2]);
 
-% 	Var.Red.Branch.lNorm = lNorm;
-% 	Var.Red.Branch.lQoL = lQoL;
-    
     Var.ClRes.pC = permute(full(pCClRes), [1 3 2]);
     Var.ClRes.qC = permute(full(qCClRes), [1 3 2]);
-    Var.ClRes.Tvar = permute(full(Tvar), [1 3 2]);
 
     Var.ClRes.pCApp = permute(full(pCApp), [1 4 2 3]);
     Var.ClRes.qCApp = permute(full(qCApp), [1 4 2 3]);
@@ -363,4 +284,5 @@ toc
 
     
 opt = fopt_expr;
+cvx_clear
 end
