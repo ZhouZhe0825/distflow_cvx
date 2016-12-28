@@ -72,8 +72,8 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
         variable Q(n, n, Config.Etapas); % reactive power from i to j
         variable l(n, n, Config.Etapas);
         
-    variable pC(n,1, Config.Etapas); % real power demand in i
-    variable qC(n,1, Config.Etapas); % reactive power demand in i
+        variable pC(n,1, Config.Etapas); % real power demand in i
+        variable qC(n,1, Config.Etapas); % reactive power demand in i
         
         variable pN(n,1, Config.Etapas);
         variable qN(n,1, Config.Etapas);
@@ -99,22 +99,14 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 		variable Tap(n,1, Config.Etapas) integer;
 		variable y(n, n, Config.Etapas) binary;
         
-        if lenCh > 0
-                variable stCh(n,1, Config.Etapas) binary;
-                variable onCh(n,1, Config.Etapas) binary;
-            expression onNext(n,1,Config.Etapas)
-        end
-        
-
-        
 		% Variables de utilidad
-			variable pCApp(n,1, Config.Etapas, 2); % real power demand in i
-			variable qCApp(n,1, Config.Etapas, 2); % real power demand in i
-			expression vApp(n, 1, Config.Etapas, 2);
-			variable pCn(n,1, Config.Etapas, 2); % real power demand in i
+        variable pCApp(n,1, Config.Etapas, 2); % real power demand in i
+        variable qCApp(n,1, Config.Etapas, 2); % real power demand in i
+        expression vApp(n, 1, Config.Etapas, 2);
+        variable pCn(n,1, Config.Etapas, 2); % real power demand in i
 
-    variable pCClRes(n,1, Config.Etapas); % real power demand in i
-    variable qCClRes(n,1, Config.Etapas); % real power demand in i
+        variable pCClRes(n,1, Config.Etapas); % real power demand in i
+        variable qCClRes(n,1, Config.Etapas); % real power demand in i
 
         
 
@@ -123,6 +115,10 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 		expression CapDif(n,1,Config.Etapas);
 		expression TapDif(n,1,Config.Etapas);
 
+		variable pCClNI(n,1, Config.Etapas);
+		variable qCClNI(n,1, Config.Etapas);
+		
+		
 		expression tfopt_expr(Config.Etapas); 
 		expression fopt_expr; 
 
@@ -131,9 +127,6 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 		expression lNorm(n, n, Config.Etapas,3);
 		
 
-		fopt_expr = 0;
-
-
 		%% Funcion objetivo
         CapDif(:,1,1) = Data.Red.Bus.CapIni;
         CapDif(:,1,(2:Config.Etapas)) = Cap(:,1,(2:Config.Etapas)) - Cap(:,1,(1:Config.Etapas-1));
@@ -141,18 +134,17 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
         TapDif(:,1,1) = Data.Red.Bus.TapIni;
         TapDif(:,1,(2:Config.Etapas)) = Tap(:,1,(2:Config.Etapas)) - Tap(:,1,(1:Config.Etapas-1));
 		
-		tfopt_expr = sum(...
-			+ sum(Data.Cost.piPTras .* PTras) ...
-			+ sum(Data.Cost.cdv .* cDv) ...
-            + sum(cQTras) ...
-            + sum(Data.Red.cambioCap*CapDif.^2) ...
-            + sum(Data.Red.cambioTap*TapDif.^2) ...
-        + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2) ...
-            );
+		tfopt_expr = ...
+            sum(Data.Cost.piPTras .* PTras,1) ...
+            + sum(Data.Cost.cdv .* cDv,1) ...
+            + sum(cQTras,1) ...
+            + sum(Data.Red.cambioCap*CapDif.^2,1) ...
+            + sum(Data.Red.cambioTap*TapDif.^2,1) ...
+            + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2,1) ...
+            ;
 
-        if lenCh > 0
-            tfopt_expr = tfopt_expr + sum(Data.Util.betaE.*(Data.ClNI.pC.*onCh).^2);
-        end
+
+        
         
         
         
@@ -175,16 +167,10 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
         qCp <= NcpCapL.*v + NcpvT.*Cap - NcpCapLvT;
         qCp <= NcpCapT.*v + NcpvL.*Cap - NcpCapTvL;
 
+		pC == pCClRes + pCClNI;
+		qC == qCClRes + qCClNI;
 
-        if lenCh > 0
-			pC == pCClRes + Data.ClNI.pC.*onCh;
-			qC == qCClRes + Data.ClNI.qC.*onCh;
-		else
-		    pC == pCClRes;
-		    qC == qCClRes;
 
-        end
-        
         pG = PTras;
         qG = QTras + qCp;
         
@@ -292,11 +278,17 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
         
 
-    %% Restricciones de storage bateria
-		fopt_expr = sum(tfopt_expr);
 
         %% Restricciones de cargas no interrumpibles
         if lenCh > 0
+            variable stCh(n,1, Config.Etapas) binary;
+            variable onCh(n,1, Config.Etapas) binary;
+            expression onNext(n,1,Config.Etapas)
+
+			pCClNI == Data.ClNI.pC.*onCh;
+			qCClNI == Data.ClNI.qC.*onCh;
+			
+			
             onNext(nodCh,1,(1:Config.Etapas-1)) = onCh(nodCh,1,(2:Config.Etapas));
             onNext(nodCh,1,Config.Etapas) = 0;
             stCh - onNext + onCh >= 0;
@@ -307,8 +299,14 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
             stCh(NnodCh,1,:) == 0;
             onCh(NnodCh,1,:) == 0;
+
+            tfopt_expr = tfopt_expr + sum(Data.Util.betaE.*(pCClNI - Data.Util.pzCnPrefE).^2,1);
+        else
+            pCClNI == 0;
+            qCClNI == 0;
         end
         
+        fopt_expr = sum(tfopt_expr);
 
 		if findOpt
 			minimize fopt_expr
@@ -319,11 +317,10 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 	toc
 	
     if lenCh > 0
-        Var.ClNI.pC = Data.ClNI.pC.*onCh;
-        Var.ClNI.qC = Data.ClNI.qC.*onCh;
+        Var.ClNI.pC = pCClNI;
+        Var.ClNI.qC = qCClNI;
         Var.ClNI.on = onCh;
         Var.ClNI.start = stCh;
-        Var.Cost.optEt = tfopt_expr;
     end
 
 
@@ -348,8 +345,8 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 	Var.Red.Bus.qN = qN;
 	Var.Red.Bus.v = v;
 
-Var.ClRes.pC = pCClRes;
-Var.ClRes.qC = qCClRes;
+    Var.ClRes.pC = pCClRes;
+    Var.ClRes.qC = qCClRes;
 	Var.ClRes.pCApp = pCApp;
 	Var.ClRes.qCApp = qCApp;
 
