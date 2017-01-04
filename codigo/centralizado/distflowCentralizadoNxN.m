@@ -132,15 +132,15 @@ cvx_begin
 	qCp <= NcpCapT.*v + NcpvL.*Cap - NcpCapTvL;
 
 	% Restricciones conica de corriente
-	lQoL(:,:,:,1) = 2*P;
-	lQoL(:,:,:,2) = 2*Q;
-	lQoL(:,:,:,3) =  (l - repmat(v, [1 n 1]));
-	norms(lQoL,2,4) <= (l + repmat(v, [1 n 1]));
+	lQoL(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+	lQoL(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+	lQoL(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(v, [1 n 1]));
+	norms(lQoL,2,4) <= Data.Red.Branch.T.*(l + repmat(v, [1 n 1]));
 
-	lNorm(:,:,:,1) = 2*P;
-	lNorm(:,:,:,2) = 2*Q;
-	lNorm(:,:,:,3) =  l - repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z;
-	norms(lNorm,2,4) <= l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z;
+	lNorm(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+	lNorm(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+	lNorm(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
+	norms(lNorm,2,4) <= Data.Red.Branch.T.*(l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
 
 	% Restriccion de la tension
 	nn >= (1 + Tap.*Data.Red.Bus.Ntr).^2;
@@ -158,8 +158,8 @@ cvx_begin
 	vExpr = (repmat(nv, [1 n 1]) - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T ...
 	- 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 
-	0 >= (vExpr - repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
-	0 <= (vExpr + repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+	0 >= (vExpr - Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+	0 <= (vExpr + Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
 
 	cDv >= 0;
 	cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));
@@ -187,8 +187,8 @@ cvx_begin
 	v >= Data.Red.Bus.uLow.^2;
 	v <= Data.Red.Bus.uTop.^2;
 	l <= Data.Red.Branch.lTop.*z;
-	Data.Red.Branch.T .* z >= 0;
-	Data.Red.Branch.T .* z <= 1;
+	z >= 0;
+	z <= 1;
 	y <= Data.Red.Branch.yTop;
 	y >= Data.Red.Branch.yLow;
 

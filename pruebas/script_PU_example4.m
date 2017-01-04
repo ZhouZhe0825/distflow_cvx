@@ -152,10 +152,7 @@ Data.Red.Bus.uTop(Data.Red.Bus.v0) = auxV;
 Data.Red.Branch.lTop(:,:) = lTop_ct;
 
 Data.Red.Branch.yTop = Data.Red.Branch.T;
-Data.Red.Branch.yLow = Data.Red.Branch.T;
-
-Data.Red.Branch.yLow(8, 9) = 0;
-Data.Red.Branch.yLow(9, 8) = 0;
+Data.Red.Branch.yLow = Data.Red.Branch.T*0;
     
 %% Clientes no interrumpibles
 Data.ClNI.pC = Data.Red.Bus.uLow * 0;
