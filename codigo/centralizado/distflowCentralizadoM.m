@@ -33,6 +33,22 @@ NnoG = setdiff((1:n),G);
 tnnLow = (1 + Data.Red.Bus.TapLow.*Data.Red.Bus.Ntr);
 tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
 
+%% Inicializacion
+
+St = find(Data.St.Bat.I == 1);
+nSt = length(St);
+
+M = [];
+if nSt > 0
+    M = zeros(2,2,n,Config.Etapas);
+    for i = 1:n
+        for et = 1: Config.Etapas
+            M(:,:,i,et) = Data.St.Bat.I(i,et)*[Data.St.Bat.m1(i,et) -Data.St.Bat.m2(i,et)/2; ...
+                -Data.St.Bat.m2(i,et)/2 Data.St.Bat.m1(i,et)];
+        end
+    end
+end
+
 NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
 NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
 
@@ -83,6 +99,8 @@ cvx_begin
     variable z(m, Config.Etapas);
     variable y(m, Config.Etapas) binary;
     
+    variable pStb(n, Config.Etapas);
+    variable qStb(n, Config.Etapas);
     
  	expression lQoL(m, Config.Etapas, 3);
  	expression lNorm(m, Config.Etapas, 3);
@@ -99,6 +117,7 @@ cvx_begin
     variable pCClRes(n, Config.Etapas); % real power demand in i
     variable qCClRes(n, Config.Etapas); % real power demand in i
     
+	expression tfopt_expr(Config.Etapas,1); 
 	expression fopt_expr; 
 
     CapDif(:,1) = Data.Red.Bus.CapIni;
@@ -107,14 +126,14 @@ cvx_begin
     TapDif(:,1) = Data.Red.Bus.TapIni;
     TapDif(:,(2:Config.Etapas)) = Tap(:,(2:Config.Etapas)) - Tap(:,(1:Config.Etapas-1));
         
-	fopt_expr = sum(...
-        sum(Data.Cost.piPTrasm.*pG) ...
-        + sum(Data.Cost.cdvm.*cDv) ...
-        + sum(cQG) ...
-        + sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2)) ...
-        + sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2)) ...
-        + sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2)) ...
-        );
+	tfopt_expr = ...
+        sum(Data.Cost.piPTrasm.*pG,1) ...
+        + sum(Data.Cost.cdvm.*cDv,1) ...
+        + sum(cQG,1) ...
+        + sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2),1) ...
+        + sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2),1) ...
+        + sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1) ...
+        ;
 
 % 	fopt_expr = sum(Data.Cost.piPTrasm.*pg) + sum(Data.Cost.cdvm.*cDv);
 
@@ -128,8 +147,8 @@ cvx_begin
     qN == InBr*(Q - Data.Red.Branch.xm.*l) - OutBr*Q;
 
 
-    pN - pC + pG == 0;
-    qN - qC + qG + qCp == 0;
+    pN - pC + pG + pStb == 0;
+    qN - qC + qG + qCp + qStb == 0;
     
     pC == pCClRes;
     qC == qCClRes;
@@ -236,7 +255,66 @@ cvx_begin
     pCClRes >= sum(pCApp,3);
 
     qCClRes >= sum(qCApp,3);
+    if nSt > 0
+        variable sStb(n, Config.Etapas);
+        variable pStgb(n, Config.Etapas);
+        variable xiStb(n, Config.Etapas);
+        variable EStb(n, Config.Etapas);
+        variable DlEStb(n, Config.Etapas);
+        
+        expression StbNorm(n, Config.Etapas,2);
+        expression EStbAnt(n, Config.Etapas);
+        expression cStb(n, Config.Etapas);
+
+        DlEStb <= 0;
+        DlEStb <= EStb - Data.St.Bat.ETop*Data.St.Bat.kapa;
+
+
+        cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
+
+        % Modelado de Config.Etapas
+        for et = 1: Config.Etapas
+            for i = 1:n
+                if et == 1
+                    cStb(i) = cStb(i) + [pStgb(i,et) 0] * M(:,:,i,et) * [pStgb(i,et); 0];
+                else
+                    cStb(i) = cStb(i) + [pStgb(i,et) pStgb(i,et-1)] * M(:,:,i,et) * [pStgb(i,et); pStgb(i,et-1)];
+                end
+            end
+        end
+        
+        tfopt_expr = tfopt_expr + sum(cStb,1);
+        
+        % TODO esta linea copia la sumatoria tantas veces como etapas
+        % porque queda como un escalar
+        tfopt_expr = tfopt_expr + ...
+            sum(Data.St.Bat.I(:,Config.Etapas).*Data.St.Bat.beta(:,Config.Etapas).* ...
+                ((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas)*Data.St.Bat.gama).^2) + Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
+
+        EStbAnt(:,1) = Data.St.Bat.EIni(:,1);
+        EStbAnt(:,(2:Config.Etapas)) = EStb(:,(1:Config.Etapas-1));
+
+        pStb == pStgb - (Data.St.Bat.cv.*sStb + Data.St.Bat.cr.*xiStb);
+        EStb == (1-Data.St.Bat.epsilon).*EStbAnt - Data.St.Bat.eta.*pStgb*Data.dt;
+        
+        StbNorm(:,:,1) = pStgb;
+        StbNorm(:,:,2) = qStb;
+        sStb >= norms(StbNorm,2,3);
+
+        xiStb >= pStgb.^2 + qStb.^2;
+
+        pStb <= Data.St.Bat.pgTop.*Data.St.Bat.I;
+        sStb <= Data.St.Bat.sTop.*Data.St.Bat.I;
+        EStb <= Data.St.Bat.ETop.*Data.St.Bat.I;
+
+        pStb >= Data.St.Bat.pgLow.*Data.St.Bat.I;
+        EStb >= Data.St.Bat.ELow.*Data.St.Bat.I;
+	else
+		pStb == 0;
+		qStb == 0;
+    end
     
+    fopt_expr = sum(tfopt_expr);
     minimize fopt_expr
 
     
@@ -282,6 +360,23 @@ toc
     Var.Red.Bus.QTras = zeros(n,1,Config.Etapas);
     Var.Red.Bus.QTras(G,1,:) = sum(Var.Red.Branch.Q(G,:,:),2);
 
+    if nSt > 0
+		Var.St.Bat.pStb = pStb;
+		Var.St.Bat.pStgb = pStgb;
+		Var.St.Bat.qStb = qStb;
+		Var.St.Bat.sStb = sStb;
+		Var.St.Bat.xiStb = xiStb;
+		Var.St.Bat.EStb = EStb;
+
+
+		Var.St.Bat.pStb = permute(full(Var.St.Bat.pStb), [1 3 2]);
+		Var.St.Bat.pStgb = permute(full(Var.St.Bat.pStgb), [1 3 2]);
+		Var.St.Bat.qStb = permute(full(Var.St.Bat.qStb), [1 3 2]);
+		Var.St.Bat.sStb = permute(full(Var.St.Bat.sStb), [1 3 2]);
+		Var.St.Bat.xiStb = permute(full(Var.St.Bat.xiStb), [1 3 2]);
+		Var.St.Bat.EStb = permute(full(Var.St.Bat.EStb), [1 3 2]);
+    end
+    
     
 opt = fopt_expr;
 cvx_clear

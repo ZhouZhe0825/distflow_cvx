@@ -80,7 +80,7 @@ uTop_ct = 1.05;
 iniEstado = 1;
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example5_tap_cap';
+outFilename_pref = 'PU_example5_tap_cap_st';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
@@ -317,7 +317,8 @@ Data.St.AC.a = zeros(size(Data.Red.Branch.T,1),1); %aAC por nodo
  
 % Parametros de Baterias
 Data.St.Bat.I = zeros(size(Data.Red.Branch.T,1),1);
-% Data.St.Bat.I(5) = 1;
+Data.St.Bat.I(5) = 1;
+Data.St.Bat.I(9) = 1;
 Data.St.Bat.cv = Data.St.Bat.I * .001; % temperatura minima, por nodo
 Data.St.Bat.cr = Data.St.Bat.I * .001; % temperatura maxima, por nodo
 
@@ -605,6 +606,26 @@ Data.temp = repmat(Data.temp, [1 Config.Etapas]);
 Data.St.AC.eta = repmat(Data.St.AC.eta, [1 Config.Etapas]);
 Data.St.AC.tempLow = repmat(Data.St.AC.tempLow, [1 Config.Etapas]);
 Data.St.AC.tempTop = repmat(Data.St.AC.tempTop, [1 Config.Etapas]);
+
+
+Data.St.Bat.I = repmat(Data.St.Bat.I, [1 Config.Etapas]);
+Data.St.Bat.m1 = repmat(Data.St.Bat.m1, [1 Config.Etapas]);
+Data.St.Bat.m2 = repmat(Data.St.Bat.m2, [1 Config.Etapas]);
+Data.St.Bat.ETop = repmat(Data.St.Bat.ETop, [1 Config.Etapas]);
+
+Data.St.Bat.wOm = repmat(Data.St.Bat.wOm, [1 Config.Etapas]);
+Data.St.Bat.m3 = repmat(Data.St.Bat.m3, [1 Config.Etapas]);
+Data.St.Bat.beta = repmat(Data.St.Bat.beta, [1 Config.Etapas]);
+
+Data.St.Bat.wU = repmat(Data.St.Bat.wU, [1 Config.Etapas]);
+Data.St.Bat.cv = repmat(Data.St.Bat.cv, [1 Config.Etapas]);
+Data.St.Bat.cr = repmat(Data.St.Bat.cr, [1 Config.Etapas]);
+Data.St.Bat.epsilon = repmat(Data.St.Bat.epsilon, [1 Config.Etapas]);
+Data.St.Bat.eta = repmat(Data.St.Bat.eta, [1 Config.Etapas]);
+Data.St.Bat.pgTop = repmat(Data.St.Bat.pgTop, [1 Config.Etapas]);
+Data.St.Bat.sTop = repmat(Data.St.Bat.sTop, [1 Config.Etapas]);
+Data.St.Bat.pgLow = repmat(Data.St.Bat.pgLow, [1 Config.Etapas]);
+Data.St.Bat.ELow = repmat(Data.St.Bat.ELow, [1 Config.Etapas]);
 
 
 

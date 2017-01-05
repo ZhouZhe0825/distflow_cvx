@@ -27,15 +27,6 @@ iC = Data.Red.Bus.indCons;
 
 NoT = 1 - Data.Red.Branch.T;
 
-M = zeros(2,2,n,1,Config.Etapas);
-for i = 1:n
-	for et = 1: Config.Etapas
-		M(:,:,i,1,et) = Data.St.Bat.I(i,1,et)*[Data.St.Bat.m1(i,1,et) -Data.St.Bat.m2(i,1,et)/2; ...
-			-Data.St.Bat.m2(i,1,et)/2 Data.St.Bat.m1(i,1,et)];
-	end
-end
-
-
 tnnLow = (1 + Data.Red.Bus.TapLow.*Data.Red.Bus.Ntr);
 tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
 
@@ -43,6 +34,16 @@ tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
 
 nodSt = find(Data.St.Bat.I == 1);
 lenSt = length(nodSt);
+
+if lenSt > 0
+    M = zeros(2,2,n,1,Config.Etapas);
+    for i = 1:n
+        for et = 1: Config.Etapas
+            M(:,:,i,1,et) = Data.St.Bat.I(i,1,et)*[Data.St.Bat.m1(i,1,et) -Data.St.Bat.m2(i,1,et)/2; ...
+                -Data.St.Bat.m2(i,1,et)/2 Data.St.Bat.m1(i,1,et)];
+        end
+    end
+end
 
 NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
 NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
@@ -81,8 +82,8 @@ cvx_begin
     variable pN(n,1, Config.Etapas);
     variable qN(n,1, Config.Etapas);
 
-    expression pG(n,1, Config.Etapas);
-    expression qG(n,1, Config.Etapas);
+    variable pG(n,1, Config.Etapas);
+    variable qG(n,1, Config.Etapas);
 
     variable qCp(n,1, Config.Etapas); % reactive power demand in i
     variable v(n,1, Config.Etapas); % module of square complex voltage in i
@@ -112,25 +113,16 @@ cvx_begin
     variable pCClRes(n,1, Config.Etapas); % real power demand in i
     variable qCClRes(n,1, Config.Etapas); % real power demand in i
 
-	% Almacenamiento en baterias
-    if lenSt > 0
-        variable pStb(n, 1, Config.Etapas);
-        variable qStb(n, 1, Config.Etapas);
-        variable sStb(n, 1, Config.Etapas);
-        variable pStgb(n, 1, Config.Etapas);
-        variable xiStb(n, 1, Config.Etapas);
-        variable EStb(n, 1, Config.Etapas);
-        variable DlEStb(n, 1, Config.Etapas);
-        expression EStbAnt(n, 1, Config.Etapas);
-        expression cStb(n,1);
-        expression tUtilStb(n,1);
-    end
 
 
     %% Declaracion de variables y expresiones
     expression tvExpr(n,n,Config.Etapas);
     expression CapDif(n,1,Config.Etapas);
     expression TapDif(n,1,Config.Etapas);
+
+    variable pStb(n, 1, Config.Etapas);
+    variable qStb(n, 1, Config.Etapas);
+
 
     expression tfopt_expr(Config.Etapas); 
     expression fopt_expr; 
@@ -140,53 +132,27 @@ cvx_begin
     expression lNorm(n, n, Config.Etapas,3);
 
 
-    fopt_expr = 0;
-
-
     %% Funcion objetivo
-    if lenSt > 0
-        tUtilStb = (-Data.St.Bat.beta(:,1,Config.Etapas).*((Data.St.Bat.ETop(:,1,Config.Etapas) - EStb(:,1,Config.Etapas)*Data.St.Bat.gama).^2) + Data.St.Bat.wU(:,1,Config.Etapas)).*Data.St.Bat.I(:,:,Config.Etapas);
-        DlEStb <= 0;
-        DlEStb <= EStb - Data.St.Bat.ETop*Data.St.Bat.kapa;
-
-
-        cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
-
-        % Modelado de Config.Etapas
-        for et = 1: Config.Etapas
-
-            for i = 1:n
-                if et == 1
-                    cStb(i) = cStb(i) + [pStgb(i,1,et) 0] * M(:,:,i,1,et) * [pStgb(i,1,et); 0];
-                else
-                    cStb(i) = cStb(i) + [pStgb(i,1,et) pStgb(i,1, et-1)] * M(:,:,i,1,et) * [pStgb(i,1,et); pStgb(i,1, et-1)];
-                end
-            end
-        end
-    end
-
     CapDif(:,1,1) = Data.Red.Bus.CapIni;
     CapDif(:,1,(2:Config.Etapas)) = Cap(:,1,(2:Config.Etapas)) - Cap(:,1,(1:Config.Etapas-1));
 
     TapDif(:,1,1) = Data.Red.Bus.TapIni;
     TapDif(:,1,(2:Config.Etapas)) = Tap(:,1,(2:Config.Etapas)) - Tap(:,1,(1:Config.Etapas-1));
 
-    tfopt_expr = sum(...
-        + sum(Data.Cost.piPTras .* PTras) ...
-        + sum(Data.Cost.cdv .* cDv) ...
-        + sum(cQTras) ...
-        + sum(Data.Red.cambioCap*CapDif.^2) ...
-        + sum(Data.Red.cambioTap*TapDif.^2) ...
-        + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2) ...
-        );
+		tfopt_expr = ...
+            sum(Data.Cost.piPTras .* PTras,1) ...
+            + sum(Data.Cost.cdv .* cDv,1) ...
+            + sum(cQTras,1) ...
+            + sum(Data.Red.cambioCap*CapDif.^2,1) ...
+            + sum(Data.Red.cambioTap*TapDif.^2,1) ...
+            + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2,1) ...
+            ;
 
-       
-        if lenSt > 0
-%             tfopt_expr = tfopt_expr + sum(...
-%                 + sum(cStb) ...
-%             ) + tUtilStb;
-        end
+
         
+        
+        
+
     cQTras >= - Data.Cost.piQmtras .* QTras;
     cQTras >= Data.Cost.piQMtras .* QTras;
 
@@ -206,31 +172,26 @@ cvx_begin
     qCp <= NcpCapL.*v + NcpvT.*Cap - NcpCapLvT;
     qCp <= NcpCapT.*v + NcpvL.*Cap - NcpCapTvL;
 
+	pC == pCClRes;
+	qC == qCClRes;
 
-    pC == pCClRes;
-    qC == qCClRes;
 
-    pG = PTras;
-    qG = QTras + qCp;
-
-    if lenSt > 0
-        pG = pG + pStb;
-        qG = qG + qStb;
-    end
+    pG == PTras + pStb;
+    qG == QTras + qStb + qCp;
     
     pN - pC + pG == 0;
     qN - qC + qG == 0;
 
     % Restricciones de la corriente
-    lQoL(:,:,:,1) = 2*P;
-    lQoL(:,:,:,2) = 2*Q;
-    lQoL(:,:,:,3) =  (l - repmat(v, [1 n 1]));
-    norms(lQoL,2,4) <= (l + repmat(v, [1 n 1]));
+        lQoL(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lQoL(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lQoL(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(v, [1 n 1]));
+        norms(lQoL,2,4) <= Data.Red.Branch.T.*(l + repmat(v, [1 n 1]));
 
-    lNorm(:,:,:,1) = 2*P;
-    lNorm(:,:,:,2) = 2*Q;
-    lNorm(:,:,:,3) =  (l- z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
-    norms(lNorm,2,4) <= (l + z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
+        lNorm(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lNorm(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lNorm(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
+        norms(lNorm,2,4) <= Data.Red.Branch.T.*(l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
 
     l <= Data.Red.Branch.lTop.*z;
 
@@ -252,8 +213,8 @@ cvx_begin
         - 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 
 
-    0 >= (tvExpr - repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
-    0 <= (tvExpr + repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 >= (tvExpr - Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 <= (tvExpr + Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
 
     cDv >= 0;
     cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));
@@ -322,13 +283,51 @@ cvx_begin
     
 
 	%% Restricciones de storage bateria
+	% Almacenamiento en baterias
     if lenSt > 0
+        variable sStb(n, 1, Config.Etapas);
+        variable pStgb(n, 1, Config.Etapas);
+        variable xiStb(n, 1, Config.Etapas);
+        variable EStb(n, 1, Config.Etapas);
+        variable DlEStb(n, 1, Config.Etapas);
+        
+        expression StbNorm(n, 1, Config.Etapas,2);
+        expression EStbAnt(n, 1, Config.Etapas);
+        expression cStb(n,1,Config.Etapas);
+
+        DlEStb <= 0;
+        DlEStb <= EStb - Data.St.Bat.ETop*Data.St.Bat.kapa;
+
+
+        cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
+
+        % Modelado de Config.Etapas
+        for et = 1: Config.Etapas
+            for i = 1:n
+                if et == 1
+                    cStb(i) = cStb(i) + [pStgb(i,1,et) 0] * M(:,:,i,1,et) * [pStgb(i,1,et); 0];
+                else
+                    cStb(i) = cStb(i) + [pStgb(i,1,et) pStgb(i,1, et-1)] * M(:,:,i,1,et) * [pStgb(i,1,et); pStgb(i,1, et-1)];
+                end
+            end
+        end
+        
+        tfopt_expr = tfopt_expr + sum(cStb,1);
+        
+        tfopt_expr = tfopt_expr + ...
+            sum(Data.St.Bat.I(:,:,Config.Etapas).*Data.St.Bat.beta(:,1,Config.Etapas).* ...
+                ((Data.St.Bat.ETop(:,1,Config.Etapas) - EStb(:,1,Config.Etapas)*Data.St.Bat.gama).^2) + Data.St.Bat.wU(:,1,Config.Etapas),1)./Config.Etapas;
+
         EStbAnt(:,1,1) = Data.St.Bat.EIni(:,1,1);
         EStbAnt(:,1,(2:Config.Etapas)) = EStb(:,1,(1:Config.Etapas-1));
 
         pStb == pStgb - (Data.St.Bat.cv.*sStb + Data.St.Bat.cr.*xiStb);
         EStb == (1-Data.St.Bat.epsilon).*EStbAnt - Data.St.Bat.eta.*pStgb*Data.dt;
-        sStb >= norms([pStgb qStb], 2, 2);
+
+        StbNorm(:,:,:,1) = pStgb;
+        StbNorm(:,:,:,2) = qStb;
+        sStb >= norms(StbNorm,2,4);
+        
         xiStb >= pStgb.^2 + qStb.^2;
 
         pStb <= Data.St.Bat.pgTop.*Data.St.Bat.I;
@@ -337,6 +336,9 @@ cvx_begin
 
         pStb >= Data.St.Bat.pgLow.*Data.St.Bat.I;
         EStb >= Data.St.Bat.ELow.*Data.St.Bat.I;
+	else
+		pStb == 0;
+		qStb == 0;
     end
 
     fopt_expr = sum(tfopt_expr);
@@ -398,5 +400,6 @@ Var.Red.Bus.qC = qC;
 
 status = cvx_status;
 
+    
 cvx_clear;
 end
