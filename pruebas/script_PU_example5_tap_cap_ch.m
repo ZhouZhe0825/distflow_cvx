@@ -538,7 +538,7 @@ DataM.Util.pzCnPrefE(:,:,2) = DataM.Util.pzCnPrefE(:,:,2)*.375;
 DataM.Util.pzCnPrefE(:,:,3) = DataM.Util.pzCnPrefE(:,:,3)*.625;
 DataM.Util.pzCnPrefE(:,:,4) = DataM.Util.pzCnPrefE(:,:,4)*.875;
 
-[Var_nxn, opt_nxn, status] = distflowCentralizadoNxN(DataM, Config, true, util);
+[Var_nxn, opt_nxn, status] = distflowCentralizadoNxN(DataM, Config, true, utilCarg);
 
 Data.Red.Bus.pCLow = full(Data.Red.Bus.pCLow);
 Data.Red.Bus.qCLow = full(Data.Red.Bus.qCLow);

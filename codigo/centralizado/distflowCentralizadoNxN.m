@@ -78,8 +78,8 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
         variable pN(n,1, Config.Etapas);
         variable qN(n,1, Config.Etapas);
         
-        expression pG(n,1, Config.Etapas);
-        expression qG(n,1, Config.Etapas);
+        variable pG(n,1, Config.Etapas);
+        variable qG(n,1, Config.Etapas);
 		
         variable qCp(n,1, Config.Etapas); % reactive power demand in i
 		variable v(n,1, Config.Etapas); % module of square complex voltage in i
@@ -171,22 +171,22 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 		qC == qCClRes + qCClNI;
 
 
-        pG = PTras;
-        qG = QTras + qCp;
+        pG == PTras;
+        qG == QTras + qCp;
         
 		pN - pC + pG == 0;
 		qN - qC + qG == 0;
 
 		% Restricciones de la corriente
-		lQoL(:,:,:,1) = 2*P;
-		lQoL(:,:,:,2) = 2*Q;
-		lQoL(:,:,:,3) =  (l - repmat(v, [1 n 1]));
-		norms(lQoL,2,4) <= (l + repmat(v, [1 n 1]));
+        lQoL(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lQoL(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lQoL(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(v, [1 n 1]));
+        norms(lQoL,2,4) <= Data.Red.Branch.T.*(l + repmat(v, [1 n 1]));
 
-		lNorm(:,:,:,1) = 2*P;
-		lNorm(:,:,:,2) = 2*Q;
-		lNorm(:,:,:,3) =  (l- z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
-		norms(lNorm,2,4) <= (l + z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
+        lNorm(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lNorm(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lNorm(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
+        norms(lNorm,2,4) <= Data.Red.Branch.T.*(l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
 
 		l <= Data.Red.Branch.lTop.*z;
 
@@ -208,8 +208,8 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 			- 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 
 
-		0 >= (tvExpr - repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
-		0 <= (tvExpr + repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 >= (tvExpr - Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 <= (tvExpr + Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
 
 		cDv >= 0;
 		cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));

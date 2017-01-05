@@ -3,7 +3,7 @@ cambioRed = 1.5;
 cambioTap = 1;
 cambioCap = 1;
 cg1pc = 0.5;
-cg1durHor = 4;
+cg1durHor = 3;
 cg2pc = 0.25;
 cg2durHor = 2;
 util = true;
@@ -57,8 +57,8 @@ Carga2.qC = cg2pc*.015;
 Carga2.dur = cg2durHor;
 Carga2.nod = 4;
 
-% Cargas = [Carga1;Carga2];
-Cargas = [Carga2];
+Cargas = [Carga1;Carga2];
+% Cargas = [Carga2];
 % Cargas = [];
 
 
