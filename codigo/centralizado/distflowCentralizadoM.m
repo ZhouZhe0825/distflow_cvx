@@ -33,6 +33,11 @@ NnoG = setdiff((1:n),G);
 tnnLow = (1 + Data.Red.Bus.TapLow.*Data.Red.Bus.Ntr);
 tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
 
+%% Inicializacion
+
+Pv = find(Data.Gen.Pv.I == 1);
+nPv = length(Pv);
+
 NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
 NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
 
@@ -82,6 +87,10 @@ cvx_begin
     
     variable z(m, Config.Etapas);
     variable y(m, Config.Etapas) binary;
+
+    % Variables de generadores solares
+    variable pPv(n, Config.Etapas); % real power generation in i
+    variable qPv(n, Config.Etapas); % reactive power generation in i
     
     
  	expression lQoL(m, Config.Etapas, 3);
@@ -99,6 +108,7 @@ cvx_begin
     variable pCClRes(n, Config.Etapas); % real power demand in i
     variable qCClRes(n, Config.Etapas); % real power demand in i
     
+	expression tfopt_expr(Config.Etapas,1); 
 	expression fopt_expr; 
 
     CapDif(:,1) = Data.Red.Bus.CapIni;
@@ -107,14 +117,14 @@ cvx_begin
     TapDif(:,1) = Data.Red.Bus.TapIni;
     TapDif(:,(2:Config.Etapas)) = Tap(:,(2:Config.Etapas)) - Tap(:,(1:Config.Etapas-1));
         
-	fopt_expr = sum(...
-        sum(Data.Cost.piPTrasm.*pG) ...
-        + sum(Data.Cost.cdvm.*cDv) ...
-        + sum(cQG) ...
-        + sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2)) ...
-        + sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2)) ...
-        + sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2)) ...
-        );
+	tfopt_expr = ...
+        sum(Data.Cost.piPTrasm.*pG,1) ...
+        + sum(Data.Cost.cdvm.*cDv,1) ...
+        + sum(cQG,1) ...
+        + sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2),1) ...
+        + sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2),1) ...
+        + sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1) ...
+        ;
 
 % 	fopt_expr = sum(Data.Cost.piPTrasm.*pg) + sum(Data.Cost.cdvm.*cDv);
 
@@ -128,8 +138,8 @@ cvx_begin
     qN == InBr*(Q - Data.Red.Branch.xm.*l) - OutBr*Q;
 
 
-    pN - pC + pG == 0;
-    qN - qC + qG + qCp == 0;
+    pN - pC + pG + pPv == 0;
+    qN - qC + qG + qCp + qPv == 0;
     
     pC == pCClRes;
     qC == qCClRes;
@@ -237,6 +247,36 @@ cvx_begin
 
     qCClRes >= sum(qCApp,3);
 
+    %% Restricciones de generadores Solares
+    % Variables de generadores solares
+    if nPv > 0
+        variable sPv(n, Config.Etapas);
+        variable xiPv(n, Config.Etapas); % module of square complex current in i
+        variable cqPv(n, Config.Etapas);
+        expression SPvNorm(n, Config.Etapas,2);
+
+        tfopt_expr = tfopt_expr ...
+            + sum(Data.Cost.rhopPv .* pPv) ...
+            + sum(cqPv) ...
+        ;
+        cqPv >= - Data.Cost.rhomqPv .* qPv;
+        cqPv >= Data.Cost.rhoMqPv .* qPv;
+
+
+        SPvNorm(:,:,1) = pPv;
+        SPvNorm(:,:,2) = qPv;
+        sPv >= norms(SPvNorm,2,3);
+        xiPv >= pPv.^2 + qPv.^2;
+
+        pPv == (Data.Gen.Pv.pPvg - (Data.Gen.Pv.cv.*sPv + Data.Gen.Pv.cr.*xiPv)).*Data.Gen.Pv.I;
+        sPv <= Data.Gen.Pv.sTop.*abs(sign(Data.Gen.Pv.pPvg)).*Data.Gen.Pv.I;
+
+    else
+        pPv == 0;
+        qPv == 0;
+    end
+
+    fopt_expr = sum(tfopt_expr);
     minimize fopt_expr
 
     
@@ -282,6 +322,19 @@ toc
     Var.Red.Bus.QTras = zeros(n,1,Config.Etapas);
     Var.Red.Bus.QTras(G,1,:) = sum(Var.Red.Branch.Q(G,:,:),2);
 
+    if nPv > 0
+		Var.Gen.Pv.pPv = pPv;
+		Var.Gen.Pv.qPv = qPv;
+		Var.Gen.Pv.s = sPv;
+		Var.Gen.Pv.xi = xiPv;
+
+
+		Var.Gen.Pv.pPv = permute(full(Var.Gen.Pv.pPv), [1 3 2]);
+		Var.Gen.Pv.qPv = permute(full(Var.Gen.Pv.qPv), [1 3 2]);
+		Var.Gen.Pv.s = permute(full(Var.Gen.Pv.s), [1 3 2]);
+		Var.Gen.Pv.xi = permute(full(Var.Gen.Pv.xi), [1 3 2]);
+    end
+    
     
 opt = fopt_expr;
 cvx_clear

@@ -70,14 +70,14 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
         variable Q(n, n, Config.Etapas); % reactive power from i to j
         variable l(n, n, Config.Etapas);
         
-    variable pC(n,1, Config.Etapas); % real power demand in i
-    variable qC(n,1, Config.Etapas); % reactive power demand in i
+        variable pC(n,1, Config.Etapas); % real power demand in i
+        variable qC(n,1, Config.Etapas); % reactive power demand in i
         
         variable pN(n,1, Config.Etapas);
         variable qN(n,1, Config.Etapas);
         
-        expression pG(n,1, Config.Etapas);
-        expression qG(n,1, Config.Etapas);
+        variable pG(n,1, Config.Etapas);
+        variable qG(n,1, Config.Etapas);
 		
         variable qCp(n,1, Config.Etapas); % reactive power demand in i
 		variable v(n,1, Config.Etapas); % module of square complex voltage in i
@@ -87,7 +87,8 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 		variable w(n,1, Config.Etapas);
         variable z(n, n, Config.Etapas);
 
-		variable PTras(n,1, Config.Etapas);
+
+        variable PTras(n,1, Config.Etapas);
 		variable QTras(n,1, Config.Etapas);
 
 		variable cQTras(n,1, Config.Etapas);
@@ -98,33 +99,16 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 		variable y(n, n, Config.Etapas) binary;
         
         
-
-        
-		% Variables de generadores solares
-        if lenPv > 0
-            variable pPv(n, 1, Config.Etapas); % real power generation in i
-            variable qPv(n, 1, Config.Etapas); % reactive power generation in i
-            variable sPv(n, 1, Config.Etapas);
-            variable xiPv(n, 1, Config.Etapas); % module of square complex current in i
-            variable cqPv(n, 1, Config.Etapas);
-        end
-
-
 		% Variables de utilidad
-			variable pCApp(n,1, Config.Etapas, 2); % real power demand in i
-			variable qCApp(n,1, Config.Etapas, 2); % real power demand in i
-			expression vApp(n, 1, Config.Etapas, 2);
-			variable pCn(n,1, Config.Etapas, 2); % real power demand in i
-
-		variable cqWi(n,1, Config.Etapas);
-
-		% Expresion para p y q generados que entran en la red general
-		variable pWi(n,1, Config.Etapas);
-		variable qWi(n,1, Config.Etapas);
+        variable pCApp(n,1, Config.Etapas, 2); % real power demand in i
+        variable qCApp(n,1, Config.Etapas, 2); % real power demand in i
+        expression vApp(n, 1, Config.Etapas, 2);
+        variable pCn(n,1, Config.Etapas, 2); % real power demand in i
 
 
-    variable pCClRes(n,1, Config.Etapas); % real power demand in i
-    variable qCClRes(n,1, Config.Etapas); % real power demand in i
+
+        variable pCClRes(n,1, Config.Etapas); % real power demand in i
+        variable qCClRes(n,1, Config.Etapas); % real power demand in i
       
         
 
@@ -132,6 +116,11 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 		expression tvExpr(n,n,Config.Etapas);
 		expression CapDif(n,1,Config.Etapas);
 		expression TapDif(n,1,Config.Etapas);
+
+		% Variables de generadores solares
+        variable pPv(n, 1, Config.Etapas); % real power generation in i
+        variable qPv(n, 1, Config.Etapas); % reactive power generation in i
+
 
 		expression tfopt_expr(Config.Etapas); 
 		expression fopt_expr; 
@@ -141,9 +130,6 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 		expression lNorm(n, n, Config.Etapas,3);
 
 
-		fopt_expr = 0;
-
-
 		%% Funcion objetivo
         CapDif(:,1,1) = Data.Red.Bus.CapIni;
         CapDif(:,1,(2:Config.Etapas)) = Cap(:,1,(2:Config.Etapas)) - Cap(:,1,(1:Config.Etapas-1));
@@ -151,36 +137,25 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
         TapDif(:,1,1) = Data.Red.Bus.TapIni;
         TapDif(:,1,(2:Config.Etapas)) = Tap(:,1,(2:Config.Etapas)) - Tap(:,1,(1:Config.Etapas-1));
 		
-		tfopt_expr = sum(...
-			+ sum(Data.Cost.piPTras .* PTras) ...
-			+ sum(Data.Cost.cdv .* cDv) ...
-            + sum(cQTras) ...
-            + sum(Data.Red.cambioCap*CapDif.^2) ...
-            + sum(Data.Red.cambioTap*TapDif.^2) ...
-	        + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2) ...
-            );
+		tfopt_expr = ...
+            sum(Data.Cost.piPTras .* PTras,1) ...
+            + sum(Data.Cost.cdv .* cDv,1) ...
+            + sum(cQTras,1) ...
+            + sum(Data.Red.cambioCap*CapDif.^2,1) ...
+            + sum(Data.Red.cambioTap*TapDif.^2,1) ...
+            + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2,1) ...
+            ;
+
 
         
-        if lenPv > 0
-            tfopt_expr = tfopt_expr + sum(...
-                sum(Data.Cost.rhopPv .* pPv) ...
-                + sum(cqPv) ...
-            );
-            cqPv >= - Data.Cost.rhomqPv .* qPv;
-            cqPv >= Data.Cost.rhoMqPv .* qPv;
-            
-        end
         
+        
+
 		cQTras >= - Data.Cost.piQmtras .* QTras;
 		cQTras >= Data.Cost.piQMtras .* QTras;
 
 
 		%% Restricciones de Red
-
-        (1-Data.Gen.DFIG.I) .* pWi == 0;
-        (1-Data.Gen.DFIG.I) .* qWi == 0;
-
-		
 		% Restricciones generales de branches
 		pN == (permute(sum(Data.Red.Branch.T.*P - Data.Red.Branch.r.*l, 1),[2 1 3]) - sum(Data.Red.Branch.T.*P, 2));
 		qN == (permute(sum(Data.Red.Branch.T.*Q - Data.Red.Branch.x.*l, 1),[2 1 3]) - sum(Data.Red.Branch.T.*Q, 2));
@@ -196,31 +171,25 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
         qCp <= NcpCapT.*v + NcpvL.*Cap - NcpCapTvL;
 
 
-    pC == pCClRes;
-    qC == qCClRes;
+        pC == pCClRes;
+        qC == qCClRes;
         
-        pG = PTras;
-        qG = QTras + qCp;
+        pG == PTras + pPv;
+        qG == QTras + qPv + qCp;
         
-        if lenPv > 0
-            pG = pG + pPv;
-            qG = qG + qPv;
-        end
-            
-
 		pN - pC + pG == 0;
 		qN - qC + qG == 0;
 
 		% Restricciones de la corriente
-		lQoL(:,:,:,1) = 2*P;
-		lQoL(:,:,:,2) = 2*Q;
-		lQoL(:,:,:,3) =  (l - repmat(v, [1 n 1]));
-		norms(lQoL,2,4) <= (l + repmat(v, [1 n 1]));
+        lQoL(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lQoL(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lQoL(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(v, [1 n 1]));
+        norms(lQoL,2,4) <= Data.Red.Branch.T.*(l + repmat(v, [1 n 1]));
 
-		lNorm(:,:,:,1) = 2*P;
-		lNorm(:,:,:,2) = 2*Q;
-		lNorm(:,:,:,3) =  (l- z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
-		norms(lNorm,2,4) <= (l + z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
+        lNorm(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lNorm(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lNorm(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
+        norms(lNorm,2,4) <= Data.Red.Branch.T.*(l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
 
 		l <= Data.Red.Branch.lTop.*z;
 
@@ -242,8 +211,8 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 			- 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 
 
-		0 >= (tvExpr - repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
-		0 <= (tvExpr + repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 >= (tvExpr - Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 <= (tvExpr + Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
 
 		cDv >= 0;
 		cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));
@@ -306,30 +275,41 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
         pCn >= Data.Util.pzCnLow;
         pCn <= Data.Util.pzCnTop;
 
-    pCClRes >= sum(pCApp, 4);
+        pCClRes >= sum(pCApp, 4);
 
-    qCClRes >= sum(qCApp, 4);
+        qCClRes >= sum(qCApp, 4);
 
 		%% Restricciones de generadores Solares
+		% Variables de generadores solares
         if lenPv > 0
-            pPv == (Data.Gen.Pv.pPvg - (Data.Gen.Pv.cv.*sPv + Data.Gen.Pv.cr.*xiPv)).*Data.Gen.Pv.I;
-            pPv == (Data.Gen.Pv.pPvg - (Data.Gen.Pv.cv.*sPv + Data.Gen.Pv.cr.*xiPv));
-            sPv >= norms([pPv qPv], 2, 2);
-            xiPv >= pPv.^2 + qPv.^2;
-            sPv <= Data.Gen.Pv.sTop.*abs(sign(Data.Gen.Pv.pPvg)).*Data.Gen.Pv.I;
-            sPv <= Data.Gen.Pv.sTop.*abs(sign(Data.Gen.Pv.pPvg));
+            variable sPv(n, 1, Config.Etapas);
+            variable xiPv(n, 1, Config.Etapas); % module of square complex current in i
+            variable cqPv(n, 1, Config.Etapas);
+            expression SPvNorm(n, 1, Config.Etapas,2);
 
-            (1-Data.Gen.Pv.I).*pPv == 0;
-            (1-Data.Gen.Pv.I).*qPv == 0;
-            (1-Data.Gen.Pv.I).*sPv == 0;
-            (1-Data.Gen.Pv.I).*xiPv == 0;
+            tfopt_expr = tfopt_expr ...
+                + sum(Data.Cost.rhopPv .* pPv) ...
+                + sum(cqPv) ...
+            ;
+            cqPv >= - Data.Cost.rhomqPv .* qPv;
+            cqPv >= Data.Cost.rhoMqPv .* qPv;
+            
+            pPv == (Data.Gen.Pv.pPvg - (Data.Gen.Pv.cv.*sPv + Data.Gen.Pv.cr.*xiPv)).*Data.Gen.Pv.I;
+
+            SPvNorm(:,:,:,1) = pPv;
+            SPvNorm(:,:,:,2) = qPv;
+            sPv >= norms(SPvNorm,2,4);
+            xiPv >= pPv.^2 + qPv.^2;
+            
+            sPv <= Data.Gen.Pv.sTop.*abs(sign(Data.Gen.Pv.pPvg)).*Data.Gen.Pv.I;
+
+        else
+            pPv == 0;
+            qPv == 0;
         end
         
-
-    %% Restricciones de storage bateria
 		fopt_expr = sum(tfopt_expr);
 
-        %% Restricciones de cargas no interrumpibles
 		if findOpt
 			minimize fopt_expr
         end
@@ -360,8 +340,8 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 	Var.Red.Bus.qN = qN;
 	Var.Red.Bus.v = v;
 
-Var.ClRes.pC = pCClRes;
-Var.ClRes.qC = qCClRes;
+    Var.ClRes.pC = pCClRes;
+    Var.ClRes.qC = qCClRes;
 	Var.ClRes.pCApp = pCApp;
 	Var.ClRes.qCApp = qCApp;
 

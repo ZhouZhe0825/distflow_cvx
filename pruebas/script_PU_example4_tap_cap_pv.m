@@ -80,7 +80,7 @@ uTop_ct = 1.05;
 iniEstado = 1;
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example5_tap_cap';
+outFilename_pref = 'PU_example4_tap_cap_pv';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
@@ -92,7 +92,7 @@ outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
 
 % outFilename_w_sw_dist = [outFilenamePre '_d_' outFilenameMid outFilenameSuf ''];
 
-inFilename = 'PU_example5.xls';
+inFilename = 'PU_example4.xls';
 % fileCurvaCarga = 'carga_subredLP_trafo_red_93-73_no_rnd.xlsx';
 
 %% Carga de datos
@@ -221,7 +221,7 @@ Data.Gen.DFIG.P_mec = Data.Gen.DFIG.P_mec';
 Data.Gen.DFIG.n_ = Data.Gen.DFIG.n_';
 Data.Gen.DFIG.P_mec = Data.Gen.DFIG.P_mec/2;
 
-% Data.Gen.Pv.I(7) = 1;
+Data.Gen.Pv.I(7) = 1;
 Data.Gen.Pv.pPvg = ones(length(Data.Red.Branch.T),1).*Data.Gen.Pv.I*100; %potencia de generacion del solar, por ahora constante
 
 indSn = find(Data.Gen.Pv.I == 1);
@@ -605,6 +605,15 @@ Data.temp = repmat(Data.temp, [1 Config.Etapas]);
 Data.St.AC.eta = repmat(Data.St.AC.eta, [1 Config.Etapas]);
 Data.St.AC.tempLow = repmat(Data.St.AC.tempLow, [1 Config.Etapas]);
 Data.St.AC.tempTop = repmat(Data.St.AC.tempTop, [1 Config.Etapas]);
+
+Data.Cost.rhopPv = repmat(Data.Cost.rhopPv, [1 Config.Etapas]);
+Data.Cost.rhomqPv = repmat(Data.Cost.rhomqPv, [1 Config.Etapas]);
+Data.Cost.rhoMqPv = repmat(Data.Cost.rhoMqPv, [1 Config.Etapas]);
+Data.Gen.Pv.pPvg = repmat(Data.Gen.Pv.pPvg, [1 Config.Etapas]);
+Data.Gen.Pv.cv = repmat(Data.Gen.Pv.cv, [1 Config.Etapas]);
+Data.Gen.Pv.cr = repmat(Data.Gen.Pv.cr, [1 Config.Etapas]);
+Data.Gen.Pv.I = repmat(Data.Gen.Pv.I, [1 Config.Etapas]);
+Data.Gen.Pv.sTop = repmat(Data.Gen.Pv.sTop, [1 Config.Etapas]);
 
 
 
