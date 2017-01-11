@@ -80,7 +80,7 @@ uTop_ct = 1.05;
 iniEstado = 1;
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example5_St';
+outFilename_pref = 'PU_example5';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
@@ -299,6 +299,7 @@ end
 % Configuraciones manuales
 
 % Aire Acondicionado
+Data.St.AC.I = zeros(size(Data.Red.Bus.pCLow));
 Data.St.AC.tempLow = zeros(size(Data.Red.Branch.T,1),1); % temperatura minima, por nodo
 Data.St.AC.tempLow(Data.Red.Bus.indCons) = 19;
 Data.St.AC.tempTop = zeros(size(Data.Red.Branch.T,1),1); % temperatura maxima, por nodo

@@ -20,8 +20,9 @@ TnoG(G,:,:) = zeros(length(G),n,Config.Etapas);
 TSalientesG = TSalientesG - TnoG;
 TnoG(:,G,:) = zeros(n,length(G),Config.Etapas);
 TEntrantesG = TEntrantesG - TSalientesG - TnoG;
-iC = Data.Red.Bus.indCons;
 
+AC = find(Data.St.AC.I == 1);
+lenAC = length(AC);
 
 
 
@@ -69,8 +70,8 @@ cvx_begin
     variable pN(n,1, Config.Etapas);
     variable qN(n,1, Config.Etapas);
 
-    expression pG(n,1, Config.Etapas);
-    expression qG(n,1, Config.Etapas);
+    variable pG(n,1, Config.Etapas);
+    variable qG(n,1, Config.Etapas);
 
     variable qCp(n,1, Config.Etapas); % reactive power demand in i
     variable v(n,1, Config.Etapas); % module of square complex voltage in i
@@ -90,8 +91,6 @@ cvx_begin
     variable Tap(n,1, Config.Etapas) integer;
     variable y(n, n, Config.Etapas) binary;
 
-    dual variable dTvar;
-
     % Variables de utilidad
     variable pCApp(n,1, Config.Etapas, 2); % real power demand in i
     variable qCApp(n,1, Config.Etapas, 2); % real power demand in i
@@ -100,13 +99,6 @@ cvx_begin
 
     variable pCClRes(n,1, Config.Etapas); % real power demand in i
     variable qCClRes(n,1, Config.Etapas); % real power demand in i
-
-    % Temperatura Aire Acondicionado
-    variable Tvar(n,1,Config.Etapas);
-    expression TvarAnt(n,1,Config.Etapas);
-    expression pCAC(n,1,Config.Etapas);
-
-
 
     %% Declaracion de variables y expresiones
     expression tvExpr(n,n,Config.Etapas);
@@ -121,10 +113,6 @@ cvx_begin
     expression lNorm(n, n, Config.Etapas,3);
 
 
-
-    fopt_expr = 0;
-
-
     %% Funcion objetivo
     CapDif(:,1,1) = Data.Red.Bus.CapIni;
     CapDif(:,1,(2:Config.Etapas)) = Cap(:,1,(2:Config.Etapas)) - Cap(:,1,(1:Config.Etapas-1));
@@ -132,15 +120,19 @@ cvx_begin
     TapDif(:,1,1) = Data.Red.Bus.TapIni;
     TapDif(:,1,(2:Config.Etapas)) = Tap(:,1,(2:Config.Etapas)) - Tap(:,1,(1:Config.Etapas-1));
 
-    tfopt_expr = sum(...
-        + sum(Data.Cost.piPTras .* PTras) ...
-        + sum(Data.Cost.cdv .* cDv) ...
-        + sum(cQTras) ...
-        + sum(Data.Red.cambioCap*CapDif.^2) ...
-        + sum(Data.Red.cambioTap*TapDif.^2) ...
-        + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2) ...
-		+ sum(Data.St.AC.beta.*(Tvar - Data.St.AC.tempPref).^2) ...
-        );
+		tfopt_expr = ...
+            sum(Data.Cost.piPTras .* PTras,1) ...
+            + sum(Data.Cost.cdv .* cDv,1) ...
+            + sum(cQTras,1) ...
+            + sum(Data.Red.cambioCap*CapDif.^2,1) ...
+            + sum(Data.Red.cambioTap*TapDif.^2,1) ...
+            + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2,1) ...
+            ;
+
+
+        
+        
+        
 
     cQTras >= - Data.Cost.piQmtras .* QTras;
     cQTras >= Data.Cost.piQMtras .* QTras;
@@ -165,22 +157,22 @@ cvx_begin
     pC == pCClRes;
     qC == qCClRes;
 
-    pG = PTras;
-    qG = QTras + qCp;
+    pG == PTras;
+    qG == QTras + qCp;
 
     pN - pC + pG == 0;
     qN - qC + qG == 0;
 
     % Restricciones de la corriente
-    lQoL(:,:,:,1) = 2*P;
-    lQoL(:,:,:,2) = 2*Q;
-    lQoL(:,:,:,3) =  (l - repmat(v, [1 n 1]));
-    norms(lQoL,2,4) <= (l + repmat(v, [1 n 1]));
+        lQoL(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lQoL(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lQoL(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(v, [1 n 1]));
+        norms(lQoL,2,4) <= Data.Red.Branch.T.*(l + repmat(v, [1 n 1]));
 
-    lNorm(:,:,:,1) = 2*P;
-    lNorm(:,:,:,2) = 2*Q;
-    lNorm(:,:,:,3) =  (l- z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
-    norms(lNorm,2,4) <= (l + z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
+        lNorm(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lNorm(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lNorm(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
+        norms(lNorm,2,4) <= Data.Red.Branch.T.*(l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
 
     l <= Data.Red.Branch.lTop.*z;
 
@@ -202,8 +194,8 @@ cvx_begin
         - 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 
 
-    0 >= (tvExpr - repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
-    0 <= (tvExpr + repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 >= (tvExpr - Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 <= (tvExpr + Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
 
     cDv >= 0;
     cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));
@@ -271,22 +263,29 @@ cvx_begin
     qCClRes >= sum(qCApp, 4);
     
     %% Restricciones de Aire Acondicionado
-    TvarAnt(:,1,1) = Data.St.AC.tempIni;
-    TvarAnt(:,1,(2:Config.Etapas)) = Tvar(:,1,(1:Config.Etapas-1));
-    pCAC(:,:,:) = 0;
-    pCAC(iC,1,:) = pCApp(iC,1,:,2);
+    if lenAC > 0
+        % Temperatura Aire Acondicionado
+        variable Tvar(n,1,Config.Etapas);
+        expression TvarAnt(n,1,Config.Etapas);
+        expression pCAC(n,1,Config.Etapas);
 
-% 		Tvar(iC,1,:) == TvarAnt(iC,1,:) - Data.St.AC.epsilon(iC,1,:).*(TvarAnt(iC,1,:) - Data.temp(iC,1,:))*Data.dt + Data.St.AC.eta(iC,1,:).*pCAC(iC,1,:)*Data.dt : dTvar;
-    Tvar(iC,1,:) - TvarAnt(iC,1,:) + Data.St.AC.epsilon(iC,1,:).*(TvarAnt(iC,1,:) - Data.temp(iC,1,:))*Data.dt - Data.St.AC.eta(iC,1,:).*pCAC(iC,1,:)*Data.dt == 0 : dTvar;
+        TvarAnt(:,1,1) = Data.St.AC.tempIni;
+        TvarAnt(:,1,(2:Config.Etapas)) = Tvar(:,1,(1:Config.Etapas-1));
+        pCAC(:,:,:) = 0;
+        pCAC(AC,1,:) = pCApp(AC,1,:,2);
 
-    Tvar(iC,1,:) >= Data.St.AC.tempLow(iC,1,:);
-    Tvar(iC,1,:) <= Data.St.AC.tempTop(iC,1,:);
+        Tvar(AC,1,:) - TvarAnt(AC,1,:) + Data.St.AC.epsilon(AC,1,:).*(TvarAnt(AC,1,:) - Data.temp(AC,1,:))*Data.dt - Data.St.AC.eta(AC,1,:).*pCAC(AC,1,:)*Data.dt == 0;
+
+        Tvar(AC,1,:) >= Data.St.AC.tempLow(AC,1,:);
+        Tvar(AC,1,:) <= Data.St.AC.tempTop(AC,1,:);
+
+        tfopt_expr = tfopt_expr + sum(Data.St.AC.beta.*(Tvar - Data.St.AC.tempPref).^2,1);
+    
+    end
 
 
-    %% Restricciones de storage bateria
     fopt_expr = sum(tfopt_expr);
 
-    %% Restricciones de cargas no interrumpibles
     if findOpt
         minimize fopt_expr
     end
@@ -321,7 +320,10 @@ Var.ClRes.pC = pCClRes;
 Var.ClRes.qC = qCClRes;
 Var.ClRes.pCApp = pCApp;
 Var.ClRes.qCApp = qCApp;
-Var.ClRes.Tvar = Tvar;
+
+if lenAC > 0
+    Var.ClRes.Tvar = Tvar;
+end
 
 
 
@@ -335,5 +337,6 @@ Var.Red.Bus.qC = qC;
 
 status = cvx_status;
 
+    
 cvx_clear;
 end

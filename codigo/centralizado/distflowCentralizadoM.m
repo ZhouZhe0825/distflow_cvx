@@ -49,7 +49,9 @@ NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 uLowApp = zeros(size(Data.Red.Bus.uLow,1),size(Data.Red.Bus.uLow,2), 2);
 uTopApp = uLowApp;
 
-iC = Data.Red.Bus.indCons;
+AC = find(Data.St.AC.I == 1);
+nAC = length(AC);
+
 
 tic
 cvx_begin
@@ -96,15 +98,11 @@ cvx_begin
     variable qCApp(n, Config.Etapas, 2); % real power demand in i
     expression vApp(n, Config.Etapas, 2);
     variable pCn(n, Config.Etapas, 2); % real power demand in i
-    variable Tvar(n,Config.Etapas);
-    expression TvarAnt(n,Config.Etapas);
-    expression pCAC(n,Config.Etapas);
-
-    
     
     variable pCClRes(n, Config.Etapas); % real power demand in i
     variable qCClRes(n, Config.Etapas); % real power demand in i
     
+	expression tfopt_expr(Config.Etapas,1); 
 	expression fopt_expr; 
 
     CapDif(:,1) = Data.Red.Bus.CapIni;
@@ -113,14 +111,14 @@ cvx_begin
     TapDif(:,1) = Data.Red.Bus.TapIni;
     TapDif(:,(2:Config.Etapas)) = Tap(:,(2:Config.Etapas)) - Tap(:,(1:Config.Etapas-1));
         
-	fopt_expr = sum(...
-        sum(Data.Cost.piPTrasm.*pG) ...
-        + sum(Data.Cost.cdvm.*cDv) ...
-        + sum(cQG) ...
-        + sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2)) ...
-        + sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2)) ...
-        + sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2)) ...
-        );
+	tfopt_expr = ...
+        sum(Data.Cost.piPTrasm.*pG,1) ...
+        + sum(Data.Cost.cdvm.*cDv,1) ...
+        + sum(cQG,1) ...
+        + sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2),1) ...
+        + sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2),1) ...
+        + sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1) ...
+        ;
 
 % 	fopt_expr = sum(Data.Cost.piPTrasm.*pg) + sum(Data.Cost.cdvm.*cDv);
 
@@ -244,16 +242,26 @@ cvx_begin
     qCClRes >= sum(qCApp,3);
     
     % Aire acondicionado
-    TvarAnt(:,1) = Data.St.AC.tempIni;
-    TvarAnt(:,(2:Config.Etapas)) = Tvar(:,(1:Config.Etapas-1));
-    pCAC(:,:) = 0;
-    pCAC(iC,:) = pCApp(iC,:,2);
+    if nAC > 0 
+        % Temperatura Aire Acondicionado
+        variable Tvar(n,Config.Etapas);
+        expression TvarAnt(n,Config.Etapas);
+        expression pCAC(n,Config.Etapas);
+    
+        TvarAnt(:,1) = Data.St.AC.tempIni;
+        TvarAnt(:,(2:Config.Etapas)) = Tvar(:,(1:Config.Etapas-1));
+        pCAC(:,:) = 0;
+        pCAC(AC,:) = pCApp(AC,:,2);
 
-    Tvar(iC,:) - TvarAnt(iC,:) + Data.St.AC.epsilon(iC,:).*(TvarAnt(iC,:) - Data.temp(iC,:))*Data.dt - Data.St.AC.eta(iC,:).*pCAC(iC,:)*Data.dt == 0;
+        Tvar(AC,:) - TvarAnt(AC,:) + Data.St.AC.epsilon(AC,:).*(TvarAnt(AC,:) - Data.temp(AC,:))*Data.dt - Data.St.AC.eta(AC,:).*pCAC(AC,:)*Data.dt == 0;
 
-    Tvar(iC,:) >= Data.St.AC.tempLow(iC,:);
-    Tvar(iC,:) <= Data.St.AC.tempTop(iC,:);
+        Tvar(AC,:) >= Data.St.AC.tempLow(AC,:);
+        Tvar(AC,:) <= Data.St.AC.tempTop(AC,:);
+        tfopt_expr = tfopt_expr + sum(Data.St.AC.beta.*(Tvar - Data.St.AC.tempPref).^2,1);
 
+	end
+
+    fopt_expr = sum(tfopt_expr);
     minimize fopt_expr
 
     
@@ -290,7 +298,10 @@ toc
 
     Var.ClRes.pC = permute(full(pCClRes), [1 3 2]);
     Var.ClRes.qC = permute(full(qCClRes), [1 3 2]);
-    Var.ClRes.Tvar = permute(full(Tvar), [1 3 2]);
+
+    if nAC > 0 
+        Var.ClRes.Tvar = permute(full(Tvar), [1 3 2]);
+    end
 
     Var.ClRes.pCApp = permute(full(pCApp), [1 4 2 3]);
     Var.ClRes.qCApp = permute(full(qCApp), [1 4 2 3]);
