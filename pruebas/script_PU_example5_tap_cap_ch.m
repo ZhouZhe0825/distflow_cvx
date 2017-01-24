@@ -12,7 +12,7 @@ minr = 0;
 tol = 5e-8;
 delta = 0.004;
 m = .01;
-CantHorasEtapa = .25;
+CantHorasEtapa = 1;
 iniEtapa = 1; %7:00
 
 factorReducEol = .25;
@@ -29,15 +29,15 @@ util=true;
 NodosGeneracionEolica = [];
 
 % Trafos
-Trafo1.TP = [3];
-Trafo1.N = .00005;
+Trafo1.TP = [-2 -1 0 1 2];
+Trafo1.N = .005;
 Trafo1.nod = 1;
 Trafo1.ini = 0;
 Trafos = [Trafo1];
 
 
 % Caps
-Cap1.TP = [0];
+Cap1.TP = [0 1 2 3];
 Cap1.N = .005;
 Cap1.nod = 9;
 Cap1.ini = 0;
@@ -55,11 +55,11 @@ Carga2.TP = [0 1];
 Carga2.pC = cg2pc;
 Carga2.qC = cg2pc*.015;
 Carga2.dur = cg2durHor;
-Carga2.nod = 9;
+Carga2.nod = 4;
 
 % Cargas = [Carga1;Carga2];
-% Cargas = [Carga2];
-Cargas = [];
+Cargas = [Carga2];
+% Cargas = [];
 
 
 multipCarga = ones(9, 96);
@@ -80,7 +80,7 @@ uTop_ct = 1.05;
 iniEstado = 1;
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example5';
+outFilename_pref = 'PU_example5_tap_cap_Ch';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
@@ -181,6 +181,7 @@ end
 Data.temp = temp;
 
 % Fotovoltaicos
+
 % Trasmision
 % Data.Red.Bus.Q0Top = .0955;
 % Data.Red.Bus.Q0Low = 0;
@@ -529,7 +530,15 @@ Data.Red.Bus.uLow = Data.Red.Bus.uLow/1.5;
 Data.Red.Bus.uTop(1,:) = 1;
 Data.Red.Bus.uLow(1,:) = 1;
 
-[Var_nxn, opt_nxn, Dmod] = llamarCentralizado(Data, Config);
+DataM = Data;
+[DataM] = reshapeData(DataM, Config);
+
+DataM.Util.pzCnPrefE(:,:,1) = DataM.Util.pzCnPrefE(:,:,1)*.125;
+DataM.Util.pzCnPrefE(:,:,2) = DataM.Util.pzCnPrefE(:,:,2)*.375;
+DataM.Util.pzCnPrefE(:,:,3) = DataM.Util.pzCnPrefE(:,:,3)*.625;
+DataM.Util.pzCnPrefE(:,:,4) = DataM.Util.pzCnPrefE(:,:,4)*.875;
+
+[Var_nxn, opt_nxn] = distflowCentralizadoNxN(DataM, Config);
 
 Data.Red.Bus.pCLow = full(Data.Red.Bus.pCLow);
 Data.Red.Bus.qCLow = full(Data.Red.Bus.qCLow);
@@ -575,6 +584,11 @@ Data.Util.pzCnTopE = repmat(Data.Util.pzCnTopE, [1 Config.Etapas]);
 Data.Util.qzCnLowE = repmat(Data.Util.qzCnLowE, [1 Config.Etapas]);
 Data.Util.qzCnTopE = repmat(Data.Util.qzCnTopE, [1 Config.Etapas]);
 Data.Util.pzCnPrefE = repmat(Data.Util.pzCnPrefE, [1 Config.Etapas]);
+Data.Util.pzCnPrefE(:,1) = Data.Util.pzCnPrefE(:,1)*.125;
+Data.Util.pzCnPrefE(:,2) = Data.Util.pzCnPrefE(:,2)*.375;
+Data.Util.pzCnPrefE(:,3) = Data.Util.pzCnPrefE(:,3)*.625;
+Data.Util.pzCnPrefE(:,4) = Data.Util.pzCnPrefE(:,4)*.875;
+
 
 Data.Util.pzCnPref = Data.Util.pzCnPref(:,(1:Config.Etapas),:);
 Data.Util.pzCnLow = Data.Util.pzCnLow(:,(1:Config.Etapas),:);
@@ -615,10 +629,12 @@ Data.St.AC.eta = repmat(Data.St.AC.eta, [1 Config.Etapas]);
 Data.St.AC.tempLow = repmat(Data.St.AC.tempLow, [1 Config.Etapas]);
 Data.St.AC.tempTop = repmat(Data.St.AC.tempTop, [1 Config.Etapas]);
 
+Data.ClNI.pC = repmat(Data.ClNI.pC, [1 Config.Etapas]);
+Data.ClNI.qC = repmat(Data.ClNI.qC, [1 Config.Etapas]);
 
 
 [Var_m, opt_m] = distflowCentralizadoM(Data, Config);
 
-printSalidasDistflow(Var_nxn, Dmod, Config, cantTaps, cantCaps, cantCargs, outFilename_c, [], [], [], [], []);
-printSalidasDistflow(Var_m, Dmod, Config, cantTaps, cantCaps, cantCargs, outFilename_r, [], [], [], [], []);
+printSalidasDistflow(Var_nxn, DataM, Config, cantTaps, cantCaps, cantCargs, outFilename_c, [], [], [], [], []);
+printSalidasDistflow(Var_m, DataM, Config, cantTaps, cantCaps, cantCargs, outFilename_r, [], [], [], [], []);
 

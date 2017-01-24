@@ -38,6 +38,17 @@ NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
 NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
 NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
+% Cargas No interrumpibles
+ClNI = find(Data.ClNI.I == 1);
+nClNI = length(ClNI);
+
+pLClNI = Data.Util.pzCnLowE(ClNI,:);
+pTClNI = Data.Util.pzCnTopE(ClNI,:);
+qLClNI = Data.Util.qzCnLowE(ClNI,:);
+qTClNI = Data.Util.qzCnTopE(ClNI,:);
+vLClNI = Data.Red.Bus.uLow(ClNI,:).^2;
+vTClNI = Data.Red.Bus.uTop(ClNI,:).^2;
+
 
 %% Modelo programacion matematica
 
@@ -86,6 +97,9 @@ cvx_begin
     variable pCClRes(n, Config.Etapas); % real power demand in i
     variable qCClRes(n, Config.Etapas); % real power demand in i
     
+    variable pCClNI(n, Config.Etapas);
+    variable qCClNI(n, Config.Etapas);
+	
  	expression lQoL(m, Config.Etapas, 3);
  	expression lNorm(m, Config.Etapas, 3);
     expression vExpr(n, Config.Etapas);
@@ -122,8 +136,8 @@ cvx_begin
     pN == InBr*(P - Data.Red.Branch.r.*l) - OutBr*P;
     qN == InBr*(Q - Data.Red.Branch.x.*l) - OutBr*Q;
 
-    pC == pCClRes;
-    qC == qCClRes;
+    pC == pCClRes + pCClNI;
+    qC == qCClRes + qCClNI;
 
     pG == pGTras;
     qG == qGTras + qCp;
@@ -225,6 +239,35 @@ cvx_begin
 
     qCClRes >= sum(qCApp,3);
     
+    %% Clientes no interrumpibles
+    if nClNI > 0
+		variable onClNI(nClNI,Config.Etapas) binary;
+		variable stClNI(nClNI,Config.Etapas) binary;
+
+		expression onNext(nClNI,Config.Etapas)
+        expression onClNInod(n,Config.Etapas);
+
+        onClNInod(:,:) = 0;
+        onClNInod(ClNI,:) = onClNI;
+
+
+        pCClNI == Data.ClNI.pC.*onClNInod;
+        qCClNI == Data.ClNI.qC.*onClNInod;
+
+        onNext(:,(1:Config.Etapas-1)) = onClNI(:,(2:Config.Etapas));
+        onNext(:,Config.Etapas) = 0;
+        stClNI - onNext + onClNI >= 0;
+
+        sum(stClNI,2) == 1;
+        sum(onClNI,2) == Data.ClNI.d(ClNI);
+        stClNI(:,1) == onClNI(:,1);
+        
+        tfopt_expr = tfopt_expr + sum(Data.Util.betaE.*((pCClNI - Data.Util.pzCnPrefE).^2),1);
+    else
+        pCClNI == 0;
+        qCClNI == 0;
+    end
+
     fopt_expr = sum(tfopt_expr);
     minimize fopt_expr
     
@@ -267,6 +310,21 @@ Var.ClRes.pCApp = permute(full(pCApp), [1 4 2 3]);
 Var.ClRes.qCApp = permute(full(qCApp), [1 4 2 3]);
 Var.ClRes.pC = permute(full(pCClRes), [1 3 2]);
 Var.ClRes.qC = permute(full(qCClRes), [1 3 2]);
+
+if nClNI > 0
+	Var.ClNI.pC = pCClNI;
+	Var.ClNI.qC = qCClNI;
+	Var.ClNI.on = pCClNI*0;
+	Var.ClNI.on(ClNI,:) = onClNI;
+	Var.ClNI.start = pCClNI*0;
+	Var.ClNI.start(ClNI,:) = stClNI;
+	
+	Var.ClNI.pC = permute(full(Var.ClNI.pC), [1 3 2]);
+	Var.ClNI.qC = permute(full(Var.ClNI.qC), [1 3 2]);
+	Var.ClNI.on = permute(full(Var.ClNI.on), [1 3 2]);
+	Var.ClNI.start = permute(full(Var.ClNI.start), [1 3 2]);
+	
+end
 
 opt = fopt_expr;
 cvx_clear

@@ -29,6 +29,10 @@ NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
 NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
 NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
+%% Cargas No interrumpibles
+nodCh = find(Data.ClNI.I == 1);
+NnodCh = find(Data.ClNI.I == 0);
+lenCh = length(nodCh);
 
 %% Modelo programacion matematica
 
@@ -77,6 +81,9 @@ cvx_begin
 	variable pCClRes(n,1, Config.Etapas); % real power demand in i
 	variable qCClRes(n,1, Config.Etapas); % real power demand in i
 
+	variable pCClNI(n,1, Config.Etapas);
+	variable qCClNI(n,1, Config.Etapas);
+
 	expression lQoL(n, n, Config.Etapas,3);
 	expression lNorm(n, n, Config.Etapas,3);
 	expression vExpr(n,n,Config.Etapas);
@@ -113,8 +120,8 @@ cvx_begin
 	pN == (permute(sum(Data.Red.Branch.T.*P - Data.Red.Branch.r.*l, 1),[2 1 3]) - sum(Data.Red.Branch.T.*P, 2));
 	qN == (permute(sum(Data.Red.Branch.T.*Q - Data.Red.Branch.x.*l, 1),[2 1 3]) - sum(Data.Red.Branch.T.*Q, 2));
 
-	pC == pCClRes;
-	qC == qCClRes;
+	pC == pCClRes + pCClNI;
+	qC == qCClRes + qCClNI;
 
 	pG == pGTras;
 	qG == qGTras + qCp;
@@ -223,6 +230,33 @@ cvx_begin
 
 	qCClRes >= sum(qCApp, 4);
 
+	%% Restricciones de cargas no interrumpibles
+	if lenCh > 0
+		variable stCh(n,1, Config.Etapas) binary;
+		variable onCh(n,1, Config.Etapas) binary;
+		expression onNext(n,1,Config.Etapas)
+
+		pCClNI == Data.ClNI.pC.*onCh;
+		qCClNI == Data.ClNI.qC.*onCh;
+		
+		
+		onNext(nodCh,1,(1:Config.Etapas-1)) = onCh(nodCh,1,(2:Config.Etapas));
+		onNext(nodCh,1,Config.Etapas) = 0;
+		stCh - onNext + onCh >= 0;
+
+		sum(stCh(nodCh,1,:),3) == 1;
+		sum(onCh(nodCh,1,:),3) == Data.ClNI.d(nodCh);
+		stCh(nodCh,1,1) == onCh(nodCh,1,1);
+
+		stCh(NnodCh,1,:) == 0;
+		onCh(NnodCh,1,:) == 0;
+
+		tfopt_expr = tfopt_expr + sum(Data.Util.betaE.*(pCClNI - Data.Util.pzCnPrefE).^2,1);
+	else
+		pCClNI == 0;
+		qCClNI == 0;
+	end
+	
 	fopt_expr = sum(tfopt_expr);
 	minimize fopt_expr
 
@@ -262,6 +296,13 @@ Var.ClRes.pCApp = pCApp;
 Var.ClRes.qCApp = qCApp;
 Var.ClRes.pC = pCClRes;
 Var.ClRes.qC = qCClRes;
+
+if lenCh > 0
+	Var.ClNI.pC = pCClNI;
+	Var.ClNI.qC = qCClNI;
+	Var.ClNI.on = onCh;
+	Var.ClNI.start = stCh;
+end
 
 status = cvx_status;
 opt = fopt_expr;
