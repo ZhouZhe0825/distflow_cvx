@@ -80,7 +80,7 @@ uTop_ct = 1.05;
 iniEstado = 1;
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example4_St_tap_cap';
+outFilename_pref = 'PU_example4_tap_cap';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
@@ -152,10 +152,7 @@ Data.Red.Bus.uTop(Data.Red.Bus.v0) = auxV;
 Data.Red.Branch.lTop(:,:) = lTop_ct;
 
 Data.Red.Branch.yTop = Data.Red.Branch.T;
-Data.Red.Branch.yLow = Data.Red.Branch.T;
-
-Data.Red.Branch.yLow(8, 9) = 0;
-Data.Red.Branch.yLow(9, 8) = 0;
+Data.Red.Branch.yLow = Data.Red.Branch.T*0;
     
 %% Clientes no interrumpibles
 Data.ClNI.pC = Data.Red.Bus.uLow * 0;

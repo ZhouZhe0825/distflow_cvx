@@ -5,7 +5,6 @@ function [Var, opt, status] = distflowCentralizadoNxN(Data, Config, findOpt, uti
 % Data.Red.Bus.v0, Data.Red.Bus.Q0Top, Data.Red.Bus.Q0Low, Data.Red.Bus.P0Top, Data.Red.Bus.P0Low son escalares
 % modSym, findOpt son booleano
 
-
 % [Data] = reshapeDataL_(Data,Etapas);
 % 
 n = size(Data.Red.Branch.T,1);
@@ -34,8 +33,8 @@ tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
 
 % Eolico
 indWn = find(matOverTime(Data.Gen.DFIG.I) == 1);
+NindWn = setdiff((1:n),indWn);
 lenWN = length(indWn);
-nVW = intersect(NnoG, indWn);
 
 P_mecSigWnd = zeros(1, 1, size(Data.Gen.DFIG.P_mec,3), lenWN);
 P_mecWnd = zeros(1, 1, size(Data.Gen.DFIG.P_mec,3), lenWN);
@@ -70,7 +69,7 @@ cvx_begin
 
 
 	% solo para mosek
-% 		cvx_solver_settings('MSK_DPAR_MIO_MAX_TIME', 3600);
+% 		cvx_solver_settings('MSK_DPAR_MIO_MAX_TIME', 30);
 %         for i = 1: size(Config.Centr,1)
 %             cvx_solver_settings(Config.Centr{i,1}, Config.Centr{i,2});
 %         end
@@ -88,8 +87,8 @@ cvx_begin
     variable pN(n,1, Config.Etapas);
     variable qN(n,1, Config.Etapas);
     
-    expression pG(n,1, Config.Etapas);
-    expression qG(n,1, Config.Etapas);
+    variable pG(n,1, Config.Etapas);
+    variable qG(n,1, Config.Etapas);
 	
     variable qCp(n,1, Config.Etapas); % reactive power demand in i
 	variable v(n,1, Config.Etapas); % module of square complex voltage in i
@@ -109,20 +108,6 @@ cvx_begin
 	variable Tap(n,1, Config.Etapas) integer;
 	variable y(n, n, Config.Etapas) binary;
 
-	if lenWN > 0
-
-		% Variables de generadores eolico
-		variable PDFIG(5,5, Config.Etapas,lenWN);
-		variable lDFIG(5,5, Config.Etapas,lenWN);
-		variable pWigDFIG(5,1, Config.Etapas,lenWN);
-		variable QDFIG(5,5, Config.Etapas,lenWN);
-		variable qWigDFIG(5,1, Config.Etapas,lenWN);
-		variable pCDFIG(5,1, Config.Etapas,lenWN);
-		variable qCDFIG(5,1, Config.Etapas,lenWN);
-		variable vDFIG(5,1, Config.Etapas,lenWN);
-		variable sDFIG(5,1, Config.Etapas,lenWN);
-		variable xiDFIG(5,1, Config.Etapas,lenWN);
-	end
 
 	% Variables de utilidad
 	variable pCApp(n,1, Config.Etapas, 2); % real power demand in i
@@ -132,8 +117,6 @@ cvx_begin
 
     variable pCClRes(n,1, Config.Etapas); % real power demand in i
     variable qCClRes(n,1, Config.Etapas); % real power demand in i
-
-	variable cqWi(n,1, Config.Etapas);
 
 	% Expresion para p y q generados que entran en la red general
 	variable pWi(n,1, Config.Etapas);
@@ -158,7 +141,6 @@ cvx_begin
         
 	expression lQoL(n, n, Config.Etapas,3);
 	expression lNorm(n, n, Config.Etapas,3);
-	expression lQoLDFIG(5, 5, Config.Etapas, lenWN,3);
 		
 
 
@@ -172,24 +154,15 @@ cvx_begin
     TapDif(:,1,1) = Data.Red.Bus.TapIni;
     TapDif(:,1,(2:Config.Etapas)) = Tap(:,1,(2:Config.Etapas)) - Tap(:,1,(1:Config.Etapas-1));
 	
-	tfopt_expr = sum(...
-		+ sum(Data.Cost.piPTras .* PTras) ...
-		+ sum(Data.Cost.cdv .* cDv) ...
-        + sum(cQTras) ...
-        + sum(Data.Red.cambioCap*CapDif.^2) ...
-        + sum(Data.Red.cambioTap*TapDif.^2) ...
-    + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2) ...
-        );
+		tfopt_expr = ...
+            sum(Data.Cost.piPTras .* PTras,1) ...
+            + sum(Data.Cost.cdv .* cDv,1) ...
+            + sum(cQTras,1) ...
+            + sum(Data.Red.cambioCap*CapDif.^2,1) ...
+            + sum(Data.Red.cambioTap*TapDif.^2,1) ...
+            + sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2,1) ...
+            ;
 
-    if lenWN > 0
-        tfopt_expr = tfopt_expr + sum(...
-            + sum(Data.Cost.rhopWi .* pWi) ...
-            + sum(cqWi) ...
-        );
-        cqWi >= - Data.Cost.rhomqWi .* qWi;
-        cqWi >= Data.Cost.rhoMqWi .* qWi;
-    end
-    
     
 	cQTras >= - Data.Cost.piQmtras .* QTras;
 	cQTras >= Data.Cost.piQMtras .* QTras;
@@ -197,13 +170,6 @@ cvx_begin
 
 	%% Restricciones de Red
 
-    (1-Data.Gen.DFIG.I) .* pWi == 0;
-    (1-Data.Gen.DFIG.I) .* qWi == 0;
-
-    if lenWN > 0
-        pWi(nVW,1,:) == - permute(PDFIG(1,2,:,:) + PDFIG(1,3,:,:), [4 1 3 2]);
-        qWi(nVW,1,:) == - permute(QDFIG(1,2,:,:) + QDFIG(1,3,:,:), [4 1 3 2]);
-    end
 	
 	
 	% Restricciones generales de branches
@@ -224,28 +190,23 @@ cvx_begin
     pC == pCClRes;
     qC == qCClRes;
 
-    pG = PTras;
-    qG = QTras + qCp;
-    
-    if lenWN > 0
-        pG = pG + pWi;
-        qG = qG + qWi;
-    end
+    pG == PTras + pWi;
+    qG == QTras + qWi + qCp;
     
         
 	pN - pC + pG == 0;
 	qN - qC + qG == 0;
 
 	% Restricciones de la corriente
-	lQoL(:,:,:,1) = 2*P;
-	lQoL(:,:,:,2) = 2*Q;
-	lQoL(:,:,:,3) =  (l - repmat(v, [1 n 1]));
-	norms(lQoL,2,4) <= (l + repmat(v, [1 n 1]));
+        lQoL(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lQoL(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lQoL(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(v, [1 n 1]));
+        norms(lQoL,2,4) <= Data.Red.Branch.T.*(l + repmat(v, [1 n 1]));
 
-	lNorm(:,:,:,1) = 2*P;
-	lNorm(:,:,:,2) = 2*Q;
-	lNorm(:,:,:,3) =  (l- z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
-	norms(lNorm,2,4) <= (l + z.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]));
+        lNorm(:,:,:,1) = Data.Red.Branch.T.*(2*P);
+        lNorm(:,:,:,2) = Data.Red.Branch.T.*(2*Q);
+        lNorm(:,:,:,3) =  Data.Red.Branch.T.*(l - repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
+        norms(lNorm,2,4) <= Data.Red.Branch.T.*(l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
 
 	l <= Data.Red.Branch.lTop.*z;
 
@@ -267,9 +228,8 @@ cvx_begin
 		- 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 
 
-	0 >= (tvExpr - repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
-	0 <= (tvExpr + repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
-
+        0 >= (tvExpr - Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
+        0 <= (tvExpr + Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
 
 	cDv >= 0;
 	cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));
@@ -337,9 +297,46 @@ cvx_begin
     qCClRes >= sum(qCApp, 4);
 
 	%% Restricciones de generadores Eolico
+	if lenWN > 0
 
-	% Modelo de Red interna
-    if lenWN > 0
+		% Variables de generadores eolico
+		variable cqWi(n,1, Config.Etapas);
+
+		variable PDFIG(5,5, Config.Etapas,lenWN);
+		variable lDFIG(5,5, Config.Etapas,lenWN);
+		variable pWigDFIG(5,1, Config.Etapas,lenWN);
+		variable QDFIG(5,5, Config.Etapas,lenWN);
+		variable qWigDFIG(5,1, Config.Etapas,lenWN);
+		variable pCDFIG(5,1, Config.Etapas,lenWN);
+		variable qCDFIG(5,1, Config.Etapas,lenWN);
+		variable vDFIG(5,1, Config.Etapas,lenWN);
+		variable sDFIG(5,1, Config.Etapas,lenWN);
+		variable xiDFIG(5,1, Config.Etapas,lenWN);
+
+		expression lQoLDFIG(5, 5, Config.Etapas, lenWN,3);
+
+		expression sNormdfigF(1,1,Config.Etapas,lenWN,2);
+		expression sNormdfigR(1,1,Config.Etapas,lenWN,2);
+
+		expression PQNormdfigIE(1,1,Config.Etapas,lenWN,2);
+		expression PQNormdfigIF(1,1,Config.Etapas,lenWN,2);
+
+        tfopt_expr = tfopt_expr ...
+			+ sum(Data.Cost.rhopWi .* pWi) ...
+            + sum(cqWi) ...
+		;
+
+        cqWi >= - Data.Cost.rhomqWi .* qWi;
+        cqWi >= Data.Cost.rhoMqWi .* qWi;
+
+        pWi(indWn,1,:) == - permute(PDFIG(1,2,:,:) + PDFIG(1,3,:,:), [4 1 3 2]);
+        qWi(indWn,1,:) == - permute(QDFIG(1,2,:,:) + QDFIG(1,3,:,:), [4 1 3 2]);
+
+        pWi(NindWn,1,:) == 0;
+        qWi(NindWn,1,:) == 0;
+        
+        
+		% Modelo de Red interna
         permute(vDFIG(1,1,:,:), [4 1 3 2]) == v(indWn,1,:);
 
         PDFIG(1,2,:,:) == Data.Gen.DFIG.r(1,2,:,:) .* lDFIG(1,2,:,:) - pWigDFIG(2,1,:,:);
@@ -373,13 +370,26 @@ cvx_begin
         vDFIG(3,1,:,:) >= Data.Gen.DFIG.uLow(3,1,:,:).^2;
         vDFIG(3,1,:,:) <= Data.Gen.DFIG.uTop(3,1,:,:).^2;
 
-        Data.Gen.DFIG.PQnorm(1,2,:,:) >= norms([PDFIG(1,2,:,:) QDFIG(1,2,:,:)],2 ,2);
-        Data.Gen.DFIG.PQnorm(1,3,:,:) >= norms([PDFIG(1,3,:,:) QDFIG(1,3,:,:)],2 ,2);
+        PQNormdfigIE(:,:,:,:,1) = PDFIG(1,2,:,:);
+		PQNormdfigIE(:,:,:,:,2) = QDFIG(1,2,:,:);
+        Data.Gen.DFIG.PQnorm(1,2,:,:) >= norms(PQNormdfigIE,2,5);
+        % Data.Gen.DFIG.PQnorm(1,2,:,:) >= norms([PDFIG(1,2,:,:) QDFIG(1,2,:,:)],2 ,2);
 
-        sDFIG (3,1,:,:) >= norms([pCDFIG(3,1,:,:) qCDFIG(3,1,:,:)],2 ,2);
+        PQNormdfigIF(:,:,:,:,1) = PDFIG(1,3,:,:);
+		PQNormdfigIF(:,:,:,:,2) = QDFIG(1,3,:,:);
+        Data.Gen.DFIG.PQnorm(1,3,:,:) >= norms(PQNormdfigIF,2,5);
+        % Data.Gen.DFIG.PQnorm(1,3,:,:) >= norms([PDFIG(1,3,:,:) QDFIG(1,3,:,:)],2 ,2);
+
+        sNormdfigF(:,:,:,:,1) = pCDFIG(3,1,:,:);
+		sNormdfigF(:,:,:,:,2) = qCDFIG(3,1,:,:);
+        sDFIG(3,1,:,:) >= norms(sNormdfigF,2,5);
+        % sDFIG (3,1,:,:) >= norms([pCDFIG(3,1,:,:) qCDFIG(3,1,:,:)],2 ,2);
         xiDFIG(3,1,:,:) >= pCDFIG(3,1,:,:).^2 + qCDFIG(3,1,:,:).^2;
 
-        sDFIG (5,1,:,:) >= norms([PDFIG(4,5,:,:) QDFIG(4,5,:,:)],2 ,2);
+        sNormdfigF(:,:,:,:,1) = PDFIG(4,5,:,:);
+		sNormdfigF(:,:,:,:,2) = QDFIG(4,5,:,:);
+        sDFIG(5,1,:,:) >= norms(sNormdfigF,2,5);
+        % sDFIG (5,1,:,:) >= norms([PDFIG(4,5,:,:) QDFIG(4,5,:,:)],2 ,2);
         xiDFIG(5,1,:,:) >= PDFIG(4,5,:,:).^2 + QDFIG(4,5,:,:).^2;
 
         pCDFIG(3,1,:,:) == PDFIG(4,5,:,:) ...
@@ -393,13 +403,15 @@ cvx_begin
 		(1-TgWnd).*PDFIG == 0;
 		(1-TgWnd).*lDFIG == 0;
 		(1-TgWnd).*QDFIG == 0;
+	
+	else
+	
+        pWi == 0;
+        qWi == 0;
 
     end
 
-    %% Restricciones de storage bateria
     fopt_expr = sum(tfopt_expr);
-
-    %% Restricciones de cargas no interrumpibles
 
 	if findOpt
 		minimize fopt_expr
@@ -422,6 +434,8 @@ if (lenWN > 0)
 	Var.Gen.Dfig.Bus.qg = qWigDFIG;
 	Var.Gen.Dfig.Bus.s = sDFIG;
 	Var.Gen.Dfig.Bus.xi = xiDFIG;
+    Var.Gen.Dfig.Bus.n_Wnd = n_Wnd;
+    Var.Gen.Dfig.Bus.P_mecWnd = P_mecWnd;
 else
 	Var.Gen.Dfig.pWi = zeros(n,Config.Etapas);
 	Var.Gen.Dfig.qWi = zeros(n,Config.Etapas);
@@ -465,5 +479,6 @@ Var.Red.Bus.qC = qC;
 
 status = cvx_status;
 
+    
 cvx_clear;
 end
