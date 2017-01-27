@@ -12,7 +12,7 @@ minr = 0;
 tol = 5e-8;
 delta = 0.004;
 m = .01;
-CantHorasEtapa = .25;
+CantHorasEtapa = 1;
 iniEtapa = 1; %7:00
 
 factorReducEol = .25;
@@ -25,19 +25,19 @@ util=true;
 
 %% Declaracion de constantes
 
-% NodosGeneracionEolica = [5];
-NodosGeneracionEolica = [];
+NodosGeneracionEolica = [5];
+% NodosGeneracionEolica = [];
 
 % Trafos
-Trafo1.TP = [3];
-Trafo1.N = .00005;
+Trafo1.TP = [-2 -1 0 1 2];
+Trafo1.N = .005;
 Trafo1.nod = 1;
 Trafo1.ini = 0;
 Trafos = [Trafo1];
 
 
 % Caps
-Cap1.TP = [0];
+Cap1.TP = [0 1 2 3];
 Cap1.N = .005;
 Cap1.nod = 9;
 Cap1.ini = 0;
@@ -80,7 +80,7 @@ uTop_ct = 1.05;
 iniEstado = 1;
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example5';
+outFilename_pref = 'PU_example4_tap_cap_dfig';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
@@ -92,7 +92,7 @@ outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
 
 % outFilename_w_sw_dist = [outFilenamePre '_d_' outFilenameMid outFilenameSuf ''];
 
-inFilename = 'PU_example5.xls';
+inFilename = 'PU_example4.xls';
 % fileCurvaCarga = 'carga_subredLP_trafo_red_93-73_no_rnd.xlsx';
 
 %% Carga de datos
@@ -181,6 +181,7 @@ end
 Data.temp = temp;
 
 % Fotovoltaicos
+
 % Trasmision
 % Data.Red.Bus.Q0Top = .0955;
 % Data.Red.Bus.Q0Low = 0;
@@ -205,6 +206,9 @@ Data.Gen.Tras.I(Data.Red.Bus.v0) = 1;
 Data.Gen.DFIG.P_nMec = 150000;
 Data.Gen.DFIG.cv = Data.Gen.DFIG.cv*1;
 Data.Gen.DFIG.cr = Data.Gen.DFIG.cr*1;
+Data.Gen.DFIG.lTop = sign(Data.Gen.DFIG.lTop)*.015;
+Data.Gen.DFIG.sTop(3) = .007;
+Data.Gen.DFIG.sTop(5) = .0095;
 Data.Gen.DFIG.xiTop = Data.Gen.DFIG.sTop.^2;
 temp = ones(size(temp))*temp(1);
 
@@ -561,7 +565,6 @@ Data.Red.Branch.x = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.x);
 Data.Red.Branch.lTop = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.lTop);
 Data.Red.Branch.yTop = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.yTop);
 Data.Red.Branch.yLow = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.yLow);
-
 Data.Red.Bus.Ntr = repmat(Data.Red.Bus.Ntr, [1 Config.Etapas]);
 Data.Red.Bus.uLow = repmat(Data.Red.Bus.uLow, [1 Config.Etapas]);
 Data.Red.Bus.uTop = repmat(Data.Red.Bus.uTop, [1 Config.Etapas]);
@@ -619,6 +622,101 @@ Data.St.AC.eta = repmat(Data.St.AC.eta, [1 Config.Etapas]);
 Data.St.AC.tempLow = repmat(Data.St.AC.tempLow, [1 Config.Etapas]);
 Data.St.AC.tempTop = repmat(Data.St.AC.tempTop, [1 Config.Etapas]);
 
+
+Data.Gen.DFIG = Dmod.Gen.DFIG;
+
+Data.Cost.rhopWi = repmat(Data.Cost.rhopWi, [1 Config.Etapas]);
+Data.Cost.rhomqWi = repmat(Data.Cost.rhomqWi, [1 Config.Etapas]);
+Data.Cost.rhoMqWi = repmat(Data.Cost.rhoMqWi, [1 Config.Etapas]);
+
+
+n = size(Data.Red.Branch.T,1);
+indWN = find(matOverTime(Data.Gen.DFIG.I) == 1);
+lenWN = length(indWN);
+
+
+Data.Gen.DFIG.rIE = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.rIF = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.rOR = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.rIE = squeeze(Data.Gen.DFIG.r(1,2,:,:))';
+Data.Gen.DFIG.rIF = squeeze(Data.Gen.DFIG.r(1,3,:,:))';
+Data.Gen.DFIG.rOR = squeeze(Data.Gen.DFIG.r(4,5,:,:))';
+
+
+
+Data.Gen.DFIG.xIE = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.xIF = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.xOR = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.xIE = squeeze(Data.Gen.DFIG.x(1,2,:,:))';
+Data.Gen.DFIG.xIF = squeeze(Data.Gen.DFIG.x(1,3,:,:))';
+Data.Gen.DFIG.xOR = squeeze(Data.Gen.DFIG.x(4,5,:,:))';
+
+
+
+Data.Gen.DFIG.lTopIE = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.lTopIF = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.lTopOR = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.lTopIE = squeeze(Data.Gen.DFIG.lTop(1,2,:,:))';
+Data.Gen.DFIG.lTopIF = squeeze(Data.Gen.DFIG.lTop(1,3,:,:))';
+Data.Gen.DFIG.lTopOR = squeeze(Data.Gen.DFIG.lTop(4,5,:,:))';
+
+
+
+Data.Gen.DFIG.sTopF = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.sTopR = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.sTopF = squeeze(Data.Gen.DFIG.sTop(3,1,:,:))';
+Data.Gen.DFIG.sTopR = squeeze(Data.Gen.DFIG.sTop(5,1,:,:))';
+
+
+Data.Gen.DFIG.xiTopF = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.xiTopR = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.xiTopF = squeeze(Data.Gen.DFIG.xiTop(3,1,:,:))';
+Data.Gen.DFIG.xiTopR = squeeze(Data.Gen.DFIG.xiTop(5,1,:,:))';
+
+
+
+Data.Gen.DFIG.uLowE = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.uLowF = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.uLowE = squeeze(Data.Gen.DFIG.uLow(2,1,:,:))';
+Data.Gen.DFIG.uLowF = squeeze(Data.Gen.DFIG.uLow(3,1,:,:))';
+
+
+
+Data.Gen.DFIG.uTopE = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.uTopF = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.uTopE = squeeze(Data.Gen.DFIG.uTop(2,1,:,:))';
+Data.Gen.DFIG.uTopF = squeeze(Data.Gen.DFIG.uTop(3,1,:,:))';
+
+
+
+Data.Gen.DFIG.PQnormIE = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.PQnormIF = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.PQnormIE = squeeze(Data.Gen.DFIG.PQnorm(1,2,:,:))';
+Data.Gen.DFIG.PQnormIF = squeeze(Data.Gen.DFIG.PQnorm(1,3,:,:))';
+
+
+
+Data.Gen.DFIG.cvF = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.cvR = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.cvF = squeeze(Data.Gen.DFIG.cv(3,1,:,:))';
+Data.Gen.DFIG.cvR = squeeze(Data.Gen.DFIG.cv(5,1,:,:))';
+
+
+
+Data.Gen.DFIG.crF = zeros(lenWN,Config.Etapas);
+Data.Gen.DFIG.crR = zeros(lenWN,Config.Etapas);
+
+Data.Gen.DFIG.crF = squeeze(Data.Gen.DFIG.cr(3,1,:,:))';
+Data.Gen.DFIG.crR = squeeze(Data.Gen.DFIG.cr(5,1,:,:))';
 
 
 [Var_m, opt_m] = distflowCentralizadoM(Data, Config);

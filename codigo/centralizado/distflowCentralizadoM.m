@@ -38,6 +38,27 @@ NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
 NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
 NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
+
+% Aire Acondicionado
+AC = find(Data.St.AC.I == 1);
+nAC = length(AC);
+
+% Baterias
+St = find(sign(sum(abs(Data.St.Bat.I),2)) == 1);
+nSt = length(St);
+NotSt = find(sign(sum(abs(Data.St.Bat.I),2)) == 0);
+
+M = [];
+if nSt > 0
+    M = zeros(2,2,nSt,Config.Etapas);
+    for i = 1:nSt
+        for et = 1: Config.Etapas
+            M(:,:,i,et) = [Data.St.Bat.m1(St(i),et) -Data.St.Bat.m2(St(i),et)/2; ...
+                -Data.St.Bat.m2(St(i),et)/2 Data.St.Bat.m1(St(i),et)];
+        end
+    end
+end
+
 % Cargas No interrumpibles
 ClNI = find(Data.ClNI.I == 1);
 nClNI = length(ClNI);
@@ -49,15 +70,29 @@ qTClNI = Data.Util.qzCnTopE(ClNI,:);
 vLClNI = Data.Red.Bus.uLow(ClNI,:).^2;
 vTClNI = Data.Red.Bus.uTop(ClNI,:).^2;
 
+% Eolico
+indWn = find(matOverTime(Data.Gen.DFIG.I) == 1);
+NindWn = setdiff((1:n),indWn);
+lenWN = length(indWn);
+
+P_mecSigWnd = squeeze(abs(sign(Data.Gen.DFIG.P_mec(indWn,1,:))))';
+P_mecWnd = squeeze(Data.Gen.DFIG.P_mec(indWn,1,:))';
+n_Wnd = squeeze(Data.Gen.DFIG.n_(indWn,1,:))';
+
+% Fotovoltaico
+Pv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 1);
+nPv = length(Pv);
+NotPv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 0);
+
 
 %% Modelo programacion matematica
 
 tic
 cvx_begin
 
-%     for i = 1: size(Config.Centr,1)
-%         cvx_solver_settings(Config.Centr{i,1}, Config.Centr{i,2});
-%     end
+    for i = 1: size(Config.Centr,1)
+        cvx_solver_settings(Config.Centr{i,1}, Config.Centr{i,2});
+    end
 
     cvx_precision high
     %% Declaracion de variables y expresiones
@@ -97,9 +132,18 @@ cvx_begin
     variable pCClRes(n, Config.Etapas); % real power demand in i
     variable qCClRes(n, Config.Etapas); % real power demand in i
     
+    variable pStb(n, Config.Etapas);
+    variable qStb(n, Config.Etapas);
+    
     variable pCClNI(n, Config.Etapas);
     variable qCClNI(n, Config.Etapas);
 	
+	variable pWi(n,Config.Etapas);
+	variable qWi(n,Config.Etapas);
+
+    variable pPv(n, Config.Etapas);
+    variable qPv(n, Config.Etapas);
+
  	expression lQoL(m, Config.Etapas, 3);
  	expression lNorm(m, Config.Etapas, 3);
     expression vExpr(n, Config.Etapas);
@@ -139,8 +183,8 @@ cvx_begin
     pC == pCClRes + pCClNI;
     qC == qCClRes + qCClNI;
 
-    pG == pGTras;
-    qG == qGTras + qCp;
+    pG == pGTras + pStb + pWi + pPv;
+    qG == qGTras + qCp + qStb + qWi + qPv;
 
     pN - pC + pG == 0;
     qN - qC + qG == 0;
@@ -239,7 +283,91 @@ cvx_begin
 
     qCClRes >= sum(qCApp,3);
     
-    %% Clientes no interrumpibles
+    %% Restricciones de Aire Acondicionado
+    if nAC > 0 
+        % Temperatura Aire Acondicionado
+        variable Tvar(n,Config.Etapas);
+        expression TvarAnt(n,Config.Etapas);
+        expression pCAC(n,Config.Etapas);
+    
+        TvarAnt(:,1) = Data.St.AC.tempIni;
+        TvarAnt(:,(2:Config.Etapas)) = Tvar(:,(1:Config.Etapas-1));
+        pCAC(:,:) = 0;
+        pCAC(AC,:) = pCApp(AC,:,2);
+
+        Tvar(AC,:) - TvarAnt(AC,:) + Data.St.AC.epsilon(AC,:).*(TvarAnt(AC,:) - Data.temp(AC,:))*Data.dt - Data.St.AC.eta(AC,:).*pCAC(AC,:)*Data.dt == 0;
+
+        Tvar(AC,:) >= Data.St.AC.tempLow(AC,:);
+        Tvar(AC,:) <= Data.St.AC.tempTop(AC,:);
+        tfopt_expr = tfopt_expr + sum(Data.St.AC.beta.*(Tvar - Data.St.AC.tempPref).^2,1);
+
+	end
+
+	%% Restricciones de almacenamiento de bateria
+    if nSt > 0
+        variable sStb(nSt, Config.Etapas);
+        variable pStgb(nSt, Config.Etapas);
+        variable xiStb(nSt, Config.Etapas);
+        variable EStb(n, Config.Etapas);
+        variable DlEStb(n, Config.Etapas);
+        
+        expression StbNorm(nSt, Config.Etapas,2);
+        expression EStbAnt(nSt, Config.Etapas);
+        expression cStb(n, Config.Etapas);
+
+        DlEStb <= 0;
+        DlEStb <= EStb - Data.St.Bat.ETop*Data.St.Bat.kapa;
+
+
+        cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
+
+        % Modelado de Config.Etapas
+        for et = 1: Config.Etapas
+            for i = 1:nSt
+				j = St(i);
+                if et == 1
+                    cStb(j,et) = cStb(j,et) + [pStgb(i,et) 0] * M(:,:,i,et) * [pStgb(i,et); 0];
+                else
+                    cStb(j,et) = cStb(j,et) + [pStgb(i,et) pStgb(i,et-1)] * M(:,:,i,et) * [pStgb(i,et); pStgb(i,et-1)];
+                end
+            end
+        end
+        
+        tfopt_expr = tfopt_expr + sum(cStb,1);
+        
+        tfopt_expr = tfopt_expr + ...
+            sum(Data.St.Bat.I(:,Config.Etapas).*Data.St.Bat.beta(:,Config.Etapas).* ...
+                ((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas)*Data.St.Bat.gama).^2) + Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
+
+		EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
+        EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
+
+        pStb(St,:) == pStgb - (Data.St.Bat.cv(St,:).*sStb + Data.St.Bat.cr(St,:).*xiStb);
+        EStb(St,:) == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - Data.St.Bat.eta(St,:).*pStgb*Data.dt;
+        
+        StbNorm(:,:,1) = pStgb;
+        StbNorm(:,:,2) = qStb(St,:);
+        sStb >= norms(StbNorm,2,3);
+
+        xiStb >= pStgb.^2 + qStb(St,:).^2;
+
+        pStb(St,:) <= Data.St.Bat.pgTop(St,:);
+        sStb <= Data.St.Bat.sTop(St,:);
+        xiStb <= Data.St.Bat.xiTop(St,:);
+        EStb(St,:) <= Data.St.Bat.ETop(St,:);
+
+        pStb(St,:) >= Data.St.Bat.pgLow(St,:);
+        EStb(St,:) >= Data.St.Bat.ELow(St,:);
+
+        pStb(NotSt,:) == 0;
+        qStb(NotSt,:) == 0;
+        EStb(NotSt,:) == 0;
+	else
+		pStb == 0;
+		qStb == 0;
+    end
+
+	%% Restricciones de cargas no interrumpibles
     if nClNI > 0
 		variable onClNI(nClNI,Config.Etapas) binary;
 		variable stClNI(nClNI,Config.Etapas) binary;
@@ -266,6 +394,181 @@ cvx_begin
     else
         pCClNI == 0;
         qCClNI == 0;
+    end
+
+	%% Restricciones de generadores Eolico
+	if lenWN > 0
+
+		% Variables de generadores eolico
+		variable cqWi(n, Config.Etapas);
+
+		variable PdfigIE(lenWN,Config.Etapas);
+		variable PdfigIF(lenWN,Config.Etapas);
+		variable PdfigOR(lenWN,Config.Etapas);
+
+		variable QdfigIE(lenWN,Config.Etapas);
+		variable QdfigIF(lenWN,Config.Etapas);
+		variable QdfigOR(lenWN,Config.Etapas);
+
+		variable ldfigIE(lenWN,Config.Etapas);
+		variable ldfigIF(lenWN,Config.Etapas);
+		variable ldfigOR(lenWN,Config.Etapas);
+		
+		variable vdfigI(lenWN,Config.Etapas);
+		variable vdfigE(lenWN,Config.Etapas);
+		variable vdfigF(lenWN,Config.Etapas);
+		variable vdfigO(lenWN,Config.Etapas);
+		variable vdfigR(lenWN,Config.Etapas);
+		
+		variable pWigdfigE(lenWN,Config.Etapas);
+		variable pWigdfigR(lenWN,Config.Etapas);
+		
+		variable qWigdfigE(lenWN,Config.Etapas);
+		variable qWigdfigR(lenWN,Config.Etapas);
+		
+		variable pCdfigF(lenWN,Config.Etapas);
+		variable qCdfigF(lenWN,Config.Etapas);
+		
+		variable sdfigF(lenWN,Config.Etapas);
+		variable sdfigR(lenWN,Config.Etapas);
+
+		variable xidfigF(lenWN,Config.Etapas);
+		variable xidfigR(lenWN,Config.Etapas);
+
+		expression lQoLdfigIE(lenWN,Config.Etapas,3);
+		expression lQoLdfigIF(lenWN,Config.Etapas,3);
+		expression lQoLdfigOR(lenWN,Config.Etapas,3);
+
+		expression sNormdfigF(lenWN,Config.Etapas,2);
+		expression sNormdfigR(lenWN,Config.Etapas,2);
+
+		expression PQNormdfigIE(lenWN,Config.Etapas,2);
+		expression PQNormdfigIF(lenWN,Config.Etapas,2);
+
+		
+        tfopt_expr = tfopt_expr ...
+			+ sum(Data.Cost.rhopWi .* pWi) ...
+            + sum(cqWi) ...
+		;
+
+        cqWi >= - Data.Cost.rhomqWi .* qWi;
+        cqWi >= Data.Cost.rhoMqWi .* qWi;
+
+        pWi(indWn,:) == - (PdfigIE + PdfigIF);
+        qWi(indWn,:) == - (QdfigIE + QdfigIF);
+        
+        pWi(NindWn,:) == 0;
+        qWi(NindWn,:) == 0;
+
+		% Modelo de Red interna
+        vdfigI == v(indWn,:);
+
+        PdfigIE == Data.Gen.DFIG.rIE .* ldfigIE - pWigdfigE;
+        PdfigIF == Data.Gen.DFIG.rIF .* ldfigIF + pCdfigF;
+        PdfigOR == Data.Gen.DFIG.rOR .* ldfigOR - pWigdfigR;
+
+        QdfigIE == Data.Gen.DFIG.xIE .* ldfigIE - qWigdfigE;
+        QdfigIF == Data.Gen.DFIG.xIF .* ldfigIF - qCdfigF;
+        QdfigOR == n_Wnd .* Data.Gen.DFIG.xOR .* ldfigOR - qWigdfigR;
+
+        vdfigE == vdfigI - 2*(Data.Gen.DFIG.rIE .* PdfigIE + Data.Gen.DFIG.xIE .* QdfigIE) + (Data.Gen.DFIG.rIE.^2 + Data.Gen.DFIG.xIE.^2) .* ldfigIE;
+        vdfigF == vdfigI - 2*(Data.Gen.DFIG.rIF .* PdfigIF + Data.Gen.DFIG.xIF .* QdfigIF) + (Data.Gen.DFIG.rIF.^2 + Data.Gen.DFIG.xIF.^2) .* ldfigIF;
+        vdfigR == vdfigO - 2*(Data.Gen.DFIG.rOR .* PdfigOR + n_Wnd.*Data.Gen.DFIG.xOR .* QdfigOR) + (Data.Gen.DFIG.rOR.^2 + n_Wnd.^2 .* Data.Gen.DFIG.xOR.^2) .* ldfigOR;
+
+		% Corriente
+        lQoLdfigIE(:,:,1) = 2*PdfigIE;
+        lQoLdfigIE(:,:,2) = 2*QdfigIE;
+        lQoLdfigIE(:,:,3) = ldfigIE - vdfigI;
+        norms(lQoLdfigIE,2,3) - (ldfigIE + vdfigI) <= 0;
+
+        lQoLdfigIF(:,:,1) = 2*PdfigIF;
+        lQoLdfigIF(:,:,2) = 2*QdfigIF;
+        lQoLdfigIF(:,:,3) = ldfigIF - vdfigI;
+        norms(lQoLdfigIF,2,3) - (ldfigIF + vdfigI) <= 0;
+
+        lQoLdfigOR(:,:,1) = 2*PdfigOR;
+        lQoLdfigOR(:,:,2) = 2*QdfigOR;
+        lQoLdfigOR(:,:,3) = ldfigOR - vdfigO;
+        norms(lQoLdfigOR,2,3) - (ldfigOR + vdfigO) <= 0;
+		
+        Data.Gen.DFIG.lTopIF >= ldfigIF;
+        Data.Gen.DFIG.lTopOR >= ldfigOR;
+
+        (Data.Gen.DFIG.lTopIE - ldfigIE).*P_mecSigWnd >= 0;
+        (Data.Gen.DFIG.sTopF - sdfigF).*P_mecSigWnd >= 0;
+        (Data.Gen.DFIG.sTopR - sdfigR).*P_mecSigWnd >= 0;
+        (Data.Gen.DFIG.xiTopF - xidfigF).*P_mecSigWnd >= 0;
+        (Data.Gen.DFIG.xiTopR - xidfigR).*P_mecSigWnd >= 0;
+
+        vdfigE >= Data.Gen.DFIG.uLowE.^2;
+        vdfigE <= Data.Gen.DFIG.uTopE.^2;
+
+        vdfigF >= Data.Gen.DFIG.uLowF.^2;
+        vdfigF <= Data.Gen.DFIG.uTopF.^2;
+
+        PQNormdfigIE(:,:,1) = PdfigIE;
+		PQNormdfigIE(:,:,2) = QdfigIE;
+        Data.Gen.DFIG.PQnormIE >= norms(PQNormdfigIE,2,3);
+
+        PQNormdfigIF(:,:,1) = PdfigIF;
+		PQNormdfigIF(:,:,2) = QdfigIF;
+        Data.Gen.DFIG.PQnormIF >= norms(PQNormdfigIF,2,3);
+
+        sNormdfigF(:,:,1) = pCdfigF;
+		sNormdfigF(:,:,2) = qCdfigF;
+        sdfigF >= norms(sNormdfigF,2,3);
+        xidfigF >= pCdfigF.^2 + qCdfigF.^2;
+
+        sNormdfigR(:,:,1) = PdfigOR;
+		sNormdfigR(:,:,2) = QdfigOR;
+        sdfigR >= norms(sNormdfigR,2,3);
+        xidfigR >= PdfigOR.^2 + QdfigOR.^2;
+
+        pCdfigF == PdfigOR ...
+            + (Data.Gen.DFIG.cvR .* sdfigR + Data.Gen.DFIG.crR .* xidfigR) ...
+            + (Data.Gen.DFIG.cvF .* sdfigF + Data.Gen.DFIG.crF .* xidfigF);
+        vdfigR == n_Wnd.^2*(Data.Gen.DFIG.N_er^2).*vdfigE;
+        pWigdfigE == P_mecWnd ./ (1-n_Wnd); %TODO es igual
+        pWigdfigR == -n_Wnd.*pWigdfigE;
+        qWigdfigR == n_Wnd.*(qWigdfigE);
+	
+	else
+        pWi == 0;
+        qWi == 0;
+    end
+
+    %% Restricciones de generadores Solares
+    if nPv > 0
+    % Variables de generadores solares
+        variable sPv(nPv, Config.Etapas);
+        variable xiPv(nPv, Config.Etapas); % module of square complex current in i
+        variable cqPv(n, Config.Etapas);
+        expression SPvNorm(nPv, Config.Etapas,2);
+		
+        tfopt_expr = tfopt_expr ...
+            + sum(Data.Cost.rhopPv .* pPv) ...
+            + sum(cqPv) ...
+        ;
+        cqPv >= - Data.Cost.rhomqPv .* qPv;
+        cqPv >= Data.Cost.rhoMqPv .* qPv;
+
+        pPv(Pv,:) == (Data.Gen.Pv.pPvg(Pv,:) - (Data.Gen.Pv.cv(Pv,:).*sPv + Data.Gen.Pv.cr(Pv,:).*xiPv));
+
+        SPvNorm(:,:,1) = pPv(Pv,:);
+        SPvNorm(:,:,2) = qPv(Pv,:);
+        sPv >= norms(SPvNorm,2,3);
+        xiPv >= pPv(Pv,:).^2 + qPv(Pv,:).^2;
+
+        sPv <= Data.Gen.Pv.sTop(Pv,:).*abs(sign(Data.Gen.Pv.pPvg(Pv,:)));
+        xiPv <= Data.Gen.Pv.xiTop(Pv,:).*abs(sign(Data.Gen.Pv.pPvg(Pv,:)));
+
+		
+		pPv(NotPv,:) == 0;
+		qPv(NotPv,:) == 0;
+
+    else
+        pPv == 0;
+        qPv == 0;
     end
 
     fopt_expr = sum(tfopt_expr);
@@ -311,6 +614,33 @@ Var.ClRes.qCApp = permute(full(qCApp), [1 4 2 3]);
 Var.ClRes.pC = permute(full(pCClRes), [1 3 2]);
 Var.ClRes.qC = permute(full(qCClRes), [1 3 2]);
 
+% Aire Acondicionado
+if nAC > 0 
+	Var.ClRes.Tvar = permute(full(Tvar), [1 3 2]);
+end
+
+% Baterias
+if nSt > 0
+	Var.St.Bat.pStb = pStb;
+    Var.St.Bat.pStgb = pStb*0;
+    Var.St.Bat.pStgb(St,:) = pStgb;
+	Var.St.Bat.qStb = qStb;
+    Var.St.Bat.sStb = pStb*0;
+    Var.St.Bat.sStb(St,:) = sStb;
+    Var.St.Bat.xiStb = pStb*0;
+    Var.St.Bat.xiStb(St,:) = xiStb;
+	Var.St.Bat.EStb = EStb;
+
+
+	Var.St.Bat.pStb = permute(full(Var.St.Bat.pStb), [1 3 2]);
+	Var.St.Bat.pStgb = permute(full(Var.St.Bat.pStgb), [1 3 2]);
+	Var.St.Bat.qStb = permute(full(Var.St.Bat.qStb), [1 3 2]);
+	Var.St.Bat.sStb = permute(full(Var.St.Bat.sStb), [1 3 2]);
+	Var.St.Bat.xiStb = permute(full(Var.St.Bat.xiStb), [1 3 2]);
+	Var.St.Bat.EStb = permute(full(Var.St.Bat.EStb), [1 3 2]);
+end
+
+% Cargas No interrumpibles
 if nClNI > 0
 	Var.ClNI.pC = pCClNI;
 	Var.ClNI.qC = qCClNI;
@@ -325,6 +655,80 @@ if nClNI > 0
 	Var.ClNI.start = permute(full(Var.ClNI.start), [1 3 2]);
 	
 end
+
+% Eolico
+if lenWN > 0
+	Var.Gen.Dfig.pWi = permute(full(pWi), [1 3 2]);
+	Var.Gen.Dfig.qWi = permute(full(qWi), [1 3 2]);
+	
+	Var.Gen.Dfig.Branch.P = zeros(5,5, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Branch.P(1,2,:,:) = PdfigIE;
+	Var.Gen.Dfig.Branch.P(1,3,:,:) = PdfigIF;
+	Var.Gen.Dfig.Branch.P(4,5,:,:) = PdfigOR;
+	
+	Var.Gen.Dfig.Branch.Q = zeros(5,5, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Branch.Q(1,2,:,:) = QdfigIE;
+	Var.Gen.Dfig.Branch.Q(1,3,:,:) = QdfigIF;
+	Var.Gen.Dfig.Branch.Q(4,5,:,:) = QdfigOR;
+	
+	Var.Gen.Dfig.Branch.l = zeros(5,5, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Branch.l(1,2,:,:) = ldfigIE;
+	Var.Gen.Dfig.Branch.l(1,3,:,:) = ldfigIF;
+	Var.Gen.Dfig.Branch.l(4,5,:,:) = ldfigOR;
+	
+	Var.Gen.Dfig.Bus.v = zeros(5,1, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Bus.v(1,1,:,:) = vdfigI;
+	Var.Gen.Dfig.Bus.v(2,1,:,:) = vdfigE;
+	Var.Gen.Dfig.Bus.v(3,1,:,:) = vdfigF;
+	Var.Gen.Dfig.Bus.v(4,1,:,:) = vdfigO;
+	Var.Gen.Dfig.Bus.v(5,1,:,:) = vdfigR;
+	
+	Var.Gen.Dfig.Bus.pC = zeros(5,1, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Bus.pC(3,1,:,:) = pCdfigF;
+
+	Var.Gen.Dfig.Bus.qC = zeros(5,1, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Bus.qC(3,1,:,:) = qCdfigF;
+
+	Var.Gen.Dfig.Bus.pg = zeros(5,1, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Bus.pg(2,1,:,:) = pWigdfigE;
+	Var.Gen.Dfig.Bus.pg(5,1,:,:) = pWigdfigR;
+
+	Var.Gen.Dfig.Bus.qg = zeros(5,1, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Bus.qg(2,1,:,:) = qWigdfigE;
+	Var.Gen.Dfig.Bus.qg(5,1,:,:) = qWigdfigR;
+
+	Var.Gen.Dfig.Bus.s = zeros(5,1, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Bus.s(3,1,:,:) = sdfigF;
+	Var.Gen.Dfig.Bus.s(5,1,:,:) = sdfigR;
+
+	Var.Gen.Dfig.Bus.xi = zeros(5,1, Config.Etapas,lenWN);
+	Var.Gen.Dfig.Bus.xi(3,1,:,:) = xidfigF;
+	Var.Gen.Dfig.Bus.xi(3,1,:,:) = xidfigR;
+	
+	Var.Gen.Dfig.Bus.n_Wnd = permute(n_Wnd, [4 3 2 1]);
+	Var.Gen.Dfig.Bus.P_mecWnd = permute(P_mecWnd, [4 3 2 1]);
+	
+
+else
+	Var.Gen.Dfig.pWi = zeros(n,1,Config.Etapas);
+	Var.Gen.Dfig.qWi = zeros(n,1,Config.Etapas);
+end
+
+% Fotovoltaico
+if nPv > 0
+	Var.Gen.Pv.pPv = pPv;
+	Var.Gen.Pv.qPv = qPv;
+    Var.Gen.Pv.s = pPv*0;
+    Var.Gen.Pv.s(Pv,:) = sPv;
+    Var.Gen.Pv.xi = pPv*0;
+    Var.Gen.Pv.xi(Pv,:) = xiPv;
+
+	Var.Gen.Pv.pPv = permute(full(Var.Gen.Pv.pPv), [1 3 2]);
+	Var.Gen.Pv.qPv = permute(full(Var.Gen.Pv.qPv), [1 3 2]);
+	Var.Gen.Pv.s = permute(full(Var.Gen.Pv.s), [1 3 2]);
+	Var.Gen.Pv.xi = permute(full(Var.Gen.Pv.xi), [1 3 2]);
+end
+
 
 opt = fopt_expr;
 cvx_clear

@@ -12,7 +12,7 @@ minr = 0;
 tol = 5e-8;
 delta = 0.004;
 m = .01;
-CantHorasEtapa = .25;
+CantHorasEtapa = 1;
 iniEtapa = 1; %7:00
 
 factorReducEol = .25;
@@ -29,15 +29,15 @@ util=true;
 NodosGeneracionEolica = [];
 
 % Trafos
-Trafo1.TP = [3];
-Trafo1.N = .00005;
+Trafo1.TP = [-2 -1 0 1 2];
+Trafo1.N = .005;
 Trafo1.nod = 1;
 Trafo1.ini = 0;
 Trafos = [Trafo1];
 
 
 % Caps
-Cap1.TP = [0];
+Cap1.TP = [0 1 2 3];
 Cap1.N = .005;
 Cap1.nod = 9;
 Cap1.ini = 0;
@@ -80,7 +80,7 @@ uTop_ct = 1.05;
 iniEstado = 1;
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example5';
+outFilename_pref = 'PU_example4_tap_cap_st';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
@@ -92,7 +92,7 @@ outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
 
 % outFilename_w_sw_dist = [outFilenamePre '_d_' outFilenameMid outFilenameSuf ''];
 
-inFilename = 'PU_example5.xls';
+inFilename = 'PU_example4.xls';
 % fileCurvaCarga = 'carga_subredLP_trafo_red_93-73_no_rnd.xlsx';
 
 %% Carga de datos
@@ -181,6 +181,7 @@ end
 Data.temp = temp;
 
 % Fotovoltaicos
+
 % Trasmision
 % Data.Red.Bus.Q0Top = .0955;
 % Data.Red.Bus.Q0Low = 0;
@@ -319,7 +320,7 @@ Data.St.AC.a = zeros(size(Data.Red.Branch.T,1),1); %aAC por nodo
  
 % Parametros de Baterias
 Data.St.Bat.I = zeros(size(Data.Red.Branch.T,1),1);
-% Data.St.Bat.I(5) = 1;
+Data.St.Bat.I(5) = 1;
 Data.St.Bat.cv = Data.St.Bat.I * .001; % temperatura minima, por nodo
 Data.St.Bat.cr = Data.St.Bat.I * .001; % temperatura maxima, por nodo
 
@@ -328,7 +329,7 @@ Data.St.Bat.eta = Data.St.Bat.I; % eta por nodo
 
 Data.St.Bat.pgTop = Data.St.Bat.I * .5; % temperatura minima, por nodo
 Data.St.Bat.pgLow = Data.St.Bat.I * -.5; % temperatura maxima, por nodo
-Data.St.Bat.sTop = Data.St.Bat.I * .1; % temperatura minima, por nodo
+Data.St.Bat.sTop = Data.St.Bat.I * .095; % temperatura minima, por nodo
 Data.St.Bat.xiTop = Data.St.Bat.sTop.^2; % temperatura minima, por nodo
 
 Data.St.Bat.ETop = Data.St.Bat.I * 2; % temperatura minima, por nodo
@@ -618,6 +619,27 @@ Data.temp = repmat(Data.temp, [1 Config.Etapas]);
 Data.St.AC.eta = repmat(Data.St.AC.eta, [1 Config.Etapas]);
 Data.St.AC.tempLow = repmat(Data.St.AC.tempLow, [1 Config.Etapas]);
 Data.St.AC.tempTop = repmat(Data.St.AC.tempTop, [1 Config.Etapas]);
+
+
+Data.St.Bat.I = repmat(Data.St.Bat.I, [1 Config.Etapas]);
+Data.St.Bat.m1 = repmat(Data.St.Bat.m1, [1 Config.Etapas]);
+Data.St.Bat.m2 = repmat(Data.St.Bat.m2, [1 Config.Etapas]);
+Data.St.Bat.ETop = repmat(Data.St.Bat.ETop, [1 Config.Etapas]);
+
+Data.St.Bat.wOm = repmat(Data.St.Bat.wOm, [1 Config.Etapas]);
+Data.St.Bat.m3 = repmat(Data.St.Bat.m3, [1 Config.Etapas]);
+Data.St.Bat.beta = repmat(Data.St.Bat.beta, [1 Config.Etapas]);
+
+Data.St.Bat.wU = repmat(Data.St.Bat.wU, [1 Config.Etapas]);
+Data.St.Bat.cv = repmat(Data.St.Bat.cv, [1 Config.Etapas]);
+Data.St.Bat.cr = repmat(Data.St.Bat.cr, [1 Config.Etapas]);
+Data.St.Bat.epsilon = repmat(Data.St.Bat.epsilon, [1 Config.Etapas]);
+Data.St.Bat.eta = repmat(Data.St.Bat.eta, [1 Config.Etapas]);
+Data.St.Bat.pgTop = repmat(Data.St.Bat.pgTop, [1 Config.Etapas]);
+Data.St.Bat.sTop = repmat(Data.St.Bat.sTop, [1 Config.Etapas]);
+Data.St.Bat.xiTop = repmat(Data.St.Bat.xiTop, [1 Config.Etapas]);
+Data.St.Bat.pgLow = repmat(Data.St.Bat.pgLow, [1 Config.Etapas]);
+Data.St.Bat.ELow = repmat(Data.St.Bat.ELow, [1 Config.Etapas]);
 
 
 

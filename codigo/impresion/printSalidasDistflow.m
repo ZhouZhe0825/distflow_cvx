@@ -32,8 +32,8 @@ function printSalidasDistflow(Var, Data, Config, cantTaps, cantCaps, cantCarg, o
 	
 	printVarNx1xT(Var.ClRes.pC, Header.Bus, Header.Main, outFilename, 'pClRes');
 	printVarNx1xT(Var.ClRes.qC, Header.Bus, Header.Main, outFilename, 'qClRes');
-	if isfield(Var, 'St')
-		if isfield(Var.St, 'AC')
+	if isfield(Var, 'ClRes')
+		if isfield(Var.ClRes, 'Tvar')
 			printVarNx1xT(Var.ClRes.Tvar, Header.Bus, Header.Main, outFilename, 'Tvar');
 		end
 	end

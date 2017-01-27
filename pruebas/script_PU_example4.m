@@ -205,6 +205,7 @@ Data.Gen.Tras.I(Data.Red.Bus.v0) = 1;
 Data.Gen.DFIG.P_nMec = 150000;
 Data.Gen.DFIG.cv = Data.Gen.DFIG.cv*1;
 Data.Gen.DFIG.cr = Data.Gen.DFIG.cr*1;
+Data.Gen.DFIG.xiTop = Data.Gen.DFIG.sTop.^2;
 temp = ones(size(temp))*temp(1);
 
 vVel = ones(size(vVel))*15;
@@ -225,6 +226,7 @@ Data.Gen.Pv.pPvg = ones(length(Data.Red.Branch.T),1).*Data.Gen.Pv.I*100; %potenc
 
 indSn = find(Data.Gen.Pv.I == 1);
 Data.Gen.Pv.sTop(indSn) = 0.8;											
+Data.Gen.Pv.xiTop = Data.Gen.Pv.sTop.^2;											
 Data.Gen.Pv.pgTop(indSn) = 0.0075;											
 Data.Gen.Pv.cv(indSn) = cv_ct;
 Data.Gen.Pv.cr(indSn) = cr_ct;
@@ -295,6 +297,7 @@ utilCarg = utilidadCarga();
 % Configuraciones manuales
 
 % Aire Acondicionado
+Data.St.AC.I = zeros(size(Data.Red.Bus.pCLow));
 Data.St.AC.tempLow = zeros(size(Data.Red.Branch.T,1),1); % temperatura minima, por nodo
 Data.St.AC.tempLow(Data.Red.Bus.indCons) = 19;
 Data.St.AC.tempTop = zeros(size(Data.Red.Branch.T,1),1); % temperatura maxima, por nodo
@@ -326,6 +329,7 @@ Data.St.Bat.eta = Data.St.Bat.I; % eta por nodo
 Data.St.Bat.pgTop = Data.St.Bat.I * .5; % temperatura minima, por nodo
 Data.St.Bat.pgLow = Data.St.Bat.I * -.5; % temperatura maxima, por nodo
 Data.St.Bat.sTop = Data.St.Bat.I * .1; % temperatura minima, por nodo
+Data.St.Bat.xiTop = Data.St.Bat.sTop.^2; % temperatura minima, por nodo
 
 Data.St.Bat.ETop = Data.St.Bat.I * 2; % temperatura minima, por nodo
 Data.St.Bat.EIni = Data.St.Bat.I * .5; % temperatura minima, por nodo

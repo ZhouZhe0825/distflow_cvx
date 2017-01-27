@@ -12,7 +12,7 @@ minr = 0;
 tol = 5e-8;
 delta = 0.004;
 m = .01;
-CantHorasEtapa = .25;
+CantHorasEtapa = 1;
 iniEtapa = 1; %7:00
 
 factorReducEol = .25;
@@ -29,15 +29,15 @@ util=true;
 NodosGeneracionEolica = [];
 
 % Trafos
-Trafo1.TP = [3];
-Trafo1.N = .00005;
+Trafo1.TP = [-2 -1 0 1 2];
+Trafo1.N = .005;
 Trafo1.nod = 1;
 Trafo1.ini = 0;
 Trafos = [Trafo1];
 
 
 % Caps
-Cap1.TP = [0];
+Cap1.TP = [0 1 2 3];
 Cap1.N = .005;
 Cap1.nod = 9;
 Cap1.ini = 0;
@@ -80,7 +80,7 @@ uTop_ct = 1.05;
 iniEstado = 1;
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example5';
+outFilename_pref = 'PU_example4_tap_cap_pv';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
@@ -92,7 +92,7 @@ outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
 
 % outFilename_w_sw_dist = [outFilenamePre '_d_' outFilenameMid outFilenameSuf ''];
 
-inFilename = 'PU_example5.xls';
+inFilename = 'PU_example4.xls';
 % fileCurvaCarga = 'carga_subredLP_trafo_red_93-73_no_rnd.xlsx';
 
 %% Carga de datos
@@ -181,6 +181,7 @@ end
 Data.temp = temp;
 
 % Fotovoltaicos
+
 % Trasmision
 % Data.Red.Bus.Q0Top = .0955;
 % Data.Red.Bus.Q0Low = 0;
@@ -221,11 +222,17 @@ Data.Gen.DFIG.P_mec = Data.Gen.DFIG.P_mec';
 Data.Gen.DFIG.n_ = Data.Gen.DFIG.n_';
 Data.Gen.DFIG.P_mec = Data.Gen.DFIG.P_mec/2;
 
-% Data.Gen.Pv.I(7) = 1;
-Data.Gen.Pv.pPvg = ones(length(Data.Red.Branch.T),1).*Data.Gen.Pv.I*100; %potencia de generacion del solar, por ahora constante
+Data.Gen.Pv.I(7) = 1;
+Data.Gen.Pv.pPvg = ones(length(Data.Red.Branch.T),1).*Data.Gen.Pv.I*.1; %potencia de generacion del solar, por ahora constante
 
 indSn = find(Data.Gen.Pv.I == 1);
-Data.Gen.Pv.sTop(indSn) = 0.8;											
+Data.Gen.Pv.sTop = Data.Gen.Pv.I*0;
+Data.Gen.Pv.xiTop = Data.Gen.Pv.I*0;
+Data.Gen.Pv.pgTop = Data.Gen.Pv.I*0;
+Data.Gen.Pv.cv = Data.Gen.Pv.I*0;
+Data.Gen.Pv.cr = Data.Gen.Pv.I*0;
+
+Data.Gen.Pv.sTop(indSn) = 0.6;											
 Data.Gen.Pv.xiTop = Data.Gen.Pv.sTop.^2;											
 Data.Gen.Pv.pgTop(indSn) = 0.0075;											
 Data.Gen.Pv.cv(indSn) = cv_ct;
@@ -618,6 +625,16 @@ Data.temp = repmat(Data.temp, [1 Config.Etapas]);
 Data.St.AC.eta = repmat(Data.St.AC.eta, [1 Config.Etapas]);
 Data.St.AC.tempLow = repmat(Data.St.AC.tempLow, [1 Config.Etapas]);
 Data.St.AC.tempTop = repmat(Data.St.AC.tempTop, [1 Config.Etapas]);
+
+Data.Cost.rhopPv = repmat(Data.Cost.rhopPv, [1 Config.Etapas]);
+Data.Cost.rhomqPv = repmat(Data.Cost.rhomqPv, [1 Config.Etapas]);
+Data.Cost.rhoMqPv = repmat(Data.Cost.rhoMqPv, [1 Config.Etapas]);
+Data.Gen.Pv.pPvg = repmat(Data.Gen.Pv.pPvg, [1 Config.Etapas]);
+Data.Gen.Pv.cv = repmat(Data.Gen.Pv.cv, [1 Config.Etapas]);
+Data.Gen.Pv.cr = repmat(Data.Gen.Pv.cr, [1 Config.Etapas]);
+Data.Gen.Pv.I = repmat(Data.Gen.Pv.I, [1 Config.Etapas]);
+Data.Gen.Pv.sTop = repmat(Data.Gen.Pv.sTop, [1 Config.Etapas]);
+Data.Gen.Pv.xiTop = repmat(Data.Gen.Pv.xiTop, [1 Config.Etapas]);
 
 
 
