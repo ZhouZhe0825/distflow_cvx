@@ -222,10 +222,17 @@ Data.Gen.DFIG.n_ = Data.Gen.DFIG.n_';
 Data.Gen.DFIG.P_mec = Data.Gen.DFIG.P_mec/2;
 
 Data.Gen.Pv.I(7) = 1;
-Data.Gen.Pv.pPvg = ones(length(Data.Red.Branch.T),1).*Data.Gen.Pv.I*100; %potencia de generacion del solar, por ahora constante
+Data.Gen.Pv.pPvg = ones(length(Data.Red.Branch.T),1).*Data.Gen.Pv.I*.1; %potencia de generacion del solar, por ahora constante
 
 indSn = find(Data.Gen.Pv.I == 1);
-Data.Gen.Pv.sTop(indSn) = 0.8;											
+Data.Gen.Pv.sTop = Data.Gen.Pv.I*0;
+Data.Gen.Pv.xiTop = Data.Gen.Pv.I*0;
+Data.Gen.Pv.pgTop = Data.Gen.Pv.I*0;
+Data.Gen.Pv.cv = Data.Gen.Pv.I*0;
+Data.Gen.Pv.cr = Data.Gen.Pv.I*0;
+
+Data.Gen.Pv.sTop(indSn) = 0.6;											
+Data.Gen.Pv.xiTop = Data.Gen.Pv.sTop.^2;											
 Data.Gen.Pv.pgTop(indSn) = 0.0075;											
 Data.Gen.Pv.cv(indSn) = cv_ct;
 Data.Gen.Pv.cr(indSn) = cr_ct;
@@ -624,6 +631,7 @@ Data.Gen.Pv.cv = repmat(Data.Gen.Pv.cv, [1 Config.Etapas]);
 Data.Gen.Pv.cr = repmat(Data.Gen.Pv.cr, [1 Config.Etapas]);
 Data.Gen.Pv.I = repmat(Data.Gen.Pv.I, [1 Config.Etapas]);
 Data.Gen.Pv.sTop = repmat(Data.Gen.Pv.sTop, [1 Config.Etapas]);
+Data.Gen.Pv.xiTop = repmat(Data.Gen.Pv.xiTop, [1 Config.Etapas]);
 
 
 

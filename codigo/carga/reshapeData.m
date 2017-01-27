@@ -70,6 +70,7 @@ function [DataM] = reshapeData(Data, Config)
 	DataM.Gen.Pv.cv	 = 	replicateMat3_3(	Data.Gen.Pv.cv	,Config.Etapas);
 	DataM.Gen.Pv.cr	 = 	replicateMat3_3(	Data.Gen.Pv.cr	,Config.Etapas);
 	DataM.Gen.Pv.sTop	 = 	replicateMat3_3(	Data.Gen.Pv.sTop	,Config.Etapas);
+	DataM.Gen.Pv.xiTop	 = 	replicateMat3_3(	Data.Gen.Pv.xiTop	,Config.Etapas);
 	DataM.Cost.rhopPv	 = 	replicateMat3_3(	Data.Cost.rhopPv	,Config.Etapas);
 	DataM.St.Bat.beta	 = 	replicateMat3_3(	Data.St.Bat.beta 	,Config.Etapas);
 	DataM.St.Bat.cr	 = 	replicateMat3_3(	Data.St.Bat.cr 	,Config.Etapas);

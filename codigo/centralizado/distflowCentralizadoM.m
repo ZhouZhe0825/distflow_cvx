@@ -259,6 +259,8 @@ cvx_begin
         xiPv >= pPv(Pv,:).^2 + qPv(Pv,:).^2;
 
         sPv <= Data.Gen.Pv.sTop(Pv,:).*abs(sign(Data.Gen.Pv.pPvg(Pv,:)));
+        xiPv <= Data.Gen.Pv.xiTop(Pv,:).*abs(sign(Data.Gen.Pv.pPvg(Pv,:)));
+
 		
 		pPv(NotPv,:) == 0;
 		qPv(NotPv,:) == 0;
