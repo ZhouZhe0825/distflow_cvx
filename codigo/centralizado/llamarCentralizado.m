@@ -1,10 +1,10 @@
-function [Var, opt, status, DataM] = llamarCentralizado(Data, Config, util)
+function [Var, opt, DataM] = llamarCentralizado(Data, Config)
 
 
     DataM = Data;
     [DataM] = reshapeData(DataM, Config);
 
-	[Var, opt, status] = distflowCentralizadoNxN(DataM, Config, true, util);
+	[Var, opt] = distflowCentralizadoNxN(DataM, Config);
 
 % 	DataM_f = DataM;
 % 
