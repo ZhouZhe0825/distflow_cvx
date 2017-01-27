@@ -288,7 +288,7 @@ cvx_begin
 
         pStb <= Data.St.Bat.pgTop.*Data.St.Bat.I;
         sStb <= Data.St.Bat.sTop.*Data.St.Bat.I;
-        % xiStb <= (Data.St.Bat.sTop.^2).*Data.St.Bat.I;
+        xiStb <= Data.St.Bat.xiTop.*Data.St.Bat.I;
         EStb <= Data.St.Bat.ETop.*Data.St.Bat.I;
 
         pStb >= Data.St.Bat.pgLow.*Data.St.Bat.I;

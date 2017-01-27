@@ -293,7 +293,7 @@ cvx_begin
 
         pStb(St,:) <= Data.St.Bat.pgTop(St,:);
         sStb <= Data.St.Bat.sTop(St,:);
-        % xiStb <= Data.St.Bat.sTop(St,:).^2;
+        xiStb <= Data.St.Bat.xiTop(St,:);
         EStb(St,:) <= Data.St.Bat.ETop(St,:);
 
         pStb(St,:) >= Data.St.Bat.pgLow(St,:);

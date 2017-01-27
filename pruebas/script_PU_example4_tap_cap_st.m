@@ -327,6 +327,7 @@ Data.St.Bat.eta = Data.St.Bat.I; % eta por nodo
 Data.St.Bat.pgTop = Data.St.Bat.I * .5; % temperatura minima, por nodo
 Data.St.Bat.pgLow = Data.St.Bat.I * -.5; % temperatura maxima, por nodo
 Data.St.Bat.sTop = Data.St.Bat.I * .1; % temperatura minima, por nodo
+Data.St.Bat.xiTop = Data.St.Bat.sTop.^2; % temperatura minima, por nodo
 
 Data.St.Bat.ETop = Data.St.Bat.I * 2; % temperatura minima, por nodo
 Data.St.Bat.EIni = Data.St.Bat.I * .5; % temperatura minima, por nodo
@@ -633,6 +634,7 @@ Data.St.Bat.epsilon = repmat(Data.St.Bat.epsilon, [1 Config.Etapas]);
 Data.St.Bat.eta = repmat(Data.St.Bat.eta, [1 Config.Etapas]);
 Data.St.Bat.pgTop = repmat(Data.St.Bat.pgTop, [1 Config.Etapas]);
 Data.St.Bat.sTop = repmat(Data.St.Bat.sTop, [1 Config.Etapas]);
+Data.St.Bat.xiTop = repmat(Data.St.Bat.xiTop, [1 Config.Etapas]);
 Data.St.Bat.pgLow = repmat(Data.St.Bat.pgLow, [1 Config.Etapas]);
 Data.St.Bat.ELow = repmat(Data.St.Bat.ELow, [1 Config.Etapas]);
 

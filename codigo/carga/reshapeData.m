@@ -85,6 +85,7 @@ function [DataM] = reshapeData(Data, Config)
 	DataM.St.Bat.pgLow	 = 	replicateMat3_3(	Data.St.Bat.pgLow 	,Config.Etapas);
 	DataM.St.Bat.pgTop	 = 	replicateMat3_3(	Data.St.Bat.pgTop 	,Config.Etapas);
 	DataM.St.Bat.sTop	 = 	replicateMat3_3(	Data.St.Bat.sTop 	,Config.Etapas);
+	DataM.St.Bat.xiTop	 = 	replicateMat3_3(	Data.St.Bat.xiTop 	,Config.Etapas);
 	DataM.St.Bat.wOm	 = 	replicateMat3_3(	Data.St.Bat.wOm 	,Config.Etapas);
 	DataM.St.Bat.wU	 = 	replicateMat3_3(	Data.St.Bat.wU 	,Config.Etapas);
 	DataM.Cost.piPTras	 = 	replicateMat3_2(	Data.Cost.piPTras	,1);
