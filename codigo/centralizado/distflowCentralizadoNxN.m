@@ -527,9 +527,6 @@ cvx_begin
 		pPv == 0;
 		qPv == 0;
 	end
-	
-	fopt_expr = sum(tfopt_expr);
-	minimize fopt_expr
 
 	fopt_expr = sum(tfopt_expr);
 	minimize fopt_expr

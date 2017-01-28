@@ -38,10 +38,6 @@ NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
 NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
 NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
-% Fotovoltaico
-Pv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 1);
-nPv = length(Pv);
-NotPv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 0);
 
 % Aire Acondicionado
 AC = find(Data.St.AC.I == 1);
