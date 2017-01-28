@@ -38,10 +38,6 @@ NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
 NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
 NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
-% Eolico
-indWn = find(matOverTime(Data.Gen.DFIG.I) == 1);
-NindWn = setdiff((1:n),indWn);
-lenWN = length(indWn);
 
 % Aire Acondicionado
 AC = find(Data.St.AC.I == 1);
