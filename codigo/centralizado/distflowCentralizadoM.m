@@ -38,6 +38,10 @@ NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
 NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
 NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
+% Baterias
+St = find(sign(sum(abs(Data.St.Bat.I),2)) == 1);
+nSt = length(St);
+NotSt = find(sign(sum(abs(Data.St.Bat.I),2)) == 0);
 
 % Aire Acondicionado
 AC = find(Data.St.AC.I == 1);
@@ -571,6 +575,7 @@ cvx_begin
         qPv == 0;
     end
 
+    
     fopt_expr = sum(tfopt_expr);
     minimize fopt_expr
     
