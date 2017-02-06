@@ -199,4 +199,4 @@ social = [ ...
 ];
 
 % utilCarg = .5*tarifa + .5*social;
-utilCarg = .25*social;
+utilCarg = .5*social;

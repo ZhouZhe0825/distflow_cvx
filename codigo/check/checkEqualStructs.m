@@ -1,4 +1,4 @@
-function [res] = checkEqualStructs(Astruct, Bstruct, tol)
+function [res] = checkEqualStructs(Astruct, Bstruct, AstructName, BstructName, tol)
 
 [Agasf, ~] = getAllStructFields(Astruct);
 [Bgasf, ~] = getAllStructFields(Bstruct);
@@ -25,6 +25,12 @@ if (size(Agasf,1) == size(Bgasf,1)) && (size(Agasf,2) == size(Bgasf,2))
                 disc = similarMat(AAux, BAux, tol);
                 if ~isempty(disc)
                     d = mat2cell(disc, ones(size(disc,1),1), ones(1,size(disc,2)));
+                    if ~isempty(AstructName)
+                        Afield = strrep(Afield,'Astruct', AstructName);
+                    end
+                    if ~isempty(BstructName)
+                        Bfield = strrep(Bfield,'Bstruct', BstructName);
+                    end
                     res = [res;{Afield, Bfield, ''};d];
                 end
                 find = true;

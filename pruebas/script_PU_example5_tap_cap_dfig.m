@@ -25,7 +25,7 @@ util=true;
 
 %% Declaracion de constantes
 
-NodosGeneracionEolica = [5];
+NodosGeneracionEolica = [5 6];
 % NodosGeneracionEolica = [];
 
 % Trafos
@@ -38,7 +38,7 @@ Trafos = [Trafo1];
 
 % Caps
 Cap1.TP = [0 1 2 3];
-Cap1.N = .005;
+Cap1.N = .05;
 Cap1.nod = 9;
 Cap1.ini = 0;
 Caps = [Cap1];
@@ -83,7 +83,7 @@ iniEstado = 1;
 outFilename_pref = 'PU_example5_tap_cap_dfig';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
-outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
+outFilename_mat = [outFilename_pref, 'nxn2m'];
 
 % outFilenamePre = ['.\paper\prueba_inv_'];
 % outFilenameMid = ['d_g_25_h0_1_DFig_Sto_Ch_betLess'];
@@ -153,6 +153,7 @@ Data.Red.Branch.lTop(:,:) = lTop_ct;
 
 Data.Red.Branch.yTop = Data.Red.Branch.T;
 Data.Red.Branch.yLow = Data.Red.Branch.T*0;
+Data.Red.Branch.cY = Data.Red.Branch.cY/10;
     
 %% Clientes no interrumpibles
 Data.ClNI.pC = Data.Red.Bus.uLow * 0;
@@ -537,190 +538,16 @@ Data.Red.Bus.uLow = Data.Red.Bus.uLow/1.5;
 Data.Red.Bus.uTop(1,:) = 1;
 Data.Red.Bus.uLow(1,:) = 1;
 
-[Var_nxn, opt_nxn, Dmod] = llamarCentralizado(Data, Config);
+leyenda = ['------------------------------------ ' outFilename_mat ' ------------------------------------']
 
-Data.Red.Bus.pCLow = full(Data.Red.Bus.pCLow);
-Data.Red.Bus.qCLow = full(Data.Red.Bus.qCLow);
+[Var_nxn, opt_nxn, DataNxN] = llamarCentralizadoNxN(Data, Config);
 
-Data.Gen.Tras.pgLow = full(Data.Gen.Tras.pgLow);
-Data.Gen.Tras.qgLow = full(Data.Gen.Tras.qgLow);
-Data.Gen.Tras.pgTop = full(Data.Gen.Tras.pgTop);
-Data.Gen.Tras.qgTop = full(Data.Gen.Tras.qgTop);
+[Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
 
-Data.Cost.cdv = repmat(full(Data.Cost.cdv), [1 Config.Etapas]);
+[diff_m_nxn] = checkEqualStructs(Var_m, Var_nxn, 'Var_m', 'Var_nxn', 1e-5)
 
-Data.Red.Branch.r = repmat(full(Data.Red.Branch.r), [1 1 Config.Etapas]);
-Data.Red.Branch.x = repmat(full(Data.Red.Branch.x), [1 1 Config.Etapas]);
-Data.Red.Branch.lTop = repmat(full(Data.Red.Branch.lTop), [1 1 Config.Etapas]);
-Data.Red.Branch.yTop = repmat(full(Data.Red.Branch.yTop), [1 1 Config.Etapas]);
-Data.Red.Branch.yLow = repmat(full(Data.Red.Branch.yLow), [1 1 Config.Etapas]);
+xlswrite([Config.workspace_var_file '_diffs.xlsx'], diff_m_nxn);
 
-VertI = VertIMat(Data.Red.Branch.T);
-VertJ = VertJMat(Data.Red.Branch.T);
-OutBr = VertI';
-InBr = VertJ';
-
-Data.Red.Branch.r = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.r);
-Data.Red.Branch.x = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.x);
-Data.Red.Branch.lTop = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.lTop);
-Data.Red.Branch.yTop = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.yTop);
-Data.Red.Branch.yLow = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.yLow);
-Data.Red.Bus.Ntr = repmat(Data.Red.Bus.Ntr, [1 Config.Etapas]);
-Data.Red.Bus.uLow = repmat(Data.Red.Bus.uLow, [1 Config.Etapas]);
-Data.Red.Bus.uTop = repmat(Data.Red.Bus.uTop, [1 Config.Etapas]);
-Data.Red.Bus.TapLow = repmat(Data.Red.Bus.TapLow, [1 Config.Etapas]);
-Data.Red.Bus.TapTop = repmat(Data.Red.Bus.TapTop, [1 Config.Etapas]);
-Data.Red.Bus.indTap = repmat(Data.Red.Bus.indTap, [1 Config.Etapas]);
-
-Data.Red.Bus.Ncp = repmat(Data.Red.Bus.Ncp, [1 Config.Etapas]);
-Data.Red.Bus.CapLow = repmat(Data.Red.Bus.CapLow, [1 Config.Etapas]);
-Data.Red.Bus.CapTop = repmat(Data.Red.Bus.CapTop, [1 Config.Etapas]);
-Data.Red.Bus.indCap = repmat(Data.Red.Bus.indCap, [1 Config.Etapas]);
-
-Data.Util.pzCnLowE = repmat(Data.Util.pzCnLowE, [1 Config.Etapas]);
-Data.Util.pzCnTopE = repmat(Data.Util.pzCnTopE, [1 Config.Etapas]);
-Data.Util.qzCnLowE = repmat(Data.Util.qzCnLowE, [1 Config.Etapas]);
-Data.Util.qzCnTopE = repmat(Data.Util.qzCnTopE, [1 Config.Etapas]);
-Data.Util.pzCnPrefE = repmat(Data.Util.pzCnPrefE, [1 Config.Etapas]);
-
-Data.Util.pzCnPref = Data.Util.pzCnPref(:,(1:Config.Etapas),:);
-Data.Util.pzCnLow = Data.Util.pzCnLow(:,(1:Config.Etapas),:);
-Data.Util.pzCnTop = Data.Util.pzCnTop(:,(1:Config.Etapas),:);
-
-% Data.Util.aE = repmat(Data.Util.aE, [1 Config.Etapas]);
-
-Data.Util.betaT = repmat(Data.Util.betaT, [1 Config.Etapas]);
-
-a1 = repmat(Data.Red.Bus.alpha(:,1), [1 Config.Etapas 2]);
-a1(:,:,2) = repmat(Data.Red.Bus.alpha(:,2), [1 Config.Etapas]);
-Data.Red.Bus.alpha = a1;
-
-Data.Red.Bus.pCLow = Data.Red.Bus.pCLow(:,(1:Config.Etapas));
-Data.Red.Bus.qCLow = Data.Red.Bus.qCLow(:,(1:Config.Etapas));
-
-Data.Gen.Tras.pgLow = Data.Gen.Tras.pgLow(:,(1:Config.Etapas));
-Data.Gen.Tras.qgLow = Data.Gen.Tras.qgLow(:,(1:Config.Etapas));
-Data.Gen.Tras.pgTop = Data.Gen.Tras.pgTop(:,(1:Config.Etapas));
-Data.Gen.Tras.qgTop = Data.Gen.Tras.qgTop(:,(1:Config.Etapas));
-
-Data.Cost.m = Data.Cost.m(:,(1:Config.Etapas));
-
-Data.Cost.piPTras = Data.Cost.piPTras(:,(1:Config.Etapas));
-Data.Cost.piQmtras = Data.Cost.piQmtras(:,(1:Config.Etapas));
-Data.Cost.piQMtras = Data.Cost.piQMtras(:,(1:Config.Etapas));
-
-Data.Cost.cdv = Data.Cost.cdv;
-
-
-Data.Util.betaE = Data.Util.betaE(:,(1:Config.Etapas));
-
-
-
-Data.St.AC.epsilon = repmat(Data.St.AC.epsilon, [1 Config.Etapas]);
-Data.temp = repmat(Data.temp, [1 Config.Etapas]);
-Data.St.AC.eta = repmat(Data.St.AC.eta, [1 Config.Etapas]);
-Data.St.AC.tempLow = repmat(Data.St.AC.tempLow, [1 Config.Etapas]);
-Data.St.AC.tempTop = repmat(Data.St.AC.tempTop, [1 Config.Etapas]);
-
-
-Data.Gen.DFIG = Dmod.Gen.DFIG;
-
-Data.Cost.rhopWi = repmat(Data.Cost.rhopWi, [1 Config.Etapas]);
-Data.Cost.rhomqWi = repmat(Data.Cost.rhomqWi, [1 Config.Etapas]);
-Data.Cost.rhoMqWi = repmat(Data.Cost.rhoMqWi, [1 Config.Etapas]);
-
-
-n = size(Data.Red.Branch.T,1);
-indWN = find(matOverTime(Data.Gen.DFIG.I) == 1);
-lenWN = length(indWN);
-
-
-Data.Gen.DFIG.rIE = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.rIF = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.rOR = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.rIE = squeeze(Data.Gen.DFIG.r(1,2,:,:))';
-Data.Gen.DFIG.rIF = squeeze(Data.Gen.DFIG.r(1,3,:,:))';
-Data.Gen.DFIG.rOR = squeeze(Data.Gen.DFIG.r(4,5,:,:))';
-
-
-
-Data.Gen.DFIG.xIE = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.xIF = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.xOR = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.xIE = squeeze(Data.Gen.DFIG.x(1,2,:,:))';
-Data.Gen.DFIG.xIF = squeeze(Data.Gen.DFIG.x(1,3,:,:))';
-Data.Gen.DFIG.xOR = squeeze(Data.Gen.DFIG.x(4,5,:,:))';
-
-
-
-Data.Gen.DFIG.lTopIE = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.lTopIF = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.lTopOR = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.lTopIE = squeeze(Data.Gen.DFIG.lTop(1,2,:,:))';
-Data.Gen.DFIG.lTopIF = squeeze(Data.Gen.DFIG.lTop(1,3,:,:))';
-Data.Gen.DFIG.lTopOR = squeeze(Data.Gen.DFIG.lTop(4,5,:,:))';
-
-
-
-Data.Gen.DFIG.sTopF = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.sTopR = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.sTopF = squeeze(Data.Gen.DFIG.sTop(3,1,:,:))';
-Data.Gen.DFIG.sTopR = squeeze(Data.Gen.DFIG.sTop(5,1,:,:))';
-
-
-Data.Gen.DFIG.xiTopF = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.xiTopR = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.xiTopF = squeeze(Data.Gen.DFIG.xiTop(3,1,:,:))';
-Data.Gen.DFIG.xiTopR = squeeze(Data.Gen.DFIG.xiTop(5,1,:,:))';
-
-
-
-Data.Gen.DFIG.uLowE = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.uLowF = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.uLowE = squeeze(Data.Gen.DFIG.uLow(2,1,:,:))';
-Data.Gen.DFIG.uLowF = squeeze(Data.Gen.DFIG.uLow(3,1,:,:))';
-
-
-
-Data.Gen.DFIG.uTopE = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.uTopF = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.uTopE = squeeze(Data.Gen.DFIG.uTop(2,1,:,:))';
-Data.Gen.DFIG.uTopF = squeeze(Data.Gen.DFIG.uTop(3,1,:,:))';
-
-
-
-Data.Gen.DFIG.PQnormIE = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.PQnormIF = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.PQnormIE = squeeze(Data.Gen.DFIG.PQnorm(1,2,:,:))';
-Data.Gen.DFIG.PQnormIF = squeeze(Data.Gen.DFIG.PQnorm(1,3,:,:))';
-
-
-
-Data.Gen.DFIG.cvF = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.cvR = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.cvF = squeeze(Data.Gen.DFIG.cv(3,1,:,:))';
-Data.Gen.DFIG.cvR = squeeze(Data.Gen.DFIG.cv(5,1,:,:))';
-
-
-
-Data.Gen.DFIG.crF = zeros(lenWN,Config.Etapas);
-Data.Gen.DFIG.crR = zeros(lenWN,Config.Etapas);
-
-Data.Gen.DFIG.crF = squeeze(Data.Gen.DFIG.cr(3,1,:,:))';
-Data.Gen.DFIG.crR = squeeze(Data.Gen.DFIG.cr(5,1,:,:))';
-
-
-[Var_m, opt_m] = distflowCentralizadoM(Data, Config);
-
-printSalidasDistflow(Var_nxn, Dmod, Config, cantTaps, cantCaps, cantCargs, outFilename_c, [], [], [], [], []);
-printSalidasDistflow(Var_m, Dmod, Config, cantTaps, cantCaps, cantCargs, outFilename_r, [], [], [], [], []);
+printSalidasDistflow(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_c, [], [], [], [], []);
+printSalidasDistflow(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_r, [], [], [], [], []);
 

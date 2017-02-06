@@ -1,7 +1,7 @@
 function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, status, Data_d, Ev] = llamarDistribuido(Data, Config, util, Var_centr, opt_centr, Var_ini, opt_ini)
 
     DataM = Data;
-    [DataM] = reshapeData(DataM, Config);
+    [DataM] = reshapeDataNxN(DataM, Config);
 
     if isempty(Var_centr) && isempty(Var_ini)
         

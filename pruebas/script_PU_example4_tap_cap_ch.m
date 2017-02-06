@@ -83,7 +83,7 @@ iniEstado = 1;
 outFilename_pref = 'PU_example4_tap_cap_ch';
 outFilename_c = [outFilename_pref, '_nxn'];
 outFilename_r = [outFilename_pref, '_m'];
-outFilename_mat = [outFilename_pref, 'nxn2m.mat'];
+outFilename_mat = [outFilename_pref, 'nxn2m'];
 
 % outFilenamePre = ['.\paper\prueba_inv_'];
 % outFilenameMid = ['d_g_25_h0_1_DFig_Sto_Ch_betLess'];
@@ -153,6 +153,7 @@ Data.Red.Branch.lTop(:,:) = lTop_ct;
 
 Data.Red.Branch.yTop = Data.Red.Branch.T;
 Data.Red.Branch.yLow = Data.Red.Branch.T*0;
+Data.Red.Branch.cY = Data.Red.Branch.cY/10;
     
 %% Clientes no interrumpibles
 Data.ClNI.pC = Data.Red.Bus.uLow * 0;
@@ -239,7 +240,12 @@ Data.temp = temp;
 
 % Configuraciones manuales
 
-utilCarg = utilidadCarga();
+utilCarg = ones(1,96);
+utilCarg(1) = .125;
+utilCarg(2) = .375;
+utilCarg(3) = .625;
+utilCarg(4) = .875;
+
 % if util
 %     Data.Util.Func = 2;
 
@@ -534,111 +540,16 @@ Data.Red.Bus.uLow = Data.Red.Bus.uLow/1.5;
 Data.Red.Bus.uTop(1,:) = 1;
 Data.Red.Bus.uLow(1,:) = 1;
 
-DataM = Data;
-[DataM] = reshapeData(DataM, Config);
+leyenda = ['------------------------------------ ' outFilename_mat ' ------------------------------------']
 
-DataM.Util.pzCnPrefE(:,:,1) = DataM.Util.pzCnPrefE(:,:,1)*.125;
-DataM.Util.pzCnPrefE(:,:,2) = DataM.Util.pzCnPrefE(:,:,2)*.375;
-DataM.Util.pzCnPrefE(:,:,3) = DataM.Util.pzCnPrefE(:,:,3)*.625;
-DataM.Util.pzCnPrefE(:,:,4) = DataM.Util.pzCnPrefE(:,:,4)*.875;
+[Var_nxn, opt_nxn, DataNxN] = llamarCentralizadoNxN(Data, Config);
 
-[Var_nxn, opt_nxn] = distflowCentralizadoNxN(DataM, Config);
+[Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
 
-Data.Red.Bus.pCLow = full(Data.Red.Bus.pCLow);
-Data.Red.Bus.qCLow = full(Data.Red.Bus.qCLow);
+[diff_m_nxn] = checkEqualStructs(Var_m, Var_nxn, 'Var_m', 'Var_nxn', 1e-5)
 
-Data.Gen.Tras.pgLow = full(Data.Gen.Tras.pgLow);
-Data.Gen.Tras.qgLow = full(Data.Gen.Tras.qgLow);
-Data.Gen.Tras.pgTop = full(Data.Gen.Tras.pgTop);
-Data.Gen.Tras.qgTop = full(Data.Gen.Tras.qgTop);
+xlswrite([Config.workspace_var_file '_diffs.xlsx'], diff_m_nxn);
 
-Data.Cost.cdv = repmat(full(Data.Cost.cdv), [1 Config.Etapas]);
-
-Data.Red.Branch.r = repmat(full(Data.Red.Branch.r), [1 1 Config.Etapas]);
-Data.Red.Branch.x = repmat(full(Data.Red.Branch.x), [1 1 Config.Etapas]);
-Data.Red.Branch.lTop = repmat(full(Data.Red.Branch.lTop), [1 1 Config.Etapas]);
-Data.Red.Branch.yTop = repmat(full(Data.Red.Branch.yTop), [1 1 Config.Etapas]);
-Data.Red.Branch.yLow = repmat(full(Data.Red.Branch.yLow), [1 1 Config.Etapas]);
-
-VertI = VertIMat(Data.Red.Branch.T);
-VertJ = VertJMat(Data.Red.Branch.T);
-OutBr = VertI';
-InBr = VertJ';
-
-Data.Red.Branch.r = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.r);
-Data.Red.Branch.x = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.x);
-Data.Red.Branch.lTop = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.lTop);
-Data.Red.Branch.yTop = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.yTop);
-Data.Red.Branch.yLow = NxNxT2MxT(VertI,VertJ,Data.Red.Branch.yLow);
-
-Data.Red.Bus.Ntr = repmat(Data.Red.Bus.Ntr, [1 Config.Etapas]);
-Data.Red.Bus.uLow = repmat(Data.Red.Bus.uLow, [1 Config.Etapas]);
-Data.Red.Bus.uTop = repmat(Data.Red.Bus.uTop, [1 Config.Etapas]);
-Data.Red.Bus.TapLow = repmat(Data.Red.Bus.TapLow, [1 Config.Etapas]);
-Data.Red.Bus.TapTop = repmat(Data.Red.Bus.TapTop, [1 Config.Etapas]);
-Data.Red.Bus.indTap = repmat(Data.Red.Bus.indTap, [1 Config.Etapas]);
-
-Data.Red.Bus.Ncp = repmat(Data.Red.Bus.Ncp, [1 Config.Etapas]);
-Data.Red.Bus.CapLow = repmat(Data.Red.Bus.CapLow, [1 Config.Etapas]);
-Data.Red.Bus.CapTop = repmat(Data.Red.Bus.CapTop, [1 Config.Etapas]);
-Data.Red.Bus.indCap = repmat(Data.Red.Bus.indCap, [1 Config.Etapas]);
-
-Data.Util.pzCnLowE = repmat(Data.Util.pzCnLowE, [1 Config.Etapas]);
-Data.Util.pzCnTopE = repmat(Data.Util.pzCnTopE, [1 Config.Etapas]);
-Data.Util.qzCnLowE = repmat(Data.Util.qzCnLowE, [1 Config.Etapas]);
-Data.Util.qzCnTopE = repmat(Data.Util.qzCnTopE, [1 Config.Etapas]);
-Data.Util.pzCnPrefE = repmat(Data.Util.pzCnPrefE, [1 Config.Etapas]);
-Data.Util.pzCnPrefE(:,1) = Data.Util.pzCnPrefE(:,1)*.125;
-Data.Util.pzCnPrefE(:,2) = Data.Util.pzCnPrefE(:,2)*.375;
-Data.Util.pzCnPrefE(:,3) = Data.Util.pzCnPrefE(:,3)*.625;
-Data.Util.pzCnPrefE(:,4) = Data.Util.pzCnPrefE(:,4)*.875;
-
-
-Data.Util.pzCnPref = Data.Util.pzCnPref(:,(1:Config.Etapas),:);
-Data.Util.pzCnLow = Data.Util.pzCnLow(:,(1:Config.Etapas),:);
-Data.Util.pzCnTop = Data.Util.pzCnTop(:,(1:Config.Etapas),:);
-
-% Data.Util.aE = repmat(Data.Util.aE, [1 Config.Etapas]);
-
-Data.Util.betaT = repmat(Data.Util.betaT, [1 Config.Etapas]);
-
-a1 = repmat(Data.Red.Bus.alpha(:,1), [1 Config.Etapas 2]);
-a1(:,:,2) = repmat(Data.Red.Bus.alpha(:,2), [1 Config.Etapas]);
-Data.Red.Bus.alpha = a1;
-
-Data.Red.Bus.pCLow = Data.Red.Bus.pCLow(:,(1:Config.Etapas));
-Data.Red.Bus.qCLow = Data.Red.Bus.qCLow(:,(1:Config.Etapas));
-
-Data.Gen.Tras.pgLow = Data.Gen.Tras.pgLow(:,(1:Config.Etapas));
-Data.Gen.Tras.qgLow = Data.Gen.Tras.qgLow(:,(1:Config.Etapas));
-Data.Gen.Tras.pgTop = Data.Gen.Tras.pgTop(:,(1:Config.Etapas));
-Data.Gen.Tras.qgTop = Data.Gen.Tras.qgTop(:,(1:Config.Etapas));
-
-Data.Cost.m = Data.Cost.m(:,(1:Config.Etapas));
-
-Data.Cost.piPTras = Data.Cost.piPTras(:,(1:Config.Etapas));
-Data.Cost.piQmtras = Data.Cost.piQmtras(:,(1:Config.Etapas));
-Data.Cost.piQMtras = Data.Cost.piQMtras(:,(1:Config.Etapas));
-
-Data.Cost.cdv = Data.Cost.cdv;
-
-
-Data.Util.betaE = Data.Util.betaE(:,(1:Config.Etapas));
-
-
-
-Data.St.AC.epsilon = repmat(Data.St.AC.epsilon, [1 Config.Etapas]);
-Data.temp = repmat(Data.temp, [1 Config.Etapas]);
-Data.St.AC.eta = repmat(Data.St.AC.eta, [1 Config.Etapas]);
-Data.St.AC.tempLow = repmat(Data.St.AC.tempLow, [1 Config.Etapas]);
-Data.St.AC.tempTop = repmat(Data.St.AC.tempTop, [1 Config.Etapas]);
-
-Data.ClNI.pC = repmat(Data.ClNI.pC, [1 Config.Etapas]);
-Data.ClNI.qC = repmat(Data.ClNI.qC, [1 Config.Etapas]);
-
-
-[Var_m, opt_m] = distflowCentralizadoM(Data, Config);
-
-printSalidasDistflow(Var_nxn, DataM, Config, cantTaps, cantCaps, cantCargs, outFilename_c, [], [], [], [], []);
-printSalidasDistflow(Var_m, DataM, Config, cantTaps, cantCaps, cantCargs, outFilename_r, [], [], [], [], []);
+printSalidasDistflow(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_c, [], [], [], [], []);
+printSalidasDistflow(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_r, [], [], [], [], []);
 

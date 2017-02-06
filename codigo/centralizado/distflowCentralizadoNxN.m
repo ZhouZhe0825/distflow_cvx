@@ -157,6 +157,7 @@ cvx_begin
 		+ sum(cqGTras,1) ...
 		+ sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*CapDif.^2,1) ...
 		+ sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*TapDif.^2,1) ...
+        + sum(sum(Data.Red.Branch.cY.*y,1),2) ...
 		+ sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2,1) ...
 		;
 
@@ -234,10 +235,10 @@ cvx_begin
 
 	%% Restricciones de generacion
 	% Restricciones de Trasmision
-	pGTras >= Data.Red.Bus.P0Low;
-	pGTras <= Data.Red.Bus.P0Top;
-	qGTras >= Data.Red.Bus.Q0Low;
-	qGTras <= Data.Red.Bus.Q0Top;
+    pGTras >= Data.Gen.Tras.pgLow;
+    pGTras <= Data.Gen.Tras.pgTop;
+    qGTras >= Data.Gen.Tras.qgLow;
+    qGTras <= Data.Gen.Tras.qgTop;
 
 	%% Restricciones de dominio
 	v >= Data.Red.Bus.uLow.^2;

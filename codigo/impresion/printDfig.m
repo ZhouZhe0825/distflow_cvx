@@ -45,13 +45,13 @@ function printDfig(Header, Var, Data, outFilename)
 				l(2,:) = squeeze(Var.Gen.Dfig.Branch.l(1,3,:,i));
 				l(3,:) = squeeze(Var.Gen.Dfig.Branch.l(4,5,:,i));
 
-				rl(1,:) = squeeze(Data.Gen.DFIG.r(1,2,:,i))'.*l(1,:);
-				rl(2,:) = squeeze(Data.Gen.DFIG.r(1,3,:,i))'.*l(2,:);
-				rl(3,:) = squeeze(Data.Gen.DFIG.r(4,5,:,i))'.*l(3,:);
+				r_l(1,:) = squeeze(Data.Gen.DFIG.r(1,2,:,i))'.*l(1,:);
+				r_l(2,:) = squeeze(Data.Gen.DFIG.r(1,3,:,i))'.*l(2,:);
+				r_l(3,:) = squeeze(Data.Gen.DFIG.r(4,5,:,i))'.*l(3,:);
 
 				v(:,:) =  squeeze(Var.Gen.Dfig.Bus.v(:,1,:,i));
 				
-				h_l = ((P.^2 + Q.^2) ./ v([1 2 3],:)) ./ (l+eps);
+				h_l = ((P.^2 + Q.^2) ./ v([1 1 4],:)) ./ (l+eps);
 				
 				pg(:,:) = squeeze(Var.Gen.Dfig.Bus.pg([2 5],1,:,i));
 				qg(:,:) = squeeze(Var.Gen.Dfig.Bus.qg([2 3 5],1,:,i));
@@ -67,8 +67,8 @@ function printDfig(Header, Var, Data, outFilename)
 				xi(:,:) = squeeze(Var.Gen.Dfig.Bus.xi([3 5],1,:,i));
 				h_xi(1,:) = (pC.^2 + qC.^2)./xi(1,:); 
 				h_xi(2,:) = (P(3,:).^2 + Q(3,:).^2)./xi(2,:); 
-				cv_s(1,:) = squeeze(Data.Gen.DFIG.cr(3,1,:,i))'.*xi(1,:);
-				cv_s(2,:) = squeeze(Data.Gen.DFIG.cr(5,1,:,i))'.*xi(2,:);
+				cr_xi(1,:) = squeeze(Data.Gen.DFIG.cr(3,1,:,i))'.*xi(1,:);
+				cr_xi(2,:) = squeeze(Data.Gen.DFIG.cr(5,1,:,i))'.*xi(2,:);
 
 				n_ = squeeze(Var.Gen.Dfig.Bus.n_Wnd(1,1,:,i))';
 				P_mec = squeeze(Var.Gen.Dfig.Bus.P_mecWnd(1,1,:,i))';
@@ -90,8 +90,8 @@ function printDfig(Header, Var, Data, outFilename)
 				rowHeader{	13	} = 'Holg l_1-3'; 
 				rowHeader{	14	} = 'Holg l_4-5'; 
 				rowHeader{	15	} = 'r_1-2 l_1-2';
-				rowHeader{	16	} = 'r_1-2 l_1-3';
-				rowHeader{	17	} = 'r_1-2 l_4-5';
+				rowHeader{	16	} = 'r_1-3 l_1-3';
+				rowHeader{	17	} = 'r_4-5 l_4-5';
 				rowHeader{	18	} = 'pg_2';
 				rowHeader{	19	} = 'pg_5';
 				rowHeader{	20	} = 'qg_2';

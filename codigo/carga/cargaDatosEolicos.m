@@ -109,6 +109,7 @@ Data.Gen.DFIG.Ng = Data.Gen.DFIG.r;
 Data.Gen.DFIG.cv = zeros(5,1,lenWN);
 Data.Gen.DFIG.cr = Data.Gen.DFIG.cv;
 Data.Gen.DFIG.sTop = Data.Gen.DFIG.cv;
+Data.Gen.DFIG.xiTop = Data.Gen.DFIG.cv;
 Data.Gen.DFIG.Ig = Data.Gen.DFIG.cv;
 Data.Gen.DFIG.I = zeros(size(Data.Gen.Pv.I));
 Data.Gen.DFIG.I(windNodes) = 1;
@@ -178,6 +179,9 @@ Data.Gen.DFIG.PQnorm = zeros(size(Data.Gen.DFIG.lTop));
 
 	Data.Gen.DFIG.sTop(3,1,:) = sW_3_Top;
     Data.Gen.DFIG.sTop(5,1,:) = sW_5_Top;
+
+	Data.Gen.DFIG.xiTop(3,1,:) = sW_3_Top^2;
+    Data.Gen.DFIG.xiTop(5,1,:) = sW_5_Top^2;
 
 	Data.Gen.DFIG.Ig(3,1,:) = 1;
 

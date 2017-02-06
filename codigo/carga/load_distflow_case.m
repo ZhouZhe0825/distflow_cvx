@@ -23,6 +23,9 @@ Data.Red.Branch.T = T+T';
 Data.Red.Branch.r = r+r';
 Data.Red.Branch.x = x+x';
 Data.Red.Branch.lTop = lTop+lTop';
+
+Data.Red.Branch.cY = Data.Red.Branch.T;
+
 Data.Red.Bus.alpha = sparse(1 * V_bu);
 Data.Red.Bus.uLow = sparse(n_bu(:,7));
 Data.Red.Bus.uTop = sparse(n_bu(:,6));
