@@ -3,7 +3,7 @@ function extraOutput(Var, Data, Config, Header, outFilename)
     n = size(Data.Red.Branch.T,1);
 	TotalT = matOverTime(Data.Red.Branch.T);
 
-    G = Data.Red.Bus.v0;
+    G = find(Data.Gen.Tras.I == 1);
     NnoG = setdiff((1:n), G)';
     TSalientesG = Data.Red.Branch.T;
     TEntrantesG = Data.Red.Branch.T;

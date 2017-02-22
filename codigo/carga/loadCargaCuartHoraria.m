@@ -1,18 +1,13 @@
-function [pCLowInv, pCLowVer, qCLowInv, qCLowVer, iCi, iCv] = loadCargaCuartHoraria(filename, nodos, minpC, minqC)
-% filename = 'carga_subredLP.xlsx';
-pCLowShInv = 'Ppu_inv';
-pCLowShVer = 'Ppu_ver';
-qCLowShInv = 'Qpu_inv';
-qCLowShVer = 'Qpu_ver';
+function [Data] = loadCargaCuartHoraria(filename, Data, pCSheet, qCSheet, minpC, minqC)
 
+	n = size(Data.Red.Branch.T,1);
+	[pCLow, ipC] = loadVarCuartHor(filename, pCSheet, n, minpC);
+	[qCLow, iqC] = loadVarCuartHor(filename, qCSheet, n, minqC);
 
-[pCLowInv, ipCi] = loadVarCuartHor(filename, pCLowShInv, nodos, minpC);
-[pCLowVer, iqCi] = loadVarCuartHor(filename, pCLowShVer, nodos, minpC);
-[qCLowInv, ipCv] = loadVarCuartHor(filename, qCLowShInv, nodos, minqC);
-[qCLowVer, iqCv] = loadVarCuartHor(filename, qCLowShVer, nodos, minqC);
+	Data.Red.Bus.indCons = intersect(ipC, iqC);
 
-iCi = intersect(ipCi, iqCi);
-iCv = intersect(ipCv, iqCv);
+	Data.Red.Bus.pCLow = pCLow;
+	Data.Red.Bus.qCLow = qCLow;
 
 end
 

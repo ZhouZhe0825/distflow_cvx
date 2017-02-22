@@ -1,4 +1,4 @@
-function [DataM] = reshapeDataM(Data, Config);
+function [DataM] = reshapeDataM(Data, Config)
 
 	VertI = VertIMat(Data.Red.Branch.T);
 	VertJ = VertJMat(Data.Red.Branch.T);
@@ -103,24 +103,24 @@ function [DataM] = reshapeDataM(Data, Config);
 	DataM.Gen.Pv.cr = DataM.Gen.Pv.cr * one;
 	DataM.Gen.Pv.cv = DataM.Gen.Pv.cv * one;
 	DataM.Gen.Pv.I = DataM.Gen.Pv.I * one;
-	DataM.Gen.Pv.pPvg = DataM.Gen.Pv.pPvg * one;
+	DataM.Gen.Pv.pPvg = repmat(DataM.Gen.Pv.pPvg(:,(1:lenEt)), [size(VertI,2) 1]);
 	DataM.Gen.Pv.sTop = DataM.Gen.Pv.sTop * one;
 	DataM.Gen.Pv.xiTop = DataM.Gen.Pv.xiTop * one;
 
-	DataM.Gen.Tras.pgLow = DataM.Gen.Tras.pgLow(:,(1:lenEt));
-	DataM.Gen.Tras.pgTop = DataM.Gen.Tras.pgTop(:,(1:lenEt));
-	DataM.Gen.Tras.qgLow = DataM.Gen.Tras.qgLow(:,(1:lenEt));
-	DataM.Gen.Tras.qgTop = DataM.Gen.Tras.qgTop(:,(1:lenEt));
+	DataM.Gen.Tras.pgLow = DataM.Gen.Tras.pgLow * one;
+	DataM.Gen.Tras.pgTop = DataM.Gen.Tras.pgTop * one;
+	DataM.Gen.Tras.qgLow = DataM.Gen.Tras.qgLow * one;
+	DataM.Gen.Tras.qgTop = DataM.Gen.Tras.qgTop * one;
 
 	
 	
 	
-	DataM.St.AC.beta = DataM.St.AC.beta * one;
-	DataM.St.AC.epsilon = DataM.St.AC.epsilon * one;
-	DataM.St.AC.eta = DataM.St.AC.eta * one;
-	DataM.St.AC.tempLow = DataM.St.AC.tempLow * one;
-	DataM.St.AC.tempPref = DataM.St.AC.tempPref * one;
-	DataM.St.AC.tempTop = DataM.St.AC.tempTop * one;
+	DataM.St.AC.beta = DataM.St.AC.beta(:,(1:lenEt));
+	DataM.St.AC.epsilon = DataM.St.AC.epsilon(:,(1:lenEt));
+	DataM.St.AC.eta = DataM.St.AC.eta(:,(1:lenEt));
+	DataM.St.AC.tempLow = DataM.St.AC.tempLow(:,(1:lenEt));
+	DataM.St.AC.tempPref = DataM.St.AC.tempPref(:,(1:lenEt));
+	DataM.St.AC.tempTop = DataM.St.AC.tempTop(:,(1:lenEt));
 
 	DataM.St.Bat.beta = DataM.St.Bat.beta * one;
 	DataM.St.Bat.cr = DataM.St.Bat.cr * one;
@@ -140,7 +140,7 @@ function [DataM] = reshapeDataM(Data, Config);
 	DataM.St.Bat.wOm = DataM.St.Bat.wOm * one;
 	DataM.St.Bat.wU = DataM.St.Bat.wU * one;
 
-	DataM.temp = DataM.temp * one;
+	DataM.temp = repmat(DataM.temp(:,(1:lenEt)), [size(VertI,2) 1]);
 
 	DataM.Util.betaE = DataM.Util.betaE(:,(1:lenEt));
 	DataM.Util.betaT = DataM.Util.betaT * one;

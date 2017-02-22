@@ -1,4 +1,4 @@
-function [Data] = cargaDatosEolicos(Data, windNodes, P_mec)
+function [Data] = Dfig_2mw(Data, windNodes)
 %% Datos Generador Eolico
 w = 1; % Omega? o ws? TODO sacar
 ws = pi*100;
@@ -108,7 +108,7 @@ Data.Gen.DFIG.cv = zeros(5,1,lenWN);
 Data.Gen.DFIG.cr = Data.Gen.DFIG.cv;
 Data.Gen.DFIG.sTop = Data.Gen.DFIG.cv;
 Data.Gen.DFIG.xiTop = Data.Gen.DFIG.cv;
-Data.Gen.DFIG.I = zeros(size(Data.Gen.Pv.I));
+Data.Gen.DFIG.I = zeros(size(Data.Gen.Tras.I));
 Data.Gen.DFIG.I(windNodes) = 1;
 
 Data.Gen.DFIG.n_ = n_;
@@ -167,8 +167,8 @@ Data.Gen.DFIG.PQnorm = zeros(size(Data.Gen.DFIG.lTop));
 	Data.Gen.DFIG.uLow(2,:) = uLow_2;
     Data.Gen.DFIG.uLow(3,:) = uLow_3;
 
-	Data.Gen.DFIG.uTop(2,:) = uTop_2;
-    Data.Gen.DFIG.uTop(3,:) = uTop_3;
+    Data.Gen.DFIG.uTop(2,:) = uTop_2;
+	Data.Gen.DFIG.uTop(3,:) = uTop_3;
 
 	Data.Gen.DFIG.sTop(3,1,:) = sW_3_Top;
     Data.Gen.DFIG.sTop(5,1,:) = sW_5_Top;

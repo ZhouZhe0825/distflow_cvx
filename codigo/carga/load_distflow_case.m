@@ -1,4 +1,4 @@
-function [Data] = load_distflow_case(xls_file, bus_sheet, branch_sheet)
+function [Data] = load_distflow_case(xls_file, bus_sheet, branch_sheet, Trafos, Caps, Cargas, App, Switches, cambioTap, cambioCap, cY)
 
 
 
@@ -23,51 +23,100 @@ Data.Red.Branch.T = T+T';
 Data.Red.Branch.r = r+r';
 Data.Red.Branch.x = x+x';
 Data.Red.Branch.lTop = lTop+lTop';
+Data.Red.Branch.yTop = Data.Red.Branch.T;
 
-Data.Red.Branch.cY = Data.Red.Branch.T;
+if Switches.all
+    Data.Red.Branch.yLow = Data.Red.Branch.T;
+else
+    Data.Red.Branch.yLow = Data.Red.Branch.T * 0;
+end
+    
+for i=1:length(Switches.i)
+	Data.Red.Branch.yLow(Switches.i(i), Switches.j(i))=0;
+	Data.Red.Branch.yLow(Switches.j(i), Switches.i(i))=0;
+end
+
+Data.Red.Branch.cY = Data.Red.Branch.T .* cY;
 
 Data.Red.Bus.alpha = sparse(1 * V_bu);
 Data.Red.Bus.uLow = sparse(n_bu(:,7));
 Data.Red.Bus.uTop = sparse(n_bu(:,6));
 Data.Red.Bus.pCLow = sparse(n_bu(:,3));
 Data.Red.Bus.qCLow = sparse(n_bu(:,4));
-Data.Red.Bus.Ncp = zeros(n, 1);
-Data.Red.Bus.v0 = find(~isnan(n_bu(:,2)));
-Data.Red.Bus.Q0Top = 10;
-Data.Red.Bus.Q0Low = -10;
-Data.Red.Bus.P0Top = 10;
-Data.Red.Bus.P0Low = -10;
+v0 = find(~isnan(n_bu(:,2)));
+Q0Top = 10;
+Q0Low = -10;
+P0Top = 10;
+P0Low = -10;
+Data.Red.Bus.alpha = repmat(full(Data.Red.Bus.alpha), [1,length(App)]);
+for a = 1:length(App)
+    Data.Red.Bus.alpha(:,App(a).I) = App(a).alpha;
+end
+
+
+%% Transformadores
+Data.Red.Bus.TapLow = Data.Red.Bus.uLow * 0;
+Data.Red.Bus.TapTop = Data.Red.Bus.TapLow;
+Data.Red.Bus.TapIni = Data.Red.Bus.TapLow;
+Data.Red.Bus.indTap = Data.Red.Bus.TapLow;
 Data.Red.Bus.Ntr = zeros(n, 1);
 
-% Data.Red.Cost = 0;
+for estT = 1:size(Trafos,1)
+	Data.Red.Bus.TapLow(Trafos(estT).nod) = min(Trafos(estT).TP);
+	Data.Red.Bus.TapTop(Trafos(estT).nod) = max(Trafos(estT).TP);
+	Data.Red.Bus.TapIni(Trafos(estT).nod) = Trafos(estT).ini;
+	Data.Red.Bus.indTap(Trafos(estT).nod) = 1;
+	Data.Red.Bus.Ntr(Trafos(estT).nod) = Trafos(estT).N;
+end
 
-Data.Gen.Pv.I = sparse(0 * V_bu);
-Data.Gen.Pv.cv = sparse(0 * V_bu);
-Data.Gen.Pv.cr = sparse(0 * V_bu);
-Data.Gen.Pv.qgTop = sparse(0 * V_bu);
-Data.Gen.Pv.sTop = sparse(0 * V_bu);
-Data.Gen.Pv.pgTop = sparse(0 * V_bu);
+%% Capacitores
+Data.Red.Bus.CapLow = Data.Red.Bus.uLow * 0;
+Data.Red.Bus.CapTop = Data.Red.Bus.CapLow;
+Data.Red.Bus.CapIni = Data.Red.Bus.CapLow;
+Data.Red.Bus.indCap = Data.Red.Bus.CapLow;
+Data.Red.Bus.Ncp = zeros(n, 1);
 
 
-% T = T+T';
-% r = r+r';
-% r = x+x';
-% lTop = lTop+lTop';
-% V_bu = ones(n,1);
-% I = 0 * V_bu;
-% alpha = 0.4 * V_bu;
-% cv = 0 * V_bu;
-% cr = 0 * V_bu;
-% qgTop = 0 * V_bu;
-% uLow = n_bu(:,7);
-% uTop = n_bu(:,6);
-% pcLow = n_bu(:,3);
-% qcLow = n_bu(:,4);
-% qcCap = 0 * V_bu;
-% sTop = 0 * V_bu;
-% pgTop = 0 * V_bu;
-% v0 = find(~isnan(n_bu(:,2)));
-% Q0Top = 10;
-% Q0Low = -10;
-% P0Top = 10;
-% P0Low = -10;
+for estC = 1:size(Caps,1)
+	Data.Red.Bus.CapLow(Caps(estC).nod) = min(Caps(estC).TP);
+	Data.Red.Bus.CapTop(Caps(estC).nod) = max(Caps(estC).TP);
+	Data.Red.Bus.CapIni(Caps(estC).nod) = Caps(estC).ini;
+	Data.Red.Bus.indCap(Caps(estC).nod) = 1;
+	Data.Red.Bus.Ncp(Caps(estC).nod) = Caps(estC).N;
+end
+
+%% Costo de cambio de enteras (Taps, switches
+Data.Red.cambioTap = cambioTap;
+Data.Red.cambioCap = cambioCap;
+
+%% Trasmision
+Data.Gen.Tras.pgLow = zeros(n, 1);
+Data.Gen.Tras.qgLow = Data.Gen.Tras.pgLow;
+Data.Gen.Tras.pgTop = Data.Gen.Tras.pgLow;
+Data.Gen.Tras.qgTop = Data.Gen.Tras.pgLow;
+
+Data.Gen.Tras.pgLow(v0,:) = P0Low;
+Data.Gen.Tras.qgLow(v0,:) = Q0Low;
+Data.Gen.Tras.pgTop(v0,:) = P0Top;
+Data.Gen.Tras.qgTop(v0,:) = Q0Top;
+
+Data.Gen.Tras.I = zeros(n, 1);
+Data.Gen.Tras.I(v0) = 1;
+
+
+%% Cargas no interrumpibles
+Data.ClNI.pC = Data.Red.Bus.uLow * 0;
+Data.ClNI.qC = Data.ClNI.pC;
+Data.ClNI.d = Data.ClNI.pC;
+Data.ClNI.I = Data.ClNI.pC;
+Data.ClNI.nMultipTop = Data.ClNI.pC;
+Data.ClNI.nMultipLow = Data.ClNI.pC;
+
+for estCg = 1:size(Cargas,2)
+	Data.ClNI.pC(Cargas(estCg).nod) = Cargas(estCg).pC;
+	Data.ClNI.qC(Cargas(estCg).nod) = Cargas(estCg).qC;
+	Data.ClNI.d(Cargas(estCg).nod) = Cargas(estCg).dur;
+	Data.ClNI.I(Cargas(estCg).nod) = 1;
+    Data.ClNI.nMultipTop(Cargas(estCg).nod) = Cargas(estCg).nMultipTop;
+    Data.ClNI.nMultipLow(Cargas(estCg).nod) = Cargas(estCg).nMultipLow;
+end

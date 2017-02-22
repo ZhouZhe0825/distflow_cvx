@@ -39,6 +39,8 @@ function printSalidasDistflow(Var, Data, Config, cantTaps, cantCaps, cantCarg, o
 	end
 	printVarNx1xT(squeeze(Var.ClRes.pCApp(:,:,:,1)), Header.Bus, Header.Main, outFilename, 'pCApp_1');
 	printVarNx1xT(squeeze(Var.ClRes.pCApp(:,:,:,2)), Header.Bus, Header.Main, outFilename, 'pCApp_2');
+	printVarNx1xT(squeeze(Var.ClRes.qCApp(:,:,:,1)), Header.Bus, Header.Main, outFilename, 'qCApp_1');
+	printVarNx1xT(squeeze(Var.ClRes.qCApp(:,:,:,2)), Header.Bus, Header.Main, outFilename, 'qCApp_2');
 	printVarNx1xT(Var.Red.Bus.pN, Header.Bus, Header.Main, outFilename, 'pNRed');
 	printVarNx1xT(Var.Red.Bus.qN, Header.Bus, Header.Main, outFilename, 'qNRed');
 	printVarNx1xT(Var.Red.Bus.qCp, Header.Bus, Header.Main, outFilename, 'qCp');

@@ -3,7 +3,7 @@ function [Var, opt] = distflowCentralizadoNxN(Data, Config)
 %% Inicializacion
 n = size(Data.Red.Branch.T,1);
 
-G = Data.Red.Bus.v0;
+G = find(Data.Gen.Tras.I == 1);
 NnoG = setdiff((1:n), G)';
 
 TSalientesG = Data.Red.Branch.T;
