@@ -112,7 +112,7 @@ Data.ClNI.I = Data.ClNI.pC;
 Data.ClNI.nMultipTop = Data.ClNI.pC;
 Data.ClNI.nMultipLow = Data.ClNI.pC;
 
-for estCg = 1:size(Cargas,2)
+for estCg = 1:length(Cargas)
 	Data.ClNI.pC(Cargas(estCg).nod) = Cargas(estCg).pC;
 	Data.ClNI.qC(Cargas(estCg).nod) = Cargas(estCg).qC;
 	Data.ClNI.d(Cargas(estCg).nod) = Cargas(estCg).dur;
