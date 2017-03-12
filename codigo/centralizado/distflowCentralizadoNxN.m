@@ -608,9 +608,6 @@ if (lenWN > 0)
 	Var.Gen.Dfig.Bus.xi = xiDFIG;
     Var.Gen.Dfig.Bus.n_Wnd = n_Wnd;
     Var.Gen.Dfig.Bus.P_mecWnd = P_mecWnd;
-else
-	Var.Gen.Dfig.pWi = zeros(n,Config.Etapas);
-	Var.Gen.Dfig.qWi = zeros(n,Config.Etapas);
 end
 
 % Fotovoltaico

@@ -1,4 +1,4 @@
-function printSalidasDistflow(Var, Data, Config, cantTaps, cantCaps, cantCarg, outFilename, optEv, muEv, lambdaEv, DifPEv, DifQEv)
+function printSalidasDistflowM(Var, Data, Config, cantTaps, cantCaps, cantCarg, outFilename, optEv, muEv, lambdaEv, DifPEv, DifQEv)
 
 %     n = size(Data.Red.Branch.T,1);
 %     nodos = (1:n)';
@@ -7,6 +7,10 @@ function printSalidasDistflow(Var, Data, Config, cantTaps, cantCaps, cantCarg, o
 
 
     TotalT = matOverTime(Data.Red.Branch.T);
+    
+    D.Red.Branch.T = TotalT;
+
+    [Var] = VarM2NxN(Var,D);
 
 %     [rowT, colT, ~] = find(TotalT == 1);
 

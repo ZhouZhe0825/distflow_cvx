@@ -579,158 +579,124 @@ cvx_end
 toc
 
 %% Construccion de la estructura de solucion
-% pasaje a NxNxT
-Var.Red.Branch.P = MxT2NxNxT(VertI,VertJ,P);
-Var.Red.Branch.Q = MxT2NxNxT(VertI,VertJ,Q);
-Var.Red.Branch.l = MxT2NxNxT(VertI,VertJ,l);
-Var.Red.Branch.z = MxT2NxNxT(VertI,VertJ,z);
-Var.Red.Branch.y = MxT2NxNxT(VertI,VertJ,y);
-Var.Red.Bus.w = permute(full(w), [1 3 2]);
+Var.Red.Branch.P	 = 	P	;
+Var.Red.Branch.Q	 = 	Q	;
+Var.Red.Branch.l	 = 	l	;
+Var.Red.Branch.z	 = 	z	;
+Var.Red.Branch.y	 = 	y	;
+Var.Red.Bus.w	 = 	w	;
 
-Var.Red.Bus.v = permute(full(v), [1 3 2]);
-Var.Red.Bus.cDv = permute(full(cDv), [1 3 2]);
-Var.Red.Bus.nn = permute(full(nn), [1 3 2]);
-Var.Red.Bus.nv = permute(full(nv), [1 3 2]);
-Var.Red.Bus.Tap = permute(full(Tap), [1 3 2]);
+Var.Red.Bus.v	 = 	v	;
+Var.Red.Bus.cDv	 = 	cDv	;
+Var.Red.Bus.nn	 = 	nn	;
+Var.Red.Bus.nv	 = 	nv	;
+Var.Red.Bus.Tap	 = 	Tap	;
 
-Var.Red.Bus.pC = permute(full(pC), [1 3 2]);
-Var.Red.Bus.qC = permute(full(qC), [1 3 2]);
+Var.Red.Bus.pC	 = 	pC	;
+Var.Red.Bus.qC	 = 	qC	;
 
-Var.Red.Bus.pN = permute(full(pN), [1 3 2]);
-Var.Red.Bus.qN = permute(full(qN), [1 3 2]);
+Var.Red.Bus.pN	 = 	pN	;
+Var.Red.Bus.qN	 = 	qN	;
 
-Var.Red.Bus.pG = permute(full(pG), [1 3 2]);
-Var.Red.Bus.qG = permute(full(qG), [1 3 2]);
+Var.Red.Bus.pG	 = 	pG	;
+Var.Red.Bus.qG	 = 	qG	;
 
-Var.Red.Bus.qCp = permute(full(qCp), [1 3 2]);
-Var.Red.Bus.Cap = permute(full(Cap), [1 3 2]);
+Var.Red.Bus.qCp	 = 	qCp	;
+Var.Red.Bus.Cap	 = 	Cap	;
 
-Var.Red.Bus.PTras = zeros(n,1,Config.Etapas);
-Var.Red.Bus.PTras(G,1,:) = pGTras(G,:);
-Var.Red.Bus.QTras = zeros(n,1,Config.Etapas);
-Var.Red.Bus.QTras(G,1,:) = qGTras(G,:);
+Var.Red.Bus.PTras	 = 	pGTras	;
+Var.Red.Bus.QTras	 = 	qGTras	;
 
-Var.ClRes.pCApp = permute(full(pCApp), [1 4 2 3]);
-Var.ClRes.qCApp = permute(full(qCApp), [1 4 2 3]);
-Var.ClRes.pC = permute(full(pCClRes), [1 3 2]);
-Var.ClRes.qC = permute(full(qCClRes), [1 3 2]);
+Var.ClRes.pCApp	 = 	pCApp	;
+Var.ClRes.qCApp	 = 	qCApp	;
+Var.ClRes.pC	 = 	pCClRes	;
+Var.ClRes.qC	 = 	qCClRes	;
 
 % Aire Acondicionado
 if nAC > 0 
-	Var.ClRes.Tvar = permute(full(Tvar), [1 3 2]);
+	Var.ClRes.Tvar	 = 	Tvar	;
 end
 
 % Baterias
 if nSt > 0
-	Var.St.Bat.pStb = pStb;
-    Var.St.Bat.pStgb = pStb*0;
-    Var.St.Bat.pStgb(St,:) = pStgb;
-	Var.St.Bat.qStb = qStb;
-    Var.St.Bat.sStb = pStb*0;
-    Var.St.Bat.sStb(St,:) = sStb;
-    Var.St.Bat.xiStb = pStb*0;
-    Var.St.Bat.xiStb(St,:) = xiStb;
-	Var.St.Bat.EStb = EStb;
-
-
-	Var.St.Bat.pStb = permute(full(Var.St.Bat.pStb), [1 3 2]);
-	Var.St.Bat.pStgb = permute(full(Var.St.Bat.pStgb), [1 3 2]);
-	Var.St.Bat.qStb = permute(full(Var.St.Bat.qStb), [1 3 2]);
-	Var.St.Bat.sStb = permute(full(Var.St.Bat.sStb), [1 3 2]);
-	Var.St.Bat.xiStb = permute(full(Var.St.Bat.xiStb), [1 3 2]);
-	Var.St.Bat.EStb = permute(full(Var.St.Bat.EStb), [1 3 2]);
+	Var.St.Bat.pStb	 = pStb;
+	Var.St.Bat.pStgb	 = pStb*0;
+	Var.St.Bat.pStgb(St,:)	 = pStgb;
+	Var.St.Bat.qStb	 = qStb;
+	Var.St.Bat.sStb	 = pStb*0;
+	Var.St.Bat.sStb(St,:)	 = sStb;
+	Var.St.Bat.xiStb	 = pStb*0;
+	Var.St.Bat.xiStb(St,:)	 = xiStb;
+	Var.St.Bat.EStb	 = EStb;
 end
 
 % Cargas No interrumpibles
 if nClNI > 0
-	Var.ClNI.pC = pCClNI;
-	Var.ClNI.qC = qCClNI;
-	Var.ClNI.on = pCClNI*0;
-	Var.ClNI.on(ClNI,:) = onClNI;
-	Var.ClNI.start = pCClNI*0;
-	Var.ClNI.start(ClNI,:) = stClNI;
-	
-	Var.ClNI.pC = permute(full(Var.ClNI.pC), [1 3 2]);
-	Var.ClNI.qC = permute(full(Var.ClNI.qC), [1 3 2]);
-	Var.ClNI.on = permute(full(Var.ClNI.on), [1 3 2]);
-	Var.ClNI.start = permute(full(Var.ClNI.start), [1 3 2]);
-	
+	Var.ClNI.pC	 = pCClNI;
+	Var.ClNI.qC	 = qCClNI;
+	Var.ClNI.on	 = pCClNI*0;
+	Var.ClNI.on(ClNI,:)	 = onClNI;
+	Var.ClNI.start	 = pCClNI*0;
+	Var.ClNI.start(ClNI,:)	 = stClNI;
+
 end
 
 % Eolico
 if lenWN > 0
-	Var.Gen.Dfig.pWi = permute(full(pWi), [1 3 2]);
-	Var.Gen.Dfig.qWi = permute(full(qWi), [1 3 2]);
-	
-	Var.Gen.Dfig.Branch.P = zeros(5,5, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Branch.P(1,2,:,:) = PdfigIE';
-	Var.Gen.Dfig.Branch.P(1,3,:,:) = PdfigIF';
-	Var.Gen.Dfig.Branch.P(4,5,:,:) = PdfigOR';
-	
-	Var.Gen.Dfig.Branch.Q = zeros(5,5, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Branch.Q(1,2,:,:) = QdfigIE';
-	Var.Gen.Dfig.Branch.Q(1,3,:,:) = QdfigIF';
-	Var.Gen.Dfig.Branch.Q(4,5,:,:) = QdfigOR';
-	
-	Var.Gen.Dfig.Branch.l = zeros(5,5, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Branch.l(1,2,:,:) = ldfigIE';
-	Var.Gen.Dfig.Branch.l(1,3,:,:) = ldfigIF';
-	Var.Gen.Dfig.Branch.l(4,5,:,:) = ldfigOR';
-	
-	Var.Gen.Dfig.Bus.v = zeros(5,1, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Bus.v(1,1,:,:) = vdfigI';
-	Var.Gen.Dfig.Bus.v(2,1,:,:) = vdfigE';
-	Var.Gen.Dfig.Bus.v(3,1,:,:) = vdfigF';
-	Var.Gen.Dfig.Bus.v(4,1,:,:) = vdfigO';
-	Var.Gen.Dfig.Bus.v(5,1,:,:) = vdfigR';
-	
-	Var.Gen.Dfig.Bus.pC = zeros(5,1, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Bus.pC(3,1,:,:) = pCdfigF';
 
-	Var.Gen.Dfig.Bus.qC = zeros(5,1, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Bus.qC(3,1,:,:) = qCdfigF';
+	Var.Gen.Dfig.pWi = pWi;
+	Var.Gen.Dfig.qWi = qWi;
 
-	Var.Gen.Dfig.Bus.pg = zeros(5,1, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Bus.pg(2,1,:,:) = pWigdfigE';
-	Var.Gen.Dfig.Bus.pg(5,1,:,:) = pWigdfigR';
+	Var.Gen.Dfig.Branch.PIE = PdfigIE';
+	Var.Gen.Dfig.Branch.PIF = PdfigIF';
+	Var.Gen.Dfig.Branch.POR = PdfigOR';
 
-	Var.Gen.Dfig.Bus.qg = zeros(5,1, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Bus.qg(2,1,:,:) = qWigdfigE';
-	Var.Gen.Dfig.Bus.qg(5,1,:,:) = qWigdfigR';
+	Var.Gen.Dfig.Branch.QIE = QdfigIE';
+	Var.Gen.Dfig.Branch.QIF = QdfigIF';
+	Var.Gen.Dfig.Branch.QOR = QdfigOR';
 
-	Var.Gen.Dfig.Bus.s = zeros(5,1, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Bus.s(3,1,:,:) = sdfigF';
-	Var.Gen.Dfig.Bus.s(5,1,:,:) = sdfigR';
+	Var.Gen.Dfig.Branch.lIE = ldfigIE';
+	Var.Gen.Dfig.Branch.lIF = ldfigIF';
+	Var.Gen.Dfig.Branch.lOR = ldfigOR';
 
-	Var.Gen.Dfig.Bus.xi = zeros(5,1, Config.Etapas,lenWN);
-	Var.Gen.Dfig.Bus.xi(3,1,:,:) = xidfigF';
-	Var.Gen.Dfig.Bus.xi(5,1,:,:) = xidfigR';
-	
-	Var.Gen.Dfig.Bus.n_Wnd = permute(n_Wnd, [4 3 2 1]);
-	Var.Gen.Dfig.Bus.P_mecWnd = permute(P_mecWnd, [4 3 2 1]);
-	
+	Var.Gen.Dfig.Bus.vI = vdfigI';
+	Var.Gen.Dfig.Bus.vE = vdfigE';
+	Var.Gen.Dfig.Bus.vF = vdfigF';
+	Var.Gen.Dfig.Bus.vO = vdfigO';
+	Var.Gen.Dfig.Bus.vR = vdfigR';
 
-else
-	Var.Gen.Dfig.pWi = zeros(n,1,Config.Etapas);
-	Var.Gen.Dfig.qWi = zeros(n,1,Config.Etapas);
+	Var.Gen.Dfig.Bus.pCF = pCdfigF';
+
+	Var.Gen.Dfig.Bus.qCF = qCdfigF';
+
+	Var.Gen.Dfig.Bus.pgE = pWigdfigE';
+	Var.Gen.Dfig.Bus.pgR = pWigdfigR';
+
+	Var.Gen.Dfig.Bus.qgE = qWigdfigE';
+	Var.Gen.Dfig.Bus.qgR = qWigdfigR';
+
+	Var.Gen.Dfig.Bus.sF = sdfigF';
+	Var.Gen.Dfig.Bus.sR = sdfigR';
+
+	Var.Gen.Dfig.Bus.xiF = xidfigF';
+	Var.Gen.Dfig.Bus.xiR = xidfigR';
+
+	Var.Gen.Dfig.Bus.n_Wnd = n_Wnd;
+	Var.Gen.Dfig.Bus.P_mecWnd = P_mecWnd;
+
 end
 
 % Fotovoltaico
 if nPv > 0
-	Var.Gen.Pv.pPv = pPv;
-	Var.Gen.Pv.qPv = qPv;
-    Var.Gen.Pv.s = pPv*0;
-    Var.Gen.Pv.s(Pv,:) = sPv;
-    Var.Gen.Pv.xi = pPv*0;
-    Var.Gen.Pv.xi(Pv,:) = xiPv;
-
-	Var.Gen.Pv.pPv = permute(full(Var.Gen.Pv.pPv), [1 3 2]);
-	Var.Gen.Pv.qPv = permute(full(Var.Gen.Pv.qPv), [1 3 2]);
-	Var.Gen.Pv.s = permute(full(Var.Gen.Pv.s), [1 3 2]);
-	Var.Gen.Pv.xi = permute(full(Var.Gen.Pv.xi), [1 3 2]);
+	Var.Gen.Pv.pPv	 = pPv;
+	Var.Gen.Pv.qPv	 = qPv;
+	Var.Gen.Pv.s	 = pPv*0;
+	Var.Gen.Pv.s(Pv,:)	 = sPv;
+	Var.Gen.Pv.xi	 = pPv*0;
+	Var.Gen.Pv.xi(Pv,:)	 = xiPv;
 end
 
-
-opt = fopt_expr;
+status	 = cvx_status;
+opt	 = fopt_expr;
 cvx_clear
 end
