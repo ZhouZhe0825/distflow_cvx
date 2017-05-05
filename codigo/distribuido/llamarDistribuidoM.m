@@ -66,6 +66,7 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	end
 	tdistr = tic;
 	nodos = size(Data.Red.Branch.T,1);
+    arcos = size(DataM.Red.Branch.lTop,1);
 	DistrInfo.Bus = [1:nodos];
 	DistrInfo.Gama = Config.Distr.gama_ini;
 
@@ -110,8 +111,6 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	Ev.opt_Alm	 = zeros(Config.Distr.TopIT*2+1+1,3);
 	Ev.opt_OpSis	 = zeros(Config.Distr.TopIT*2+1+1,3);
 	Ev.opt	 = zeros(Config.Distr.TopIT*2+1,3);
-	Ev.DifP	 = zeros(nodos,Config.Etapas,Config.Distr.TopIT*2+1);
-	Ev.DifQ	 = zeros(nodos,Config.Etapas,Config.Distr.TopIT*2+1);
 	Ev.errP	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.errQ	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.mu	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * 0;
@@ -122,6 +121,9 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	Ev.qG	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.pC	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.qC	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
+	Ev.v	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
+	Ev.l	 = ones(arcos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
+	Ev.h_l	 = ones(arcos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.errMu	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.errLambda	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 
@@ -172,8 +174,11 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
     
     delete(wbSol);
 	Ev.opt = Ev.opt((1:it2+it-1),:);
-	Ev.DifP = Ev.DifP(:,:,(1:it2+it-1));
-	Ev.DifQ = Ev.DifQ(:,:,(1:it2+it-1));
+	Ev.difP = Ev.difP(:,:,(1:it2+it-1));
+	Ev.difQ = Ev.difQ(:,:,(1:it2+it-1));
+	Ev.v	 = Ev.v(:,:,(1:it2+it-1));
+	Ev.l	 = Ev.l(:,:,(1:it2+it-1));
+	Ev.h_l	 = Ev.h_l(:,:,(1:it2+it-1));
 
 	Ev.mu = Ev.mu(:,:,(1:it2+it-1));
 	Ev.lambda = Ev.lambda(:,:,(1:it2+it-1));
@@ -327,21 +332,6 @@ function [conv, Ev] = converg(Ev, it, tolConv)
 	end
 end
 
-function [A] = expandMat(V)
-	A = zeros(size(V,1), 1, size(V,2));
-	A(:,1,:) = V;
-end
-
-function [B] = contractMat(V)
-	B = zeros(size(V,1), size(V,3));
-	B(:,:) = V(:,1,:);
-end
-
-function [A] = expandMatApp(V)
-	A = zeros(size(V,1), 1, size(V,2), size(V,3));
-	A(:,1,:,:) = V;
-end
-
 function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_it, Fixed, DistrInfo, Config, Data, Ev, wbSol)
 	conv = false;
 	it = 1;
@@ -352,6 +342,9 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
 	AlmNodes = find(Data.St.Bat.I == 1);
 	OpSisNodes = (1:size(Data.Red.Branch.T,1));
 	ClNINodes = find(Data.ClNI.I == 1);
+
+    VertI = VertIMat(Data.Red.Branch.T);
+
 
 	while ~conv && it <= Config.Distr.TopIT
 
@@ -385,6 +378,11 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
 		Ev.qG(:,:,print_it) = DistrInfo.Adm.qG;
 		Ev.pC(:,:,print_it) = DistrInfo.Adm.pC;
 		Ev.qC(:,:,print_it) = DistrInfo.Adm.qC;
+		Ev.v(:,:,print_it) = Var_curr.Red.Bus.v;
+		Ev.l(:,:,print_it) = Var_curr.Red.Branch.l;
+
+        Ev.h_l(:,:,print_it) = ((Var_curr.Red.Branch.P.^2 + Var_curr.Red.Branch.Q.^2)./(VertI*Var_curr.Red.Bus.v))./Var_curr.Red.Branch.l;
+
 
 		Ev.mu(:,:,print_it) = DistrInfo.mu;
 		Ev.lambda(:,:,print_it) = DistrInfo.lambda;
