@@ -464,17 +464,17 @@ cvx_begin
 		% Modelo de Red interna
         vdfigI == v(indWn,:);
 
-        PdfigIE == Data.Gen.DFIG.rIE .* ldfigIE - pWigdfigE;
-        PdfigIF == Data.Gen.DFIG.rIF .* ldfigIF + pCdfigF;
-        PdfigOR == Data.Gen.DFIG.rOR .* ldfigOR - pWigdfigR;
+        PdfigIE == Data.Gen.DFIG.rIE(indWn,:) .* ldfigIE - pWigdfigE;
+        PdfigIF == Data.Gen.DFIG.rIF(indWn,:) .* ldfigIF + pCdfigF;
+        PdfigOR == Data.Gen.DFIG.rOR(indWn,:) .* ldfigOR - pWigdfigR;
 
-        QdfigIE == Data.Gen.DFIG.xIE .* ldfigIE - qWigdfigE;
-        QdfigIF == Data.Gen.DFIG.xIF .* ldfigIF - qCdfigF;
-        QdfigOR == n_Wnd .* Data.Gen.DFIG.xOR .* ldfigOR - qWigdfigR;
+        QdfigIE == Data.Gen.DFIG.xIE(indWn,:) .* ldfigIE - qWigdfigE;
+        QdfigIF == Data.Gen.DFIG.xIF(indWn,:) .* ldfigIF - qCdfigF;
+        QdfigOR == n_Wnd(indWn,:) .* Data.Gen.DFIG.xOR(indWn,:) .* ldfigOR - qWigdfigR;
 
-        vdfigE == vdfigI - 2*(Data.Gen.DFIG.rIE .* PdfigIE + Data.Gen.DFIG.xIE .* QdfigIE) + (Data.Gen.DFIG.rIE.^2 + Data.Gen.DFIG.xIE.^2) .* ldfigIE;
-        vdfigF == vdfigI - 2*(Data.Gen.DFIG.rIF .* PdfigIF + Data.Gen.DFIG.xIF .* QdfigIF) + (Data.Gen.DFIG.rIF.^2 + Data.Gen.DFIG.xIF.^2) .* ldfigIF;
-        vdfigR == vdfigO - 2*(Data.Gen.DFIG.rOR .* PdfigOR + n_Wnd.*Data.Gen.DFIG.xOR .* QdfigOR) + (Data.Gen.DFIG.rOR.^2 + n_Wnd.^2 .* Data.Gen.DFIG.xOR.^2) .* ldfigOR;
+        vdfigE == vdfigI - 2*(Data.Gen.DFIG.rIE(indWn,:) .* PdfigIE + Data.Gen.DFIG.xIE(indWn,:) .* QdfigIE) + (Data.Gen.DFIG.rIE(indWn,:).^2 + Data.Gen.DFIG.xIE(indWn,:).^2) .* ldfigIE;
+        vdfigF == vdfigI - 2*(Data.Gen.DFIG.rIF(indWn,:) .* PdfigIF + Data.Gen.DFIG.xIF(indWn,:) .* QdfigIF) + (Data.Gen.DFIG.rIF(indWn,:).^2 + Data.Gen.DFIG.xIF(indWn,:).^2) .* ldfigIF;
+        vdfigR == vdfigO - 2*(Data.Gen.DFIG.rOR(indWn,:) .* PdfigOR + n_Wnd(indWn,:).*Data.Gen.DFIG.xOR(indWn,:) .* QdfigOR) + (Data.Gen.DFIG.rOR(indWn,:).^2 + n_Wnd(indWn,:).^2 .* Data.Gen.DFIG.xOR(indWn,:).^2) .* ldfigOR;
 
 		% Corriente
         lQoLdfigIE(:,:,1) = 2*PdfigIE;
@@ -492,28 +492,28 @@ cvx_begin
         lQoLdfigOR(:,:,3) = ldfigOR - vdfigO;
         norms(lQoLdfigOR,2,3) - (ldfigOR + vdfigO) <= 0;
 		
-        Data.Gen.DFIG.lTopIF >= ldfigIF;
-        Data.Gen.DFIG.lTopOR >= ldfigOR;
+        Data.Gen.DFIG.lTopIF(indWn,:) >= ldfigIF;
+        Data.Gen.DFIG.lTopOR(indWn,:) >= ldfigOR;
 
-        (Data.Gen.DFIG.lTopIE - ldfigIE).*P_mecSigWnd >= 0;
-        (Data.Gen.DFIG.sTopF - sdfigF).*P_mecSigWnd >= 0;
-        (Data.Gen.DFIG.sTopR - sdfigR).*P_mecSigWnd >= 0;
-        (Data.Gen.DFIG.xiTopF - xidfigF).*P_mecSigWnd >= 0;
-        (Data.Gen.DFIG.xiTopR - xidfigR).*P_mecSigWnd >= 0;
+		(Data.Gen.DFIG.lTopIE(indWn,:)).*P_mecSigWnd(indWn,:) - ldfigIE >= 0;
+		(Data.Gen.DFIG.sTopF(indWn,:)).* P_mecSigWnd(indWn,:) - sdfigF >= 0;
+		(Data.Gen.DFIG.sTopR(indWn,:)) .* P_mecSigWnd(indWn,:) - sdfigR >= 0;
+		(Data.Gen.DFIG.xiTopF(indWn,:)).*P_mecSigWnd(indWn,:) - xidfigF >= 0;
+		(Data.Gen.DFIG.xiTopR(indWn,:)).*P_mecSigWnd(indWn,:) - xidfigR >= 0;
 
-        vdfigE >= Data.Gen.DFIG.uLowE.^2;
-        vdfigE <= Data.Gen.DFIG.uTopE.^2;
+        vdfigE >= Data.Gen.DFIG.uLowE(indWn,:).^2;
+        vdfigE <= Data.Gen.DFIG.uTopE(indWn,:).^2;
 
-        vdfigF >= Data.Gen.DFIG.uLowF.^2;
-        vdfigF <= Data.Gen.DFIG.uTopF.^2;
+        vdfigF >= Data.Gen.DFIG.uLowF(indWn,:).^2;
+        vdfigF <= Data.Gen.DFIG.uTopF(indWn,:).^2;
 
         PQNormdfigIE(:,:,1) = PdfigIE;
 		PQNormdfigIE(:,:,2) = QdfigIE;
-        Data.Gen.DFIG.PQnormIE >= norms(PQNormdfigIE,2,3);
+        Data.Gen.DFIG.PQnormIE(indWn,:) >= norms(PQNormdfigIE,2,3);
 
         PQNormdfigIF(:,:,1) = PdfigIF;
 		PQNormdfigIF(:,:,2) = QdfigIF;
-        Data.Gen.DFIG.PQnormIF >= norms(PQNormdfigIF,2,3);
+        Data.Gen.DFIG.PQnormIF(indWn,:) >= norms(PQNormdfigIF,2,3);
 
         sNormdfigF(:,:,1) = pCdfigF;
 		sNormdfigF(:,:,2) = qCdfigF;
@@ -526,12 +526,12 @@ cvx_begin
         xidfigR >= PdfigOR.^2 + QdfigOR.^2;
 
         pCdfigF == PdfigOR ...
-            + (Data.Gen.DFIG.cvR .* sdfigR + Data.Gen.DFIG.crR .* xidfigR) ...
-            + (Data.Gen.DFIG.cvF .* sdfigF + Data.Gen.DFIG.crF .* xidfigF);
-        vdfigR == n_Wnd.^2*(Data.Gen.DFIG.N_er^2).*vdfigE;
-        pWigdfigE == P_mecWnd ./ (1-n_Wnd); %TODO es igual
-        pWigdfigR == -n_Wnd.*pWigdfigE;
-        qWigdfigR == n_Wnd.*(qWigdfigE);
+            + (Data.Gen.DFIG.cvR(indWn,:) .* sdfigR + Data.Gen.DFIG.crR(indWn,:) .* xidfigR) ...
+            + (Data.Gen.DFIG.cvF(indWn,:) .* sdfigF + Data.Gen.DFIG.crF(indWn,:) .* xidfigF);
+        vdfigR == n_Wnd(indWn,:).^2.*(repmat(Data.Gen.DFIG.N_er(indWn,:).^2,[1 Config.Etapas])).*vdfigE;
+        pWigdfigE == P_mecWnd(indWn,:) ./ (1-n_Wnd(indWn,:)); %TODO es igual
+        pWigdfigR == -n_Wnd(indWn,:).*pWigdfigE;
+        qWigdfigR == n_Wnd(indWn,:).*(qWigdfigE);
 	
 	else
         pWi == 0;
@@ -647,39 +647,63 @@ if lenWN > 0
 	Var.Gen.Dfig.pWi = pWi;
 	Var.Gen.Dfig.qWi = qWi;
 
-	Var.Gen.Dfig.Branch.PIE = PdfigIE';
-	Var.Gen.Dfig.Branch.PIF = PdfigIF';
-	Var.Gen.Dfig.Branch.POR = PdfigOR';
+	Var.Gen.Dfig.Branch.PIE = pWi*0;
+	Var.Gen.Dfig.Branch.PIE(indWn,:) = PdfigIE;
+	Var.Gen.Dfig.Branch.PIF = pWi*0;
+	Var.Gen.Dfig.Branch.PIF(indWn,:) = PdfigIF;
+	Var.Gen.Dfig.Branch.POR = pWi*0;
+	Var.Gen.Dfig.Branch.POR(indWn,:) = PdfigOR;
 
-	Var.Gen.Dfig.Branch.QIE = QdfigIE';
-	Var.Gen.Dfig.Branch.QIF = QdfigIF';
-	Var.Gen.Dfig.Branch.QOR = QdfigOR';
+	Var.Gen.Dfig.Branch.QIE = pWi*0;
+	Var.Gen.Dfig.Branch.QIE(indWn,:) = QdfigIE;
+	Var.Gen.Dfig.Branch.QIF = pWi*0;
+	Var.Gen.Dfig.Branch.QIF(indWn,:) = QdfigIF;
+	Var.Gen.Dfig.Branch.QOR = pWi*0;
+	Var.Gen.Dfig.Branch.QOR(indWn,:) = QdfigOR;
 
-	Var.Gen.Dfig.Branch.lIE = ldfigIE';
-	Var.Gen.Dfig.Branch.lIF = ldfigIF';
-	Var.Gen.Dfig.Branch.lOR = ldfigOR';
+	Var.Gen.Dfig.Branch.lIE = pWi*0;
+	Var.Gen.Dfig.Branch.lIE(indWn,:) = ldfigIE;
+	Var.Gen.Dfig.Branch.lIF = pWi*0;
+	Var.Gen.Dfig.Branch.lIF(indWn,:) = ldfigIF;
+	Var.Gen.Dfig.Branch.lOR = pWi*0;
+	Var.Gen.Dfig.Branch.lOR(indWn,:) = ldfigOR;
 
-	Var.Gen.Dfig.Bus.vI = vdfigI';
-	Var.Gen.Dfig.Bus.vE = vdfigE';
-	Var.Gen.Dfig.Bus.vF = vdfigF';
-	Var.Gen.Dfig.Bus.vO = vdfigO';
-	Var.Gen.Dfig.Bus.vR = vdfigR';
+	Var.Gen.Dfig.Bus.vI = pWi*0;
+	Var.Gen.Dfig.Bus.vI(indWn,:) = vdfigI;
+	Var.Gen.Dfig.Bus.vE = pWi*0;
+	Var.Gen.Dfig.Bus.vE(indWn,:) = vdfigE;
+	Var.Gen.Dfig.Bus.vF = pWi*0;
+	Var.Gen.Dfig.Bus.vF(indWn,:) = vdfigF;
+	Var.Gen.Dfig.Bus.vO = pWi*0;
+	Var.Gen.Dfig.Bus.vO(indWn,:) = vdfigO;
+	Var.Gen.Dfig.Bus.vR = pWi*0;
+	Var.Gen.Dfig.Bus.vR(indWn,:) = vdfigR;
 
-	Var.Gen.Dfig.Bus.pCF = pCdfigF';
+	Var.Gen.Dfig.Bus.pCF = pWi*0;
+	Var.Gen.Dfig.Bus.pCF(indWn,:) = pCdfigF;
 
-	Var.Gen.Dfig.Bus.qCF = qCdfigF';
+	Var.Gen.Dfig.Bus.qCF = pWi*0;
+	Var.Gen.Dfig.Bus.qCF(indWn,:) = qCdfigF;
 
-	Var.Gen.Dfig.Bus.pgE = pWigdfigE';
-	Var.Gen.Dfig.Bus.pgR = pWigdfigR';
+	Var.Gen.Dfig.Bus.pgE = pWi*0;
+	Var.Gen.Dfig.Bus.pgE(indWn,:) = pWigdfigE;
+	Var.Gen.Dfig.Bus.pgR = pWi*0;
+	Var.Gen.Dfig.Bus.pgR(indWn,:) = pWigdfigR;
 
-	Var.Gen.Dfig.Bus.qgE = qWigdfigE';
-	Var.Gen.Dfig.Bus.qgR = qWigdfigR';
+	Var.Gen.Dfig.Bus.qgE = pWi*0;
+	Var.Gen.Dfig.Bus.qgE(indWn,:) = qWigdfigE;
+	Var.Gen.Dfig.Bus.qgR = pWi*0;
+	Var.Gen.Dfig.Bus.qgR(indWn,:) = qWigdfigR;
 
-	Var.Gen.Dfig.Bus.sF = sdfigF';
-	Var.Gen.Dfig.Bus.sR = sdfigR';
+	Var.Gen.Dfig.Bus.sF = pWi*0;
+	Var.Gen.Dfig.Bus.sF(indWn,:) = sdfigF;
+	Var.Gen.Dfig.Bus.sR = pWi*0;
+	Var.Gen.Dfig.Bus.sR(indWn,:) = sdfigR;
 
-	Var.Gen.Dfig.Bus.xiF = xidfigF';
-	Var.Gen.Dfig.Bus.xiR = xidfigR';
+	Var.Gen.Dfig.Bus.xiF = pWi*0;
+	Var.Gen.Dfig.Bus.xiF(indWn,:) = xidfigF;
+	Var.Gen.Dfig.Bus.xiR = pWi*0;
+	Var.Gen.Dfig.Bus.xiR(indWn,:) = xidfigR;
 
 	Var.Gen.Dfig.Bus.n_Wnd = n_Wnd;
 	Var.Gen.Dfig.Bus.P_mecWnd = P_mecWnd;

@@ -81,52 +81,41 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 			VarNxN.Gen.Dfig.pWi	 = permute(full(	VarM.Gen.Dfig.pWi	), [1 3 2]);
 			VarNxN.Gen.Dfig.qWi	 = permute(full(	VarM.Gen.Dfig.qWi	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Branch.P	 = zeros(5,5, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Branch.P(1,2,:,:)	 = 	VarM.Gen.Dfig.Branch.PIE	;
-			VarNxN.Gen.Dfig.Branch.P(1,3,:,:)	 = 	VarM.Gen.Dfig.Branch.PIF	;
-			VarNxN.Gen.Dfig.Branch.P(4,5,:,:)	 = 	VarM.Gen.Dfig.Branch.POR	;
+			VarNxN.Gen.Dfig.Branch.PIE	 = permute(full(	VarM.Gen.Dfig.Branch.PIE	), [1 3 2]);
+			VarNxN.Gen.Dfig.Branch.PIF	 = permute(full(	VarM.Gen.Dfig.Branch.PIF	), [1 3 2]);
+			VarNxN.Gen.Dfig.Branch.POR	 = permute(full(	VarM.Gen.Dfig.Branch.POR	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Branch.Q	 = zeros(5,5, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Branch.Q(1,2,:,:)	 = 	VarM.Gen.Dfig.Branch.QIE	;
-			VarNxN.Gen.Dfig.Branch.Q(1,3,:,:)	 = 	VarM.Gen.Dfig.Branch.QIF	;
-			VarNxN.Gen.Dfig.Branch.Q(4,5,:,:)	 = 	VarM.Gen.Dfig.Branch.QOR	;
+			VarNxN.Gen.Dfig.Branch.QIE	 = permute(full(	VarM.Gen.Dfig.Branch.QIE	), [1 3 2]);
+			VarNxN.Gen.Dfig.Branch.QIF	 = permute(full(	VarM.Gen.Dfig.Branch.QIF	), [1 3 2]);
+			VarNxN.Gen.Dfig.Branch.QOR	 = permute(full(	VarM.Gen.Dfig.Branch.QOR	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Branch.l	 = zeros(5,5, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Branch.l(1,2,:,:)	 = 	VarM.Gen.Dfig.Branch.lIE	;
-			VarNxN.Gen.Dfig.Branch.l(1,3,:,:)	 = 	VarM.Gen.Dfig.Branch.lIF	;
-			VarNxN.Gen.Dfig.Branch.l(4,5,:,:)	 = 	VarM.Gen.Dfig.Branch.lOR	;
+			VarNxN.Gen.Dfig.Branch.lIE	 = permute(full(	VarM.Gen.Dfig.Branch.lIE	), [1 3 2]);
+			VarNxN.Gen.Dfig.Branch.lIF	 = permute(full(	VarM.Gen.Dfig.Branch.lIF	), [1 3 2]);
+			VarNxN.Gen.Dfig.Branch.lOR	 = permute(full(	VarM.Gen.Dfig.Branch.lOR	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Bus.v	 = zeros(5,1, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Bus.v(1,1,:,:)	 = 	VarM.Gen.Dfig.Bus.vI	;
-			VarNxN.Gen.Dfig.Bus.v(2,1,:,:)	 = 	VarM.Gen.Dfig.Bus.vE	;
-			VarNxN.Gen.Dfig.Bus.v(3,1,:,:)	 = 	VarM.Gen.Dfig.Bus.vF	;
-			VarNxN.Gen.Dfig.Bus.v(4,1,:,:)	 = 	VarM.Gen.Dfig.Bus.vO	;
-			VarNxN.Gen.Dfig.Bus.v(5,1,:,:)	 = 	VarM.Gen.Dfig.Bus.vR	;
+			VarNxN.Gen.Dfig.Bus.pCF	 = permute(full(	VarM.Gen.Dfig.Bus.pCF	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.qCF	 = permute(full(	VarM.Gen.Dfig.Bus.qCF	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Bus.pC	 = zeros(5,1, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Bus.pC(3,1,:,:)	 = 	VarM.Gen.Dfig.Bus.pCF	;
+			VarNxN.Gen.Dfig.Bus.pgE	 = permute(full(	VarM.Gen.Dfig.Bus.pgE	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.qgE	 = permute(full(	VarM.Gen.Dfig.Bus.qgE	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Bus.qC	 = zeros(5,1, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Bus.qC(3,1,:,:)	 = 	VarM.Gen.Dfig.Bus.qCF	;
+			VarNxN.Gen.Dfig.Bus.pgR	 = permute(full(	VarM.Gen.Dfig.Bus.pgR	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.qgR	 = permute(full(	VarM.Gen.Dfig.Bus.qgR	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Bus.pg	 = zeros(5,1, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Bus.pg(2,1,:,:)	 = 	VarM.Gen.Dfig.Bus.pgE	;
-			VarNxN.Gen.Dfig.Bus.pg(5,1,:,:)	 = 	VarM.Gen.Dfig.Bus.pgR	;
+			VarNxN.Gen.Dfig.Bus.sF	 = permute(full(	VarM.Gen.Dfig.Bus.sF	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.sR	 = permute(full(	VarM.Gen.Dfig.Bus.sR	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Bus.qg	 = zeros(5,1, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Bus.qg(2,1,:,:)	 = 	VarM.Gen.Dfig.Bus.qgE	;
-			VarNxN.Gen.Dfig.Bus.qg(5,1,:,:)	 = 	VarM.Gen.Dfig.Bus.qgR	;
+			VarNxN.Gen.Dfig.Bus.xiF	 = permute(full(	VarM.Gen.Dfig.Bus.xiF	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.xiR	 = permute(full(	VarM.Gen.Dfig.Bus.xiR	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Bus.s	 = zeros(5,1, Etapas,lenWN);
-			VarNxN.Gen.Dfig.Bus.s(3,1,:,:)	 = 	VarM.Gen.Dfig.Bus.sF	;
-			VarNxN.Gen.Dfig.Bus.s(5,1,:,:)	 = 	VarM.Gen.Dfig.Bus.sR	;
+			VarNxN.Gen.Dfig.Bus.vI	 = permute(full(	VarM.Gen.Dfig.Bus.vI	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.vE	 = permute(full(	VarM.Gen.Dfig.Bus.vE	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.vF	 = permute(full(	VarM.Gen.Dfig.Bus.vF	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.vO	 = permute(full(	VarM.Gen.Dfig.Bus.vO	), [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.vR	 = permute(full(	VarM.Gen.Dfig.Bus.vR	), [1 3 2]);
 
-			VarNxN.Gen.Dfig.Bus.xi	 = zeros(5,1, Etapas,lenWN)
-			VarNxN.Gen.Dfig.Bus.xi(3,1,:,:)	 = 	VarM.Gen.Dfig.Bus.xiF	;
-			VarNxN.Gen.Dfig.Bus.xi(5,1,:,:)	 = 	VarM.Gen.Dfig.Bus.xiR	;
-
-			VarNxN.Gen.Dfig.Bus.n_Wnd	 = permute(	VarM.Gen.Dfig.Bus.n_Wnd	, [4 3 2 1]);
-			VarNxN.Gen.Dfig.Bus.P_mecWnd	 = permute(	VarM.Gen.Dfig.Bus.P_mecWnd	, [4 3 2 1]);
+			VarNxN.Gen.Dfig.Bus.n_Wnd	 = permute(	VarM.Gen.Dfig.Bus.n_Wnd	, [1 3 2]);
+			VarNxN.Gen.Dfig.Bus.P_mecWnd	 = permute(	VarM.Gen.Dfig.Bus.P_mecWnd	, [1 3 2]);
 		end
 	end
 

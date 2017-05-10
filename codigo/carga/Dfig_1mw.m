@@ -143,43 +143,43 @@ Data.Gen.DFIG.lambda_opt = lambda_opt;
 
 Data.Gen.DFIG.uLow = Data.Gen.DFIG.cr;
 Data.Gen.DFIG.uTop = ones(size(Data.Gen.DFIG.uLow))*3;
-Data.Gen.DFIG.PQnorm = zeros(size(Data.Gen.DFIG.lTop));
+% Data.Gen.DFIG.PQnorm = zeros(size(Data.Gen.DFIG.lTop));
 
 % for wnd = 1:lenWN
-	Data.Gen.DFIG.r(1,2,:) = RW_12;
-    Data.Gen.DFIG.r(1,3,:) = RW_13;
-    Data.Gen.DFIG.r(4,5,:) = RW_45;
+	Data.Gen.DFIG.rIE = RW_12;
+    Data.Gen.DFIG.rIF = RW_13;
+    Data.Gen.DFIG.rOR = RW_45;
 
-	Data.Gen.DFIG.x(1,2,:) = Data.Gen.DFIG.w*LW_12;
-    Data.Gen.DFIG.x(1,3,:) = Data.Gen.DFIG.w*LW_13;
-    Data.Gen.DFIG.x(4,5,:) = Data.Gen.DFIG.w*LW_45;
+	Data.Gen.DFIG.xIE = Data.Gen.DFIG.w*LW_12;
+    Data.Gen.DFIG.xIF = Data.Gen.DFIG.w*LW_13;
+    Data.Gen.DFIG.xOR = Data.Gen.DFIG.w*LW_45;
 
-	Data.Gen.DFIG.lTop(1,2,:) = lW_12_Top;
-    Data.Gen.DFIG.lTop(1,3,:) = lW_13_Top;
-    Data.Gen.DFIG.lTop(4,5,:) = lW_45_Top;
+	Data.Gen.DFIG.lTopIE = lW_12_Top;
+    Data.Gen.DFIG.lTopIF = lW_13_Top;
+    Data.Gen.DFIG.lTopOR = lW_45_Top;
 
-	Data.Gen.DFIG.cv(3,1,:) = cvW_3;
-    Data.Gen.DFIG.cv(5,1,:) = cvW_5;
+	Data.Gen.DFIG.cvF = cvW_3;
+    Data.Gen.DFIG.cvR = cvW_5;
 
-	Data.Gen.DFIG.cr(3,1,:) = crW_3;
-    Data.Gen.DFIG.cr(5,1,:) = crW_5;
+	Data.Gen.DFIG.crF = crW_3;
+    Data.Gen.DFIG.crR = crW_5;
 
-	Data.Gen.DFIG.uLow(2,:) = uLow_2;
-    Data.Gen.DFIG.uLow(3,:) = uLow_3;
+	Data.Gen.DFIG.uLowE = uLow_2;
+    Data.Gen.DFIG.uLowF = uLow_3;
 
-    Data.Gen.DFIG.uTop(2,:) = uTop_2;
-	Data.Gen.DFIG.uTop(3,:) = uTop_3;
+    Data.Gen.DFIG.uTopE = uTop_2;
+	Data.Gen.DFIG.uTopF = uTop_3;
 
-	Data.Gen.DFIG.sTop(3,1,:) = sW_3_Top;
-    Data.Gen.DFIG.sTop(5,1,:) = sW_5_Top;
+	Data.Gen.DFIG.sTopF = sW_3_Top;
+    Data.Gen.DFIG.sTopR = sW_5_Top;
 
-	Data.Gen.DFIG.xiTop(3,1,:) = sW_3_Top^2;
-    Data.Gen.DFIG.xiTop(5,1,:) = sW_5_Top^2;
+	Data.Gen.DFIG.xiTopF = sW_3_Top^2;
+    Data.Gen.DFIG.xiTopR = sW_5_Top^2;
 
 	Data.Gen.DFIG.Ig(3,1,:) = 1;
 
-    Data.Gen.DFIG.PQnorm(1,2,:) = PQnorm_2;
-    Data.Gen.DFIG.PQnorm(1,3,:) = PQnorm_3;
+    Data.Gen.DFIG.PQnormIE = PQnorm_2;
+    Data.Gen.DFIG.PQnormIF = PQnorm_3;
     
     
 %     ini = 5*(wnd-1)+1;

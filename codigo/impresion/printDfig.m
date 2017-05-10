@@ -7,7 +7,7 @@ function printDfig(Header, Var, Data, outFilename)
 
 			for i = 1:length(nodDfig)
 				nod = nodDfig(i);
-				Etapas = size(Var.Gen.Dfig.Branch.P,3);
+				Etapas = size(Var.Gen.Dfig.Branch.PIE,3);
 
 				pWi = zeros(1,Etapas);
 				qWi = zeros(1,Etapas);
@@ -17,7 +17,7 @@ function printDfig(Header, Var, Data, outFilename)
 				r_l = zeros(3,Etapas);
 				h_l = zeros(3,Etapas);
 				pg = zeros(2,Etapas);
-				qg = zeros(3,Etapas);
+				qg = zeros(2,Etapas);
 				pC = zeros(1,Etapas);
 				qC = zeros(1,Etapas); 
 				s = zeros(2,Etapas);
@@ -33,48 +33,62 @@ function printDfig(Header, Var, Data, outFilename)
 				pWi(:,:) = squeeze(Var.Gen.Dfig.pWi(nod,1,:));
 				qWi(:,:) = squeeze(Var.Gen.Dfig.qWi(nod,1,:));
 
-				P(1,:) = squeeze(Var.Gen.Dfig.Branch.P(1,2,:,i));
-				P(2,:) = squeeze(Var.Gen.Dfig.Branch.P(1,3,:,i));
-				P(3,:) = squeeze(Var.Gen.Dfig.Branch.P(4,5,:,i));
+				P(1,:) = squeeze(Var.Gen.Dfig.Branch.PIE(nod,:,:));
+				P(2,:) = squeeze(Var.Gen.Dfig.Branch.PIF(nod,:,:));
+				P(3,:) = squeeze(Var.Gen.Dfig.Branch.POR(nod,:,:));
 
-				Q(1,:) = squeeze(Var.Gen.Dfig.Branch.Q(1,2,:,i));
-				Q(2,:) = squeeze(Var.Gen.Dfig.Branch.Q(1,3,:,i));
-				Q(3,:) = squeeze(Var.Gen.Dfig.Branch.Q(4,5,:,i));
+				Q(1,:) = squeeze(Var.Gen.Dfig.Branch.QIE(nod,:,:));
+				Q(2,:) = squeeze(Var.Gen.Dfig.Branch.QIF(nod,:,:));
+				Q(3,:) = squeeze(Var.Gen.Dfig.Branch.QOR(nod,:,:));
 
-				l(1,:) = squeeze(Var.Gen.Dfig.Branch.l(1,2,:,i));
-				l(2,:) = squeeze(Var.Gen.Dfig.Branch.l(1,3,:,i));
-				l(3,:) = squeeze(Var.Gen.Dfig.Branch.l(4,5,:,i));
+				l(1,:) = squeeze(Var.Gen.Dfig.Branch.lIE(nod,:,:));
+				l(2,:) = squeeze(Var.Gen.Dfig.Branch.lIF(nod,:,:));
+				l(3,:) = squeeze(Var.Gen.Dfig.Branch.lOR(nod,:,:));
 
-				r_l(1,:) = squeeze(Data.Gen.DFIG.r(1,2,:,i))'.*l(1,:);
-				r_l(2,:) = squeeze(Data.Gen.DFIG.r(1,3,:,i))'.*l(2,:);
-				r_l(3,:) = squeeze(Data.Gen.DFIG.r(4,5,:,i))'.*l(3,:);
+				r_l(1,:) = squeeze(Data.Gen.DFIG.rIE(nod,:,:))'.*l(1,:);
+				r_l(2,:) = squeeze(Data.Gen.DFIG.rIF(nod,:,:))'.*l(2,:);
+				r_l(3,:) = squeeze(Data.Gen.DFIG.rOR(nod,:,:))'.*l(3,:);
 
-				v(:,:) =  squeeze(Var.Gen.Dfig.Bus.v(:,1,:,i));
+				v(1,:) =  squeeze(Var.Gen.Dfig.Bus.vI(nod,:,:));
+				v(2,:) =  squeeze(Var.Gen.Dfig.Bus.vE(nod,:,:));
+				v(3,:) =  squeeze(Var.Gen.Dfig.Bus.vF(nod,:,:));
+				v(4,:) =  squeeze(Var.Gen.Dfig.Bus.vO(nod,:,:));
+				v(5,:) =  squeeze(Var.Gen.Dfig.Bus.vR(nod,:,:));
 				
 				h_l = ((P.^2 + Q.^2) ./ v([1 1 4],:)) ./ (l+eps);
 				
-				pg(:,:) = squeeze(Var.Gen.Dfig.Bus.pg([2 5],1,:,i));
-				qg(:,:) = squeeze(Var.Gen.Dfig.Bus.qg([2 3 5],1,:,i));
-				pC(:,:) = squeeze(Var.Gen.Dfig.Bus.pC(3,1,:,i));
-				qC(:,:) = squeeze(Var.Gen.Dfig.Bus.qC(3,1,:,i));
+				pg(1,:) = squeeze(Var.Gen.Dfig.Bus.pgE(nod,:,:));
+				pg(2,:) = squeeze(Var.Gen.Dfig.Bus.pgR(nod,:,:));
+
+				qg(1,:) = squeeze(Var.Gen.Dfig.Bus.qgE(nod,:,:));
+				qg(2,:) = squeeze(Var.Gen.Dfig.Bus.qgR(nod,:,:));
+
+				pC(:,:) = squeeze(Var.Gen.Dfig.Bus.pCF(nod,:,:));
+				qC(:,:) = squeeze(Var.Gen.Dfig.Bus.qCF(nod,:,:));
 				
-				s(:,:) =  squeeze(Var.Gen.Dfig.Bus.s([3 5],1,:,i));
+				s(1,:) =  squeeze(Var.Gen.Dfig.Bus.sF(nod,:,:));
+				s(2,:) =  squeeze(Var.Gen.Dfig.Bus.sR(nod,:,:));
+
 				h_s(1,:) = sqrt(pC.^2 + qC.^2)./s(1,:); 
 				h_s(2,:) = sqrt(P(3,:).^2 + Q(3,:).^2)./s(2,:);
-				cv_s(1,:) = squeeze(Data.Gen.DFIG.cv(3,1,:,i))'.*s(1,:);
-				cv_s(2,:) = squeeze(Data.Gen.DFIG.cv(5,1,:,i))'.*s(2,:);
+
+				cv_s(1,:) = squeeze(Data.Gen.DFIG.cvF(nod,:,:))'.*s(1,:);
+				cv_s(2,:) = squeeze(Data.Gen.DFIG.cvR(nod,:,:))'.*s(2,:);
 				
-				xi(:,:) = squeeze(Var.Gen.Dfig.Bus.xi([3 5],1,:,i));
+				xi(1,:) = squeeze(Var.Gen.Dfig.Bus.xiF(nod,:,:));
+				xi(2,:) = squeeze(Var.Gen.Dfig.Bus.xiR(nod,:,:));
+
 				h_xi(1,:) = (pC.^2 + qC.^2)./xi(1,:); 
 				h_xi(2,:) = (P(3,:).^2 + Q(3,:).^2)./xi(2,:); 
-				cr_xi(1,:) = squeeze(Data.Gen.DFIG.cr(3,1,:,i))'.*xi(1,:);
-				cr_xi(2,:) = squeeze(Data.Gen.DFIG.cr(5,1,:,i))'.*xi(2,:);
 
-				n_ = squeeze(Var.Gen.Dfig.Bus.n_Wnd(1,1,:,i))';
-				P_mec = squeeze(Var.Gen.Dfig.Bus.P_mecWnd(1,1,:,i))';
+				cr_xi(1,:) = squeeze(Data.Gen.DFIG.crF(nod,:,:))'.*xi(1,:);
+				cr_xi(2,:) = squeeze(Data.Gen.DFIG.crR(nod,:,:))'.*xi(2,:);
+
+				n_ = squeeze(Var.Gen.Dfig.Bus.n_Wnd(nod,:,:))';
+				P_mec = squeeze(Var.Gen.Dfig.Bus.P_mecWnd(nod,:,:))';
 
 				
-				rowHeader = cell(43,1);		
+				rowHeader = cell(42,1);		
 				rowHeader{	1	} = 'pWi';
 				rowHeader{	2	} = 'qWi';
 				rowHeader{	3	} = 'P_1-2';
@@ -95,29 +109,28 @@ function printDfig(Header, Var, Data, outFilename)
 				rowHeader{	18	} = 'pg_2';
 				rowHeader{	19	} = 'pg_5';
 				rowHeader{	20	} = 'qg_2';
-				rowHeader{	21	} = 'qg_3';
-				rowHeader{	22	} = 'qg_5';
-				rowHeader{	23	} = 'pC_3';
-				rowHeader{	24	} = 'qC_3';
-				rowHeader{	25	} = 's_3';
-				rowHeader{	26	} = 's_5';
-				rowHeader{	27	} = 'Holg s_3';
-				rowHeader{	28	} = 'Holg s_5';
-				rowHeader{	29	} = 'cv_3 s_3';
-				rowHeader{	30	} = 'cv_5 s_5';
-				rowHeader{	31	} = 'xi_3';
-				rowHeader{	32	} = 'xi_5';
-				rowHeader{	33	} = 'Holg xi_3';
-				rowHeader{	34	} = 'Holg xi_5';
-				rowHeader{	35	} = 'cr_3 xi_3';
-				rowHeader{	36	} = 'cr_5 xi_5';
-				rowHeader{	37	} = 'v_1';
-				rowHeader{	38	} = 'v_2';
-				rowHeader{	39	} = 'v_3';
-				rowHeader{	40	} = 'v_4';
-				rowHeader{	41	} = 'v_5';
-				rowHeader{	42	} = 'n_';
-				rowHeader{	43	} = 'P_mec';
+				rowHeader{	21	} = 'qg_5';
+				rowHeader{	22	} = 'pC_3';
+				rowHeader{	23	} = 'qC_3';
+				rowHeader{	24	} = 's_3';
+				rowHeader{	25	} = 's_5';
+				rowHeader{	26	} = 'Holg s_3';
+				rowHeader{	27	} = 'Holg s_5';
+				rowHeader{	28	} = 'cv_3 s_3';
+				rowHeader{	29	} = 'cv_5 s_5';
+				rowHeader{	30	} = 'xi_3';
+				rowHeader{	31	} = 'xi_5';
+				rowHeader{	32	} = 'Holg xi_3';
+				rowHeader{	33	} = 'Holg xi_5';
+				rowHeader{	34	} = 'cr_3 xi_3';
+				rowHeader{	35	} = 'cr_5 xi_5';
+				rowHeader{	36	} = 'v_1';
+				rowHeader{	37	} = 'v_2';
+				rowHeader{	38	} = 'v_3';
+				rowHeader{	39	} = 'v_4';
+				rowHeader{	40	} = 'v_5';
+				rowHeader{	41	} = 'n_';
+				rowHeader{	42	} = 'P_mec';
 
 				Dfig = [pWi;qWi;P;Q;l;h_l;r_l;pg;qg;pC;qC;s;h_s;cv_s;xi;h_xi;cr_xi;v;n_;P_mec];
 				sheetName = ['Dfig_' num2str(nod)];

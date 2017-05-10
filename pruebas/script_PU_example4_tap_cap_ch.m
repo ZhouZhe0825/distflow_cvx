@@ -112,16 +112,19 @@ fileCurvaCarga = 'carga_PU_example.xlsx';
 
 %% Generadores
 % Eolicos
+[vVel, Data.temp] = cargarVelocidadVientoInvierno();
+
+[Data] = cargaDatosEolicos(Data,  vVel);
+
 [Data] = Dfig_200kw(Data, NodosGeneracionEolica);
 
-[vVel, Data.temp] = cargarVelocidadVientoInvierno();
 
 [Data.Gen.DFIG.P_mec, Data.Gen.DFIG.n_]= calculoPotenciaEolica(vVel, ...
 	Data.Gen.DFIG.vmm, Data.Gen.DFIG.vm, Data.Gen.DFIG.vM, Data.Gen.DFIG.vMM, ...
 	Data.Gen.DFIG.Omega, Data.Gen.DFIG.G, Data.Gen.DFIG.P_nMec, Data.Gen.DFIG.Np, ...
 	Data.Gen.DFIG.R_, Data.Gen.DFIG.rho, Data.Gen.DFIG.ws, Data.Gen.DFIG.c1, ...
 	Data.Gen.DFIG.c2, Data.Gen.DFIG.c3, Data.Gen.DFIG.c4, Data.Gen.DFIG.c5, ...
-	Data.Gen.DFIG.c6, Data.Gen.DFIG.c7, Data.Gen.DFIG.lambda_opt);
+	Data.Gen.DFIG.c6, Data.Gen.DFIG.c7, Data.Gen.DFIG.lambda_opt, NodosGeneracionEolica);
 
 % Fotovoltaicos
 

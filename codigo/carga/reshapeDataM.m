@@ -73,31 +73,31 @@ function [DataM] = reshapeDataM(Data, Config)
 
 
 	if lenWn > 0
-		DataM.Gen.DFIG.crF = DataM.Gen.DFIG.cr(3,:)' * one;
-		DataM.Gen.DFIG.crR = DataM.Gen.DFIG.cr(5,:)' * one;
-		DataM.Gen.DFIG.cvF = DataM.Gen.DFIG.cv(3,:)' * one;
-		DataM.Gen.DFIG.cvR = DataM.Gen.DFIG.cv(5,:)' * one;
-		DataM.Gen.DFIG.lTopIE = squeeze(DataM.Gen.DFIG.lTop(1,2,:)) * one;
-		DataM.Gen.DFIG.lTopIF = squeeze(DataM.Gen.DFIG.lTop(1,3,:)) * one;
-		DataM.Gen.DFIG.lTopOR = squeeze(DataM.Gen.DFIG.lTop(4,5,:)) * one;
-		DataM.Gen.DFIG.n_	 = 	repmat(DataM.Gen.DFIG.n_(:,Et), [lenWn 1]);
-		DataM.Gen.DFIG.P_mec	 = 	repmat(DataM.Gen.DFIG.P_mec(:,Et), [lenWn 1]);
-		DataM.Gen.DFIG.PQnormIE = squeeze(DataM.Gen.DFIG.PQnorm(1,2,:)) * one;
-		DataM.Gen.DFIG.PQnormIF = squeeze(DataM.Gen.DFIG.PQnorm(1,3,:)) * one;
-		DataM.Gen.DFIG.rIE = squeeze(DataM.Gen.DFIG.r(1,2,:)) * one;
-		DataM.Gen.DFIG.rIF = squeeze(DataM.Gen.DFIG.r(1,3,:)) * one;
-		DataM.Gen.DFIG.rOR = squeeze(DataM.Gen.DFIG.r(4,5,:)) * one;
-		DataM.Gen.DFIG.sTopF = DataM.Gen.DFIG.sTop(3,:)' * one;
-		DataM.Gen.DFIG.sTopR = DataM.Gen.DFIG.sTop(5,:)' * one;
-		DataM.Gen.DFIG.xIE = squeeze(DataM.Gen.DFIG.x(1,2,:)) * one;
-		DataM.Gen.DFIG.xIF = squeeze(DataM.Gen.DFIG.x(1,3,:)) * one;
-		DataM.Gen.DFIG.xOR = squeeze(DataM.Gen.DFIG.x(4,5,:)) * one;
-		DataM.Gen.DFIG.xiTopF = DataM.Gen.DFIG.xiTop(3,:)' * one;
-		DataM.Gen.DFIG.xiTopR = DataM.Gen.DFIG.xiTop(5,:)' * one;
-		DataM.Gen.DFIG.uLowE = DataM.Gen.DFIG.uLow(2,:)' * one;
-		DataM.Gen.DFIG.uLowF = DataM.Gen.DFIG.uLow(3,:)' * one;
-		DataM.Gen.DFIG.uTopE = DataM.Gen.DFIG.uTop(2,:)' * one;
-		DataM.Gen.DFIG.uTopF = DataM.Gen.DFIG.uTop(3,:)' * one;
+		DataM.Gen.DFIG.crF = DataM.Gen.DFIG.crF(:,(1:lenEt));
+		DataM.Gen.DFIG.crR = DataM.Gen.DFIG.crR(:,(1:lenEt));
+		DataM.Gen.DFIG.cvF = DataM.Gen.DFIG.cvF(:,(1:lenEt));
+		DataM.Gen.DFIG.cvR = DataM.Gen.DFIG.cvR(:,(1:lenEt));
+		DataM.Gen.DFIG.lTopIE = DataM.Gen.DFIG.lTopIE(:,(1:lenEt));
+		DataM.Gen.DFIG.lTopIF = DataM.Gen.DFIG.lTopIF(:,(1:lenEt));
+		DataM.Gen.DFIG.lTopOR = DataM.Gen.DFIG.lTopOR(:,(1:lenEt));
+		DataM.Gen.DFIG.n_	 = 	DataM.Gen.DFIG.n_(:,(1:lenEt));
+		DataM.Gen.DFIG.P_mec	 = 	DataM.Gen.DFIG.P_mec(:,(1:lenEt));
+		DataM.Gen.DFIG.PQnormIE = DataM.Gen.DFIG.PQnormIE(:,(1:lenEt));
+		DataM.Gen.DFIG.PQnormIF = DataM.Gen.DFIG.PQnormIF(:,(1:lenEt));
+		DataM.Gen.DFIG.rIE = DataM.Gen.DFIG.rIE(:,(1:lenEt));
+		DataM.Gen.DFIG.rIF = DataM.Gen.DFIG.rIF(:,(1:lenEt));
+		DataM.Gen.DFIG.rOR = DataM.Gen.DFIG.rOR(:,(1:lenEt));
+		DataM.Gen.DFIG.sTopF = DataM.Gen.DFIG.sTopF(:,(1:lenEt));
+		DataM.Gen.DFIG.sTopR = DataM.Gen.DFIG.sTopR(:,(1:lenEt));
+		DataM.Gen.DFIG.xIE = DataM.Gen.DFIG.xIE(:,(1:lenEt));
+		DataM.Gen.DFIG.xIF = DataM.Gen.DFIG.xIF(:,(1:lenEt));
+		DataM.Gen.DFIG.xOR = DataM.Gen.DFIG.xOR(:,(1:lenEt));
+		DataM.Gen.DFIG.xiTopF = DataM.Gen.DFIG.xiTopF(:,(1:lenEt));
+		DataM.Gen.DFIG.xiTopR = DataM.Gen.DFIG.xiTopR(:,(1:lenEt));
+		DataM.Gen.DFIG.uLowE = DataM.Gen.DFIG.uLowE(:,(1:lenEt));
+		DataM.Gen.DFIG.uLowF = DataM.Gen.DFIG.uLowF(:,(1:lenEt));
+		DataM.Gen.DFIG.uTopE = DataM.Gen.DFIG.uTopE(:,(1:lenEt));
+		DataM.Gen.DFIG.uTopF = DataM.Gen.DFIG.uTopF(:,(1:lenEt));
 	end
 
 	DataM.Gen.Pv.cr = DataM.Gen.Pv.cr * one;

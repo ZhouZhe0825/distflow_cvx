@@ -58,16 +58,9 @@ indWn = find(matOverTime(Data.Gen.DFIG.I) == 1);
 NindWn = setdiff((1:n),indWn);
 lenWN = length(indWn);
 
-P_mecSigWnd = zeros(1, 1, size(Data.Gen.DFIG.P_mec,3), lenWN);
-P_mecWnd = zeros(1, 1, size(Data.Gen.DFIG.P_mec,3), lenWN);
-n_Wnd = zeros(1, 1, size(Data.Gen.DFIG.P_mec,3), lenWN);
-TgWnd = zeros(size(Data.Gen.DFIG.Tg,1), size(Data.Gen.DFIG.Tg,2), size(Data.Gen.DFIG.Tg,3), lenWN);
-for wnd = 1:lenWN
-    P_mecSigWnd(1,1,:,wnd) = abs(sign(Data.Gen.DFIG.P_mec(indWn(wnd),1,:)));
-    P_mecWnd(1,1,:,wnd) = Data.Gen.DFIG.P_mec(indWn(wnd),1,:);
-    n_Wnd(1,1,:,wnd) = Data.Gen.DFIG.n_(indWn(wnd),1,:);
-    TgWnd(:,:,:,wnd) = Data.Gen.DFIG.Tg;
-end
+P_mecSigWnd = abs(sign(Data.Gen.DFIG.P_mec));
+P_mecWnd = Data.Gen.DFIG.P_mec;
+n_Wnd = Data.Gen.DFIG.n_;
 
 % Fotovoltaico
 nodPv = find(matOverTime(Data.Gen.Pv.I) == 1);
@@ -393,24 +386,49 @@ cvx_begin
 		% Variables de generadores eolico
 		variable cqWi(n,1, Config.Etapas);
 
-		variable PDFIG(5,5, Config.Etapas,lenWN);
-		variable lDFIG(5,5, Config.Etapas,lenWN);
-		variable pWigDFIG(5,1, Config.Etapas,lenWN);
-		variable QDFIG(5,5, Config.Etapas,lenWN);
-		variable qWigDFIG(5,1, Config.Etapas,lenWN);
-		variable pCDFIG(5,1, Config.Etapas,lenWN);
-		variable qCDFIG(5,1, Config.Etapas,lenWN);
-		variable vDFIG(5,1, Config.Etapas,lenWN);
-		variable sDFIG(5,1, Config.Etapas,lenWN);
-		variable xiDFIG(5,1, Config.Etapas,lenWN);
+		variable PdfigIE(n,1,Config.Etapas);
+		variable PdfigIF(n,1,Config.Etapas);
+		variable PdfigOR(n,1,Config.Etapas);
 
-		expression lQoLDFIG(5, 5, Config.Etapas, lenWN,3);
+		variable QdfigIE(n,1,Config.Etapas);
+		variable QdfigIF(n,1,Config.Etapas);
+		variable QdfigOR(n,1,Config.Etapas);
 
-		expression sNormdfigF(1,1,Config.Etapas,lenWN,2);
-		expression sNormdfigR(1,1,Config.Etapas,lenWN,2);
+		variable ldfigIE(n,1,Config.Etapas);
+		variable ldfigIF(n,1,Config.Etapas);
+		variable ldfigOR(n,1,Config.Etapas);
+		
+		variable vdfigI(n,1,Config.Etapas);
+		variable vdfigE(n,1,Config.Etapas);
+		variable vdfigF(n,1,Config.Etapas);
+		variable vdfigO(n,1,Config.Etapas);
+		variable vdfigR(n,1,Config.Etapas);
+		
+		variable pWigdfigE(n,1,Config.Etapas);
+		variable pWigdfigR(n,1,Config.Etapas);
+		
+		variable qWigdfigE(n,1,Config.Etapas);
+		variable qWigdfigR(n,1,Config.Etapas);
+		
+		variable pCdfigF(n,1,Config.Etapas);
+		variable qCdfigF(n,1,Config.Etapas);
+		
+		variable sdfigF(n,1,Config.Etapas);
+		variable sdfigR(n,1,Config.Etapas);
 
-		expression PQNormdfigIE(1,1,Config.Etapas,lenWN,2);
-		expression PQNormdfigIF(1,1,Config.Etapas,lenWN,2);
+		variable xidfigF(n,1,Config.Etapas);
+		variable xidfigR(n,1,Config.Etapas);
+
+		expression lQoLdfigIE(n,1,Config.Etapas,3);
+		expression lQoLdfigIF(n,1,Config.Etapas,3);
+		expression lQoLdfigOR(n,1,Config.Etapas,3);
+
+		expression sNormdfigF(n,1,Config.Etapas,2);
+		expression sNormdfigR(n,1,Config.Etapas,2);
+
+		expression PQNormdfigIE(n,1,Config.Etapas,2);
+		expression PQNormdfigIF(n,1,Config.Etapas,2);
+
 
         tfopt_expr = tfopt_expr ...
 			+ sum(Data.Cost.rhopWi .* pWi) ...
@@ -420,78 +438,84 @@ cvx_begin
         cqWi >= - Data.Cost.rhomqWi .* qWi;
         cqWi >= Data.Cost.rhoMqWi .* qWi;
 
-        pWi(indWn,1,:) == - permute(PDFIG(1,2,:,:) + PDFIG(1,3,:,:), [4 1 3 2]);
-        qWi(indWn,1,:) == - permute(QDFIG(1,2,:,:) + QDFIG(1,3,:,:), [4 1 3 2]);
+        pWi(indWn,1,:) == - (PdfigIE(indWn,1,:) + PdfigIF(indWn,1,:));
+        qWi(indWn,1,:) == - (QdfigIE(indWn,1,:) + QdfigIF(indWn,1,:));
 
         pWi(NindWn,1,:) == 0;
         qWi(NindWn,1,:) == 0;
         
-        
 		% Modelo de Red interna
-        permute(vDFIG(1,1,:,:), [4 1 3 2]) == v(indWn,1,:);
+        vdfigI(indWn,1,:) == v(indWn,1,:);
+        vdfigI(NindWn,1,:) == 0;
 
-        PDFIG(1,2,:,:) == Data.Gen.DFIG.r(1,2,:,:) .* lDFIG(1,2,:,:) - pWigDFIG(2,1,:,:);
-        PDFIG(1,3,:,:) == Data.Gen.DFIG.r(1,3,:,:) .* lDFIG(1,3,:,:) + pCDFIG(3,1,:,:);
-        PDFIG(4,5,:,:) == Data.Gen.DFIG.r(4,5,:,:) .* lDFIG(4,5,:,:) - pWigDFIG(5,1,:,:);
+        PdfigIE == Data.Gen.DFIG.rIE .* ldfigIE - pWigdfigE;
+        PdfigIF == Data.Gen.DFIG.rIF .* ldfigIF + pCdfigF;
+        PdfigOR == Data.Gen.DFIG.rOR .* ldfigOR - pWigdfigR;
 
-        QDFIG(1,2,:,:) == Data.Gen.DFIG.x(1,2,:,:) .* lDFIG(1,2,:,:) - qWigDFIG(2,1,:,:);
-        QDFIG(1,3,:,:) == Data.Gen.DFIG.x(1,3,:,:) .* lDFIG(1,3,:,:) - qCDFIG(3,1,:,:);
-        QDFIG(4,5,:,:) == n_Wnd(1,1,:,:) .* Data.Gen.DFIG.x(4,5,:,:) .* lDFIG(4,5,:,:) - qWigDFIG(5,1,:,:);
+        QdfigIE == Data.Gen.DFIG.xIE .* ldfigIE - qWigdfigE;
+        QdfigIF == Data.Gen.DFIG.xIF .* ldfigIF - qCdfigF;
+        QdfigOR == n_Wnd .* Data.Gen.DFIG.xOR .* ldfigOR - qWigdfigR;
 
-        vDFIG(2,1,:,:) == vDFIG(1,1,:,:) - 2*(Data.Gen.DFIG.r(1,2,:,:) .* PDFIG(1,2,:,:) + Data.Gen.DFIG.x(1,2,:,:) .* QDFIG(1,2,:,:)) + (Data.Gen.DFIG.r(1,2,:,:).^2 + Data.Gen.DFIG.x(1,2,:,:).^2) .* lDFIG(1,2,:,:);
-        vDFIG(3,1,:,:) == vDFIG(1,1,:,:) - 2*(Data.Gen.DFIG.r(1,3,:,:) .* PDFIG(1,3,:,:) + Data.Gen.DFIG.x(1,3,:,:) .* QDFIG(1,3,:,:)) + (Data.Gen.DFIG.r(1,3,:,:).^2 + Data.Gen.DFIG.x(1,3,:,:).^2) .* lDFIG(1,3,:,:);
-        vDFIG(5,1,:,:) == vDFIG(4,1,:,:) - 2*(Data.Gen.DFIG.r(4,5,:,:) .* PDFIG(4,5,:,:) + n_Wnd(1,1,:,:).*Data.Gen.DFIG.x(4,5,:,:) .* QDFIG(4,5,:,:)) + (Data.Gen.DFIG.r(4,5,:,:).^2 + n_Wnd(1,1,:,:).^2 .* Data.Gen.DFIG.x(4,5,:,:).^2) .* lDFIG(4,5,:,:);
+        vdfigE == vdfigI - 2*(Data.Gen.DFIG.rIE .* PdfigIE + Data.Gen.DFIG.xIE .* QdfigIE) + (Data.Gen.DFIG.rIE.^2 + Data.Gen.DFIG.xIE.^2) .* ldfigIE;
+        vdfigF == vdfigI - 2*(Data.Gen.DFIG.rIF .* PdfigIF + Data.Gen.DFIG.xIF .* QdfigIF) + (Data.Gen.DFIG.rIF.^2 + Data.Gen.DFIG.xIF.^2) .* ldfigIF;
+        vdfigR == vdfigO - 2*(Data.Gen.DFIG.rOR .* PdfigOR + n_Wnd.*Data.Gen.DFIG.xOR .* QdfigOR) + (Data.Gen.DFIG.rOR.^2 + n_Wnd.^2 .* Data.Gen.DFIG.xOR.^2) .* ldfigOR;
 
 		% Corriente
-        lQoLDFIG(:,:,:,:,1) = 2*PDFIG.*TgWnd;
-        lQoLDFIG(:,:,:,:,2) = 2*QDFIG.*TgWnd;
-        lQoLDFIG(:,:,:,:,3) = (lDFIG - repmat(vDFIG, [1 5 1 1])).*TgWnd;
-        norms(lQoLDFIG,2,5) - (lDFIG + repmat(vDFIG, [1 5 1 1])).*TgWnd <= 0;
+        lQoLdfigIE(:,:,:,1) = 2*PdfigIE;
+        lQoLdfigIE(:,:,:,2) = 2*QdfigIE;
+        lQoLdfigIE(:,:,:,3) = ldfigIE - vdfigI;
+        norms(lQoLdfigIE,2,4) - (ldfigIE + vdfigI) <= 0;
 
-        Data.Gen.DFIG.lTop(1,3,:,:) >= lDFIG(1,3,:,:);
-        Data.Gen.DFIG.lTop(4,5,:,:) >= lDFIG(4,5,:,:);
+        lQoLdfigIF(:,:,:,1) = 2*PdfigIF;
+        lQoLdfigIF(:,:,:,2) = 2*QdfigIF;
+        lQoLdfigIF(:,:,:,3) = ldfigIF - vdfigI;
+        norms(lQoLdfigIF,2,4) - (ldfigIF + vdfigI) <= 0;
 
-        (Data.Gen.DFIG.lTop(1,2,:,:) - lDFIG(1,2,:,:)).*P_mecSigWnd(1,1,:,:) >= 0;
-        (Data.Gen.DFIG.sTop(3,1,:,:) - sDFIG(3,1,:,:)).*P_mecSigWnd(1,1,:,:) >= 0;
-        (Data.Gen.DFIG.sTop(5,1,:,:) - sDFIG(5,1,:,:)).*P_mecSigWnd(1,1,:,:) >= 0;
-        (Data.Gen.DFIG.xiTop(3,1,:,:) - xiDFIG(3,1,:,:)).*P_mecSigWnd(1,1,:,:) >= 0;
-        (Data.Gen.DFIG.xiTop(5,1,:,:) - xiDFIG(5,1,:,:)).*P_mecSigWnd(1,1,:,:) >= 0;
+        lQoLdfigOR(:,:,:,1) = 2*PdfigOR;
+        lQoLdfigOR(:,:,:,2) = 2*QdfigOR;
+        lQoLdfigOR(:,:,:,3) = ldfigOR - vdfigO;
+        norms(lQoLdfigOR,2,4) - (ldfigOR + vdfigO) <= 0;
+		
+        Data.Gen.DFIG.lTopIF >= ldfigIF;
+        Data.Gen.DFIG.lTopOR >= ldfigOR;
 
-        vDFIG(2,1,:,:) >= Data.Gen.DFIG.uLow(2,1,:,:).^2;
-        vDFIG(2,1,:,:) <= Data.Gen.DFIG.uTop(2,1,:,:).^2;
+		(Data.Gen.DFIG.lTopIE).*P_mecSigWnd - ldfigIE >= 0;
+		(Data.Gen.DFIG.sTopF).*P_mecSigWnd - sdfigF >= 0;
+		(Data.Gen.DFIG.sTopR).*P_mecSigWnd - sdfigR >= 0;
+		(Data.Gen.DFIG.xiTopF).*P_mecSigWnd - xidfigF >= 0;
+		(Data.Gen.DFIG.xiTopR).*P_mecSigWnd - xidfigR >= 0;
 
-        vDFIG(3,1,:,:) >= Data.Gen.DFIG.uLow(3,1,:,:).^2;
-        vDFIG(3,1,:,:) <= Data.Gen.DFIG.uTop(3,1,:,:).^2;
+        vdfigE >= Data.Gen.DFIG.uLowE.^2;
+        vdfigE <= Data.Gen.DFIG.uTopE.^2;
 
-        PQNormdfigIE(:,:,:,:,1) = PDFIG(1,2,:,:);
-		PQNormdfigIE(:,:,:,:,2) = QDFIG(1,2,:,:);
-        Data.Gen.DFIG.PQnorm(1,2,:,:) >= norms(PQNormdfigIE,2,5);
+        vdfigF >= Data.Gen.DFIG.uLowF.^2;
+        vdfigF <= Data.Gen.DFIG.uTopF.^2;
 
-        PQNormdfigIF(:,:,:,:,1) = PDFIG(1,3,:,:);
-		PQNormdfigIF(:,:,:,:,2) = QDFIG(1,3,:,:);
-        Data.Gen.DFIG.PQnorm(1,3,:,:) >= norms(PQNormdfigIF,2,5);
+        PQNormdfigIE(:,:,:,1) = PdfigIE;
+		PQNormdfigIE(:,:,:,2) = QdfigIE;
+        Data.Gen.DFIG.PQnormIE >= norms(PQNormdfigIE,2,4);
 
-        sNormdfigF(:,:,:,:,1) = pCDFIG(3,1,:,:);
-		sNormdfigF(:,:,:,:,2) = qCDFIG(3,1,:,:);
-        sDFIG(3,1,:,:) >= norms(sNormdfigF,2,5);
-        xiDFIG(3,1,:,:) >= pCDFIG(3,1,:,:).^2 + qCDFIG(3,1,:,:).^2;
+        PQNormdfigIF(:,:,:,1) = PdfigIF;
+		PQNormdfigIF(:,:,:,2) = QdfigIF;
+        Data.Gen.DFIG.PQnormIF >= norms(PQNormdfigIF,2,4);
 
-        sNormdfigF(:,:,:,:,1) = PDFIG(4,5,:,:);
-		sNormdfigF(:,:,:,:,2) = QDFIG(4,5,:,:);
-        sDFIG(5,1,:,:) >= norms(sNormdfigF,2,5);
-        xiDFIG(5,1,:,:) >= PDFIG(4,5,:,:).^2 + QDFIG(4,5,:,:).^2;
+        sNormdfigF(:,:,:,1) = pCdfigF;
+		sNormdfigF(:,:,:,2) = qCdfigF;
+        sdfigF >= norms(sNormdfigF,2,4);
+        xidfigF >= pCdfigF.^2 + qCdfigF.^2;
 
-        pCDFIG(3,1,:,:) == PDFIG(4,5,:,:) ...
-            + (Data.Gen.DFIG.cv(5,1,:,:) .* sDFIG(5,1,:,:) + Data.Gen.DFIG.cr(5,1,:,:) .* xiDFIG(5,1,:,:)) ...
-            + (Data.Gen.DFIG.cv(3,1,:,:) .* sDFIG(3,1,:,:) + Data.Gen.DFIG.cr(3,1,:,:) .* xiDFIG(3,1,:,:));
-        vDFIG(5,1,:,:) == n_Wnd(1,1,:,:).^2*(Data.Gen.DFIG.N_er^2).*vDFIG(2,1,:,:);
-        pWigDFIG(2,1,:,:) == P_mecWnd(1,1,:,:) ./ (1-n_Wnd(1,1,:,:)); %TODO es igual
-        pWigDFIG(5,1,:,:) == -n_Wnd(1,1,:,:).*pWigDFIG(2,1,:,:);
-        qWigDFIG(5,1,:,:) == n_Wnd(1,1,:,:).*(qWigDFIG(2,1,:,:));
+        sNormdfigR(:,:,:,1) = PdfigOR;
+		sNormdfigR(:,:,:,2) = QdfigOR;
+        sdfigR >= norms(sNormdfigR,2,4);
+        xidfigR >= PdfigOR.^2 + QdfigOR.^2;
 
-		(1-TgWnd).*PDFIG == 0;
-		(1-TgWnd).*lDFIG == 0;
-		(1-TgWnd).*QDFIG == 0;
+        pCdfigF == PdfigOR ...
+            + (Data.Gen.DFIG.cvR .* sdfigR + Data.Gen.DFIG.crR .* xidfigR) ...
+            + (Data.Gen.DFIG.cvF .* sdfigF + Data.Gen.DFIG.crF .* xidfigF);
+        vdfigR == n_Wnd.^2.*(Data.Gen.DFIG.N_er.^2).*vdfigE;
+        pWigdfigE == P_mecWnd ./ (1-n_Wnd); %TODO es igual
+        pWigdfigR == -n_Wnd.*pWigdfigE;
+        qWigdfigR == n_Wnd.*(qWigdfigE);
 	
 	else
         pWi == 0;
@@ -596,18 +620,43 @@ end
 if (lenWN > 0)
 	Var.Gen.Dfig.pWi = pWi;
 	Var.Gen.Dfig.qWi = qWi;
-	Var.Gen.Dfig.Branch.P = PDFIG;
-	Var.Gen.Dfig.Branch.Q = QDFIG;
-	Var.Gen.Dfig.Branch.l = lDFIG;
-	Var.Gen.Dfig.Bus.v = vDFIG;
-	Var.Gen.Dfig.Bus.pC = pCDFIG;
-	Var.Gen.Dfig.Bus.qC = qCDFIG;
-	Var.Gen.Dfig.Bus.pg = pWigDFIG;
-	Var.Gen.Dfig.Bus.qg = qWigDFIG;
-	Var.Gen.Dfig.Bus.s = sDFIG;
-	Var.Gen.Dfig.Bus.xi = xiDFIG;
-    Var.Gen.Dfig.Bus.n_Wnd = n_Wnd;
-    Var.Gen.Dfig.Bus.P_mecWnd = P_mecWnd;
+
+	Var.Gen.Dfig.Branch.PIE = PdfigIE;
+	Var.Gen.Dfig.Branch.PIF = PdfigIF;
+	Var.Gen.Dfig.Branch.POR = PdfigOR;
+
+	Var.Gen.Dfig.Branch.QIE = QdfigIE;
+	Var.Gen.Dfig.Branch.QIF = QdfigIF;
+	Var.Gen.Dfig.Branch.QOR = QdfigOR;
+
+	Var.Gen.Dfig.Branch.lIE = ldfigIE;
+	Var.Gen.Dfig.Branch.lIF = ldfigIF;
+	Var.Gen.Dfig.Branch.lOR = ldfigOR;
+
+	Var.Gen.Dfig.Bus.vI = vdfigI;
+	Var.Gen.Dfig.Bus.vE = vdfigE;
+	Var.Gen.Dfig.Bus.vF = vdfigF;
+	Var.Gen.Dfig.Bus.vO = vdfigO;
+	Var.Gen.Dfig.Bus.vR = vdfigR;
+
+	Var.Gen.Dfig.Bus.pCF = pCdfigF;
+
+	Var.Gen.Dfig.Bus.qCF = qCdfigF;
+
+	Var.Gen.Dfig.Bus.pgE = pWigdfigE;
+	Var.Gen.Dfig.Bus.pgR = pWigdfigR;
+
+	Var.Gen.Dfig.Bus.qgE = qWigdfigE;
+	Var.Gen.Dfig.Bus.qgR = qWigdfigR;
+
+	Var.Gen.Dfig.Bus.sF = sdfigF;
+	Var.Gen.Dfig.Bus.sR = sdfigR;
+
+	Var.Gen.Dfig.Bus.xiF = xidfigF;
+	Var.Gen.Dfig.Bus.xiR = xidfigR;
+
+	Var.Gen.Dfig.Bus.n_Wnd = n_Wnd;
+	Var.Gen.Dfig.Bus.P_mecWnd = P_mecWnd;
 end
 
 % Fotovoltaico
