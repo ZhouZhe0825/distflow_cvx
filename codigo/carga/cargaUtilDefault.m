@@ -1,4 +1,4 @@
-function [Data] = cargarUtilDefault(Data, tgPhi, betaT, utilCarg, Cargas, App)
+function [Data] = cargaUtilDefault(Data, tgPhi, betaT, utilCarg, Cargas, App)
 
 Data.Util.tgPhi = tgPhi;
 

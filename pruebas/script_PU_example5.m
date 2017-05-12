@@ -114,7 +114,7 @@ fileCurvaCarga = 'carga_PU_example.xlsx';
 % Eolicos
 [vVel, Data.temp] = cargarVelocidadVientoInvierno();
 
-[Data] = cargaDatosEolicos(Data,  vVel);
+[Data] = cargaEolicosDefault(Data,  vVel);
 
 [Data] = Dfig_200kw(Data, NodosGeneracionEolica);
 
@@ -130,6 +130,8 @@ fileCurvaCarga = 'carga_PU_example.xlsx';
 
 [Data] = PvGen_sm(Data,NodosGeneracionSolar);
 
+[Data.Gen.Pv.pPvg] = calculoPotenciaSolar(Data.temp, Data.Gen.Pv.pPvg_low, Data.Gen.Pv.pPvg_top);
+
 %% Utilidad
 
 % Configuraciones manuales
@@ -140,22 +142,15 @@ utilCarg(2) = .375;
 utilCarg(3) = .625;
 utilCarg(4) = .875;
 
-[Data] = cargarUtilDefault(Data, tgPhi, betaT, utilCarg, Cargas, App);
+[Data] = cargaUtilDefault(Data, tgPhi, betaT, utilCarg, Cargas, App);
 
 %% Parametros de Storage
 
-% Configuraciones manuales
-
 % Aire Acondicionado
-Data.dt = .25;
-Data.St.AC.I = zeros(size(Data.Red.Branch.T,1),1);
-Data.St.AC.tempLow = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * 19;
-Data.St.AC.tempTop = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * 25;
-Data.St.AC.tempPref = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * 22;
-Data.St.AC.tempIni = Data.St.AC.I * 21;
-Data.St.AC.epsilon = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * .16;
-Data.St.AC.eta = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * 1666.67;
-Data.St.AC.beta = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * .2;
+
+[Data] = cargaACDefault(Data);
+
+% Configuraciones manuales
  
 % Parametros de Baterias
 [Data] = Bat_def(Data,EIni_ct,NodosBaterias);

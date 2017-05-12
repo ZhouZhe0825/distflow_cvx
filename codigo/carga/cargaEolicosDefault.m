@@ -1,4 +1,4 @@
-function [Data] = cargaDatosEolicos(Data,  vVel)
+function [Data] = cargaEolicosDefault(Data,  vVel)
 
 	et = length(vVel);
 	n = size(Data.Red.Branch.T, 1);
