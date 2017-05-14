@@ -20,14 +20,12 @@ function [DataM] = reshapeDataM(Data, Config)
 	DataM.Gen.Tras.qgTop = full(DataM.Gen.Tras.qgTop);
 
 
-	DataM.Red.Branch.cY = repmat(full(DataM.Red.Branch.cY), [1 1 lenEt]);
 	DataM.Red.Branch.lTop = repmat(full(DataM.Red.Branch.lTop), [1 1 lenEt]);
 	DataM.Red.Branch.r = repmat(full(DataM.Red.Branch.r), [1 1 lenEt]);
 	DataM.Red.Branch.x = repmat(full(DataM.Red.Branch.x), [1 1 lenEt]);
 	DataM.Red.Branch.yLow = repmat(full(DataM.Red.Branch.yLow), [1 1 lenEt]);
 	DataM.Red.Branch.yTop = repmat(full(DataM.Red.Branch.yTop), [1 1 lenEt]);
 
-	DataM.Red.Branch.cY = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.cY);
 	DataM.Red.Branch.lTop = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.lTop);
 	DataM.Red.Branch.r = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.r);
 	DataM.Red.Branch.x = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.x);
@@ -58,6 +56,10 @@ function [DataM] = reshapeDataM(Data, Config)
 	
 	
 	DataM.Cost.cdv = full(DataM.Cost.cdv) * one;
+	DataM.Cost.cCap = DataM.Cost.cCap * one;
+	DataM.Cost.cTap = DataM.Cost.cTap * one;
+	DataM.Cost.cY = repmat(full(DataM.Cost.cY), [1 1 lenEt]);
+	DataM.Cost.cY = NxNxT2MxT(VertI,VertJ,DataM.Cost.cY);
 	DataM.Cost.m = DataM.Cost.m(:,(1:lenEt));
 	DataM.Cost.piPTras = DataM.Cost.piPTras(:,(1:lenEt));
 	DataM.Cost.piQmtras = DataM.Cost.piQmtras(:,(1:lenEt));

@@ -1,11 +1,4 @@
-cambioTap = 1;
-cambioCap = 1;
-minpC = 0;
-minqC = minpC * .15;
-minr = 0;
 tol = 5e-8;
-delta = 0.004;
-m = .01;
 CantHorasEtapa = .25;
 iniEtapa = 1;
 
@@ -27,6 +20,7 @@ Trafo1.TP = [0];
 Trafo1.N = .005;
 Trafo1.nod = 1;
 Trafo1.ini = 0;
+Trafo1.cambio = 1;
 Trafos = [Trafo1];
 
 % Caps
@@ -34,6 +28,7 @@ Cap1.TP = [0];
 Cap1.N = .005;
 Cap1.nod = 9;
 Cap1.ini = 0;
+Cap1.cambio = 1;
 Caps = [Cap1];
 
 
@@ -78,19 +73,12 @@ App = [App1, App2];
 % Switches
 Switches.i = [];
 Switches.j = [];
+Switches.cY = .1;
 Switches.all = false;
 
 
 tgPhi = .2;
-
-rhoQ_ct = 1.5;
-rhoP_ct = 1;
-
-cv_ct = .1;
-cr_ct = .1;
-cY = .1;
 EIni_ct = .5;
-betaT = .2;
 
 %% Nombres de archivos
 % 
@@ -101,52 +89,52 @@ outFilename_mat = [outFilename_pref, 'nxn2m'];
 
 inFilename = 'PU_example5.xls';
 fileCurvaCarga = 'carga_PU_example.xlsx';
-
+fileP_mec = '';
+filePPvg = '';
+fileUtilBeta = '';
+fileTemp = '';
+fileCostosTension = '';
+fileCostosPv = '';
+fileCostosDfig = '';
+fileCostosTras = '';
 
 %% Carga de datos
 %% Red
-[Data] = load_distflow_case(inFilename, 'bus_data_CVX', 'branch_data_CVX', Trafos, Caps, Cargas, App, Switches, cambioTap, cambioCap, cY);
+[Data] = load_distflow_case(inFilename, 'bus_data_CVX', 'branch_data_CVX', Trafos, Caps, Cargas, App, Switches);
 
-[Data] = loadCargaCuartHoraria(fileCurvaCarga, Data, 'Ppu', 'Qpu', minpC, minqC);
+[Data] = loadCargaCuartHoraria(fileCurvaCarga, Data, 'Ppu', 'Qpu');
 
 
 %% Generadores
 % Eolicos
-[vVel, Data.temp] = cargarVelocidadVientoInvierno();
 
-[Data] = cargaEolicosDefault(Data,  vVel);
+[Data] = cargaEolicosDefault(Data);
 
-[Data] = Dfig_200kw(Data, NodosGeneracionEolica);
+[P_mec, n_] = p_mecN_(fileP_mec);
 
-
-[Data.Gen.DFIG.P_mec, Data.Gen.DFIG.n_]= calculoPotenciaEolica(vVel, ...
-	Data.Gen.DFIG.vmm, Data.Gen.DFIG.vm, Data.Gen.DFIG.vM, Data.Gen.DFIG.vMM, ...
-	Data.Gen.DFIG.Omega, Data.Gen.DFIG.G, Data.Gen.DFIG.P_nMec, Data.Gen.DFIG.Np, ...
-	Data.Gen.DFIG.R_, Data.Gen.DFIG.rho, Data.Gen.DFIG.ws, Data.Gen.DFIG.c1, ...
-	Data.Gen.DFIG.c2, Data.Gen.DFIG.c3, Data.Gen.DFIG.c4, Data.Gen.DFIG.c5, ...
-	Data.Gen.DFIG.c6, Data.Gen.DFIG.c7, Data.Gen.DFIG.lambda_opt, NodosGeneracionEolica);
+[Data] = Dfig_200kw(Data, NodosGeneracionEolica, P_mec, n_);
 
 % Fotovoltaicos
 
-[Data] = PvGen_sm(Data,NodosGeneracionSolar);
+[Data] = cargaPvDefault(Data);
 
-[Data.Gen.Pv.pPvg] = calculoPotenciaSolar(Data.temp, Data.Gen.Pv.pPvg_low, Data.Gen.Pv.pPvg_top);
+[pPvg] = pPvgs(filePPvg);
+
+[Data] = PvGen_sm(Data,NodosGeneracionSolar, pPvg);
 
 %% Utilidad
 
 % Configuraciones manuales
 
-utilCarg = ones(1,96);
-utilCarg(1) = .125;
-utilCarg(2) = .375;
-utilCarg(3) = .625;
-utilCarg(4) = .875;
+[utilCarg, betaT] = utilBetas(fileUtilBeta);
 
-[Data] = cargaUtilDefault(Data, tgPhi, betaT, utilCarg, Cargas, App);
+[Data] = cargaUtilDefault(Data, tgPhi, utilCarg, betaT, Cargas, App);
 
 %% Parametros de Storage
 
 % Aire Acondicionado
+
+[Data.temp] = cargarTempInvierno(fileTemp);
 
 [Data] = cargaACDefault(Data);
 
@@ -156,9 +144,15 @@ utilCarg(4) = .875;
 [Data] = Bat_def(Data,EIni_ct,NodosBaterias);
 
 %% Costos
-[mHor, piPTrasHor] = mRhoHorario();
+[mHor, delta, cdv] = costosTension(fileCostosTension);
 
-[Data] = cargaCostosDefault(Data, mHor, piPTrasHor, rhoP_ct, rhoQ_ct, m, delta);
+[piPTrasHor, piQmtrasHor, piQMtrasHor] = costosTrasmision(fileCostosTras);
+
+[rhopPv,rhomqPv,rhoMqPv] = costosPv(fileCostosPv);
+
+[rhopWi,rhomqWi,rhoMqWi] = costosDfig(fileCostosDfig);
+
+[Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, mHor, cdv, delta, rhopPv, rhomqPv, rhoMqPv, rhopWi, rhomqWi, rhoMqWi, piPTrasHor, piQmtrasHor, piQMtrasHor);
 
 %% Configuracion de parametros de solvers para problemas y subproblemas
 % Subproblemas distribuidos

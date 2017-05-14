@@ -1,4 +1,4 @@
-function [Data] = load_distflow_case(xls_file, bus_sheet, branch_sheet, Trafos, Caps, Cargas, App, Switches, cambioTap, cambioCap, cY)
+function [Data] = load_distflow_case(xls_file, bus_sheet, branch_sheet, Trafos, Caps, Cargas, App, Switches, cambioTap, cambioCap)
 
 
 
@@ -35,8 +35,6 @@ for i=1:length(Switches.i)
 	Data.Red.Branch.yLow(Switches.i(i), Switches.j(i))=0;
 	Data.Red.Branch.yLow(Switches.j(i), Switches.i(i))=0;
 end
-
-Data.Red.Branch.cY = Data.Red.Branch.T .* cY;
 
 Data.Red.Bus.alpha = sparse(1 * V_bu);
 Data.Red.Bus.uLow = sparse(n_bu(:,7));
@@ -84,10 +82,6 @@ for estC = 1:size(Caps,1)
 	Data.Red.Bus.indCap(Caps(estC).nod) = 1;
 	Data.Red.Bus.Ncp(Caps(estC).nod) = Caps(estC).N;
 end
-
-%% Costo de cambio de enteras (Taps, switches
-Data.Red.cambioTap = cambioTap;
-Data.Red.cambioCap = cambioCap;
 
 %% Trasmision
 Data.Gen.Tras.pgLow = zeros(n, 1);

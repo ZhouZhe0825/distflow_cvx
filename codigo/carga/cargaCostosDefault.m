@@ -1,26 +1,29 @@
-function [Data] = cargaCostosDefault(Data, mHor, piPTrasHor, rhoP_ct, rhoQ_ct, m, delta)
+function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, mHor, cdv, delta, rhopPv, rhomqPv, rhoMqPv, rhopWi, rhomqWi, rhoMqWi, piPTrasHor, piQmtrasHor, piQMtrasHor)
 
-Data.Cost.rhopPv = ones(size(Data.Gen.Pv.I)).*Data.Gen.Pv.I;
-Data.Cost.rhomqPv = ones(size(Data.Gen.Pv.I)).*Data.Gen.Pv.I;
-Data.Cost.rhoMqPv = ones(size(Data.Gen.Pv.I)).*Data.Gen.Pv.I;
+Data.Cost.rhopPv = rhopPv;
+Data.Cost.rhomqPv = rhomqPv;
+Data.Cost.rhoMqPv = rhoMqPv;
 
-Data.Cost.piPTras = zeros(size(Data.Gen.Pv.I));
-Data.Cost.piQmtras = zeros(size(Data.Gen.Pv.I));
-Data.Cost.piQMtras = zeros(size(Data.Gen.Pv.I));
+Data.Cost.rhopWi = rhopWi;
+Data.Cost.rhomqWi = rhomqWi;
+Data.Cost.rhoMqWi = rhoMqWi;
 
-v0 = find(Data.Gen.Tras.I == 1);
-Data.Cost.piPTras(v0) = 1;
-Data.Cost.piQmtras(v0) = 1;
-Data.Cost.piQMtras(v0) = 1; 
+Data.Cost.piPTras = Data.Gen.Tras.I * piPTrasHor';
+Data.Cost.piQmtras = Data.Gen.Tras.I * piQmtrasHor';
+Data.Cost.piQMtras = Data.Gen.Tras.I * piQMtrasHor';
 
-Data.Cost.rhopWi = zeros(length(Data.Red.Branch.T),1);
-Data.Cost.rhomqWi = zeros(length(Data.Red.Branch.T),1);
-Data.Cost.rhoMqWi = zeros(length(Data.Red.Branch.T),1);
-Data.Cost.cdv = ones(length(Data.Red.Branch.T),1);
-
-Data.Cost.piPTras = Data.Cost.piPTras * rhoP_ct * piPTrasHor';
-Data.Cost.piQmtras = Data.Cost.piQmtras * rhoQ_ct * piPTrasHor';
-Data.Cost.piQMtras = Data.Cost.piQMtras * rhoQ_ct * piPTrasHor';
-
-Data.Cost.m = m*mHor';
+Data.Cost.m = mHor';
 Data.Cost.delta = delta;
+Data.Cost.cdv = cdv;
+
+Data.Cost.cCap = Data.Red.Bus.indCap;
+for i = 1:length(Caps)
+	Data.Cost.cCap(Caps(i).nod) = Caps(i).cambio;
+end    
+
+Data.Cost.cTap = Data.Red.Bus.indTap;
+for i = 1:length(Trafos)
+	Data.Cost.cTap(Trafos(i).nod) = Trafos(i).cambio;
+end    
+
+Data.Cost.cY = Data.Red.Branch.T .* Switches.cY;

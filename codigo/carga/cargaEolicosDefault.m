@@ -1,7 +1,7 @@
-function [Data] = cargaEolicosDefault(Data,  vVel)
+function [Data] = cargaEolicosDefault(Data)
 
-	et = length(vVel);
 	n = size(Data.Red.Branch.T, 1);
+    et = size(Data.Red.Bus.pCLow,2);
 
 	Data.Gen.DFIG.Tg = zeros(5, 5);
 	Data.Gen.DFIG.Tg(1, 2) = 1;
@@ -56,3 +56,7 @@ function [Data] = cargaEolicosDefault(Data,  vVel)
 	Data.Gen.DFIG.xOR = zeros(n, et);
 	Data.Gen.DFIG.xiTopF = zeros(n, et);
 	Data.Gen.DFIG.xiTopR = zeros(n, et);
+
+	Data.Gen.DFIG.P_mec = zeros(n, et);
+	Data.Gen.DFIG.n_ = zeros(n, et);
+    

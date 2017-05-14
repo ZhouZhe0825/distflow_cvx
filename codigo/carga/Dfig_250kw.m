@@ -3,6 +3,8 @@ function [Data] = Dfig_250kw(Data, windNodes)
 w = 1; % Omega? o ws? TODO sacar
 ws = pi*100;
 
+et = size(Data.Gen.DFIG.rIE,2);
+
 % Np?
 Np = 2;
 % G?
@@ -91,95 +93,74 @@ lenWN = length(windNodes);
 % P_mec = rho*pi*R_^2*C_plb*vv^3;
 % P_mec = 0.15271;
 
-Data.Gen.DFIG.Tg = zeros(5,5);
-Data.Gen.DFIG.Tg(1,2) = 1;
-Data.Gen.DFIG.Tg(1,3) = 1;
-Data.Gen.DFIG.Tg(4,5) = 1;
 
-% Data.Gen.Wa.Sg = [3];
-% indSg = zeros(1,5);
-% indSg(Data.Gen.Wa.Sg) = 1;
+Data.Gen.DFIG.n_(windNodes) = n_;
+Data.Gen.DFIG.N_er(windNodes) = N_er;
+Data.Gen.DFIG.w(windNodes) = w;
+Data.Gen.DFIG.rho(windNodes) = rho;
+Data.Gen.DFIG.R_(windNodes) = R_;
+Data.Gen.DFIG.C_plb(windNodes) = C_plb;
+Data.Gen.DFIG.vv(windNodes) = vv;
+Data.Gen.DFIG.P_mec(windNodes) = 0;
 
-Data.Gen.DFIG.r = zeros(5,5,lenWN);
-Data.Gen.DFIG.x = Data.Gen.DFIG.r;
-Data.Gen.DFIG.lTop = Data.Gen.DFIG.r;
+Data.Gen.DFIG.vmm(windNodes) = vmm;
+Data.Gen.DFIG.vm(windNodes) = vm;
+Data.Gen.DFIG.vM(windNodes) = vM;
+Data.Gen.DFIG.vMM(windNodes) = vMM;
 
-Data.Gen.DFIG.cv = zeros(5,1,lenWN);
-Data.Gen.DFIG.cr = Data.Gen.DFIG.cv;
-Data.Gen.DFIG.sTop = Data.Gen.DFIG.cv;
-Data.Gen.DFIG.xiTop = Data.Gen.DFIG.cv;
-Data.Gen.DFIG.I = zeros(size(Data.Gen.Tras.I));
-Data.Gen.DFIG.I(windNodes) = 1;
+Data.Gen.DFIG.P_nMec(windNodes) = P_nMec;
+Data.Gen.DFIG.c1(windNodes) = c1;
+Data.Gen.DFIG.c2(windNodes) = c2;
+Data.Gen.DFIG.c3(windNodes) = c3;
+Data.Gen.DFIG.c4(windNodes) = c4;
+Data.Gen.DFIG.c5(windNodes) = c5;
+Data.Gen.DFIG.c6(windNodes) = c6;
+Data.Gen.DFIG.c7(windNodes) = c7;
 
-Data.Gen.DFIG.n_ = n_;
-Data.Gen.DFIG.N_er = N_er;
-Data.Gen.DFIG.w = w;
-Data.Gen.DFIG.rho = rho;
-Data.Gen.DFIG.R_ = R_;
-Data.Gen.DFIG.C_plb = C_plb;
-Data.Gen.DFIG.vv = vv;
-Data.Gen.DFIG.P_mec = 0;
-
-Data.Gen.DFIG.vmm = vmm;
-Data.Gen.DFIG.vm = vm;
-Data.Gen.DFIG.vM = vM;
-Data.Gen.DFIG.vMM = vMM;
-
-Data.Gen.DFIG.P_nMec = P_nMec;
-Data.Gen.DFIG.c1 = c1;
-Data.Gen.DFIG.c2 = c2;
-Data.Gen.DFIG.c3 = c3;
-Data.Gen.DFIG.c4 = c4;
-Data.Gen.DFIG.c5 = c5;
-Data.Gen.DFIG.c6 = c6;
-Data.Gen.DFIG.c7 = c7;
-
-Data.Gen.DFIG.Omega = Omega;
-Data.Gen.DFIG.G = G;
-Data.Gen.DFIG.Np = Np;
-Data.Gen.DFIG.rho = rho;
-Data.Gen.DFIG.ws = ws;
-Data.Gen.DFIG.lambda_opt = lambda_opt;
-
-Data.Gen.DFIG.uLow = Data.Gen.DFIG.cr;
-Data.Gen.DFIG.uTop = ones(size(Data.Gen.DFIG.uLow))*3;
-% Data.Gen.DFIG.PQnorm = zeros(size(Data.Gen.DFIG.lTop));
+Data.Gen.DFIG.Omega(windNodes) = Omega;
+Data.Gen.DFIG.G(windNodes) = G;
+Data.Gen.DFIG.Np(windNodes) = Np;
+Data.Gen.DFIG.rho(windNodes) = rho;
+Data.Gen.DFIG.ws(windNodes) = ws;
+Data.Gen.DFIG.lambda_opt(windNodes) = lambda_opt;
 
 % for wnd = 1:lenWN
-	Data.Gen.DFIG.rIE = RW_12;
-    Data.Gen.DFIG.rIF = RW_13;
-    Data.Gen.DFIG.rOR = RW_45;
+	Data.Gen.DFIG.rIE(windNodes,:) = RW_12;
+    Data.Gen.DFIG.rIF(windNodes,:) = RW_13;
+    Data.Gen.DFIG.rOR(windNodes,:) = RW_45;
 
-	Data.Gen.DFIG.xIE = Data.Gen.DFIG.w*LW_12;
-    Data.Gen.DFIG.xIF = Data.Gen.DFIG.w*LW_13;
-    Data.Gen.DFIG.xOR = Data.Gen.DFIG.w*LW_45;
+	Data.Gen.DFIG.xIE(windNodes,:) = repmat(Data.Gen.DFIG.w(windNodes)*LW_12, [1,et]);
+    Data.Gen.DFIG.xIF(windNodes,:) = repmat(Data.Gen.DFIG.w(windNodes)*LW_13, [1,et]);
+    Data.Gen.DFIG.xOR(windNodes,:) = repmat(Data.Gen.DFIG.w(windNodes)*LW_45, [1,et]);
 
-	Data.Gen.DFIG.lTopIE = lW_12_Top;
-    Data.Gen.DFIG.lTopIF = lW_13_Top;
-    Data.Gen.DFIG.lTopOR = lW_45_Top;
+	Data.Gen.DFIG.lTopIE(windNodes,:) = lW_12_Top;
+    Data.Gen.DFIG.lTopIF(windNodes,:) = lW_13_Top;
+    Data.Gen.DFIG.lTopOR(windNodes,:) = lW_45_Top;
 
-	Data.Gen.DFIG.cvF = cvW_3;
-    Data.Gen.DFIG.cvR = cvW_5;
+	Data.Gen.DFIG.cvF(windNodes,:) = cvW_3;
+    Data.Gen.DFIG.cvR(windNodes,:) = cvW_5;
 
-	Data.Gen.DFIG.crF = crW_3;
-    Data.Gen.DFIG.crR = crW_5;
+	Data.Gen.DFIG.crF(windNodes,:) = crW_3;
+    Data.Gen.DFIG.crR(windNodes,:) = crW_5;
 
-	Data.Gen.DFIG.uLowE = uLow_2;
-    Data.Gen.DFIG.uLowF = uLow_3;
+	Data.Gen.DFIG.uLowE(windNodes,:) = uLow_2;
+    Data.Gen.DFIG.uLowF(windNodes,:) = uLow_3;
 
-    Data.Gen.DFIG.uTopE = uTop_2;
-	Data.Gen.DFIG.uTopF = uTop_3;
+    Data.Gen.DFIG.uTopE(windNodes,:) = uTop_2;
+	Data.Gen.DFIG.uTopF(windNodes,:) = uTop_3;
 
-	Data.Gen.DFIG.sTopF = sW_3_Top;
-    Data.Gen.DFIG.sTopR = sW_5_Top;
+	Data.Gen.DFIG.sTopF(windNodes,:) = sW_3_Top;
+    Data.Gen.DFIG.sTopR(windNodes,:) = sW_5_Top;
 
-	Data.Gen.DFIG.xiTopF = sW_3_Top^2;
-    Data.Gen.DFIG.xiTopR = sW_5_Top^2;
+	Data.Gen.DFIG.xiTopF(windNodes,:) = sW_3_Top^2;
+    Data.Gen.DFIG.xiTopR(windNodes,:) = sW_5_Top^2;
 
-	Data.Gen.DFIG.Ig(3,1,:) = 1;
+% 	Data.Gen.DFIG.Ig(3,1,:) = 1;
 
-    Data.Gen.DFIG.PQnormIE = PQnorm_2;
-    Data.Gen.DFIG.PQnormIF = PQnorm_3;
+    Data.Gen.DFIG.I(windNodes,:) = 1;
+    
+    Data.Gen.DFIG.PQnormIE(windNodes,:) = PQnorm_2;
+    Data.Gen.DFIG.PQnormIF(windNodes,:) = PQnorm_3;
     
     
 %     ini = 5*(wnd-1)+1;

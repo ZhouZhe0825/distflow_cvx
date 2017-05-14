@@ -10,7 +10,6 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 	Tup = triu(DataNxN.Red.Branch.T);
 
 	
-	DataNxN.Red.Branch.cY	 = 	replicateMat3_3(	DataNxN.Red.Branch.cY	,Config.Etapas);
 	DataNxN.Red.Branch.lTop	 = 	replicateMat3_3(	DataNxN.Red.Branch.lTop 	,Config.Etapas);
 	DataNxN.Red.Branch.r	 = 	replicateMat3_3(	DataNxN.Red.Branch.r	,Config.Etapas);
 	DataNxN.Red.Branch.T	 = 	replicateMat3_3(	DataNxN.Red.Branch.T	,Config.Etapas);
@@ -44,6 +43,9 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 	
 	
 	DataNxN.Cost.cdv	 = 	replicateMat3_3(	DataNxN.Cost.cdv	,Config.Etapas);
+	DataNxN.Cost.cCap	 = 	replicateMat3_3(	DataNxN.Cost.cCap	,Config.Etapas);
+	DataNxN.Cost.cTap	 = 	replicateMat3_3(	DataNxN.Cost.cTap	,Config.Etapas);
+	DataNxN.Cost.cY	 = 	replicateMat3_3(	DataNxN.Cost.cY	,Config.Etapas);
 	DataNxN.Cost.m	 = 	replicateMat3_1(	DataNxN.Cost.m(:,Et)	,Buses);
 	DataNxN.Cost.piPTras	 = 	replicateMat3_2(	DataNxN.Cost.piPTras(:,Et)	,1);
 	DataNxN.Cost.piQmtras	 = 	replicateMat3_2(	DataNxN.Cost.piQmtras(:,Et)	,1);

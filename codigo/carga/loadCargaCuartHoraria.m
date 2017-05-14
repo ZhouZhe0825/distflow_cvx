@@ -1,8 +1,8 @@
-function [Data] = loadCargaCuartHoraria(filename, Data, pCSheet, qCSheet, minpC, minqC)
+function [Data] = loadCargaCuartHoraria(filename, Data, pCSheet, qCSheet)
 
 	n = size(Data.Red.Branch.T,1);
-	[pCLow, ipC] = loadVarCuartHor(filename, pCSheet, n, minpC);
-	[qCLow, iqC] = loadVarCuartHor(filename, qCSheet, n, minqC);
+	[pCLow, ipC] = loadVarCuartHor(filename, pCSheet, n);
+	[qCLow, iqC] = loadVarCuartHor(filename, qCSheet, n);
 
 	Data.Red.Bus.indCons = intersect(ipC, iqC);
 
@@ -12,9 +12,9 @@ function [Data] = loadCargaCuartHoraria(filename, Data, pCSheet, qCSheet, minpC,
 end
 
 
-function [var, indCons] = loadVarCuartHor(filename, sheet, nodos, minVal)
+function [var, indCons] = loadVarCuartHor(filename, sheet, nodos)
 	[n,t,r] = xlsread(filename, sheet);
-	var = ones(nodos,size(n,1)-1)*minVal;
+	var = zeros(nodos,size(n,1)-1);
 	sirve = ~isnan(n(1,:));
 	aux = n(:,sirve);
 	ind = aux(1,:)';

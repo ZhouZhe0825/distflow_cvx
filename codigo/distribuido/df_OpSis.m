@@ -137,7 +137,7 @@ function [Var, opt, status] = df_OpSis(Data, Config, findOpt, DistrInfo)
             TapDif(:,1,1) = Data.Red.Bus.TapIni;
             TapDif(:,1,(2:Config.Etapas)) = Tap(:,1,(2:Config.Etapas)) - Tap(:,1,(1:Config.Etapas-1));
 
-            tfopt_expr = sum(Data.Cost.cdv .* cDv + Data.Red.cambioCap*CapDif(:,1,:).^2 + Data.Red.cambioTap*TapDif(:,1,:).^2,1);
+            tfopt_expr = sum(Data.Cost.cdv .* cDv + Data.Red.cambioCap*CapDif(:,1,:).^2 + Data.Cost.cTap.*TapDif(:,1,:).^2,1);
             tfopt_virt = sum(- DistrInfo.muT(:,1,:) .* pN - DistrInfo.lambdaT(:,1,:) .* qN + DistrInfo.lambdaT(:,1,:) .* qCp,1);
             tfopt_conv = sum(norms(pN - DistrInfo.OpSis.pN,2,2) ...
                             + norms(qN - DistrInfo.OpSis.qN,2,2) ...
