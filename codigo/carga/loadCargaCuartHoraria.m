@@ -13,7 +13,7 @@ end
 
 
 function [var, indCons] = loadVarCuartHor(filename, sheet, nodos)
-	[n,t,r] = xlsread(filename, sheet);
+	[n,~,~] = xlsread(filename, sheet);
 	var = zeros(nodos,size(n,1)-1);
 	sirve = ~isnan(n(1,:));
 	aux = n(:,sirve);
