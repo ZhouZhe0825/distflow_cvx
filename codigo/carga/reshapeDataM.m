@@ -145,7 +145,7 @@ function [DataM] = reshapeDataM(Data, Config)
 	DataM.temp = repmat(DataM.temp(:,(1:lenEt)), [size(VertI,2) 1]);
 
 	DataM.Util.betaE = DataM.Util.betaE(:,(1:lenEt));
-	DataM.Util.betaT = DataM.Util.betaT * one;
+	DataM.Util.betaT = DataM.Util.betaT(:,(1:lenEt));
 	DataM.Util.pzCnLow = DataM.Util.pzCnLow(:,(1:lenEt),:);
 	DataM.Util.pzCnLowE = DataM.Util.pzCnLowE * one;
 	DataM.Util.pzCnPref = DataM.Util.pzCnPref(:,(1:lenEt),:);

@@ -1,13 +1,13 @@
-function [Data] = cargaUtilDefault(Data, tgPhi, utilCarg, betaT, Cargas, App)
+function [Data] = cargaUtilDefault(Data, tgPhi, betaE, betaT, Cargas, App)
 
 Data.Util.tgPhi = tgPhi;
 
-Data.Util.betaT = zeros(size(Data.Red.Bus.pCLow,1),1);
-Data.Util.betaT(Data.Red.Bus.indCons) = betaT;
+Data.Util.betaT = zeros(size(Data.Red.Bus.pCLow,1),size(betaT,1));
+Data.Util.betaT(Data.Red.Bus.indCons,:) = ones(length(Data.Red.Bus.indCons),1)*betaT';
 
 Data.Util.betaE = zeros(size(Data.Red.Bus.pCLow));
 for estCg = 1:size(Cargas,1)
-	Data.Util.betaE(Cargas(estCg).nod,:) = utilCarg';
+	Data.Util.betaE(Cargas(estCg).nod,:) = betaE;
 end
 
 Data.Util.pzCnPref = repmat(full(Data.Red.Bus.pCLow), [1,1,length(App)]);

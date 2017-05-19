@@ -180,7 +180,7 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 	% DataNxN.Util.aT	 = 	replicateMat4_3_4(	DataNxN.Util.aT	,Config.Etapas,2);
 	% DataNxN.Util.aE	 = 	replicateMat3_3(	DataNxN.Util.aE	,Config.Etapas);
 	DataNxN.Util.betaE	 = 	replicateMat3_2(	DataNxN.Util.betaE(:,Et)	,1);
-	DataNxN.Util.betaT	 = 	replicateMat4_3_4(	DataNxN.Util.betaT	,Config.Etapas,2);
+	DataNxN.Util.betaT	 = 	replicateMat4_3_4(	DataNxN.Util.betaT(:,Et)	,2);
 	DataNxN.Util.pzCnLow	 = 	replicateMat4_2(	DataNxN.Util.pzCnLow(:,Et,:)	,1);
 	DataNxN.Util.pzCnLowE	 = 	replicateMat3_3(	DataNxN.Util.pzCnLowE	,Config.Etapas);
 	DataNxN.Util.pzCnPref	 = 	replicateMat4_2(	DataNxN.Util.pzCnPref(:,Et,:)	,1);
@@ -205,20 +205,11 @@ function [A] = replicateMat4_4(V,D4)
 	end
 end
 
-function [A] = replicateMat4_3_4(V,D3,D4)
-	A = zeros(size(V,1),1,D3,D4);
-	for d3 = 1:D3
-		for d4 = 1:D4
-			A(:,1,d3,d4) = V;
-		end
-	end
-end
-
-function [A] = replicateMat4_3(V,D3)
-	A = zeros(size(V,1),size(V,2),D3,size(V,3));
-	for d3 = 1:D3
-			A(:,:,d3,:) = V;
-	end
+function [A] = replicateMat4_3_4(V,D4)
+	A = zeros(size(V,1),1,size(V,2),D4);
+    for d4 = 1:D4
+        A(:,1,:,d4) = V;
+    end
 end
 
 function [A] = replicateMat4_2(V,D2)

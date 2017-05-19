@@ -15,6 +15,33 @@ NodosGeneracionEolica = [];
 NodosGeneracionSolar = [4 7];
 NodosBaterias = [];
 
+% Eolicos
+Eol1.nod = 5;
+Eol1.type = @Dfig_200kw;
+Eol1.fileG = '';
+Eol1.fileC = '';
+
+Eolicos = [];
+
+% Solar
+Pv1.nod = 4;
+Pv1.type = @PvGen_sm;
+Pv1.fileG = '';
+Pv1.fileC = '';
+
+Pv2.nod = 7;
+Pv2.type = @PvGen_sm;
+Pv2.fileG = '';
+Pv2.fileC = '';
+
+Solares = [];
+
+% Baterias
+Bat1.nod = 5;
+Bat.type = @Bat_def;
+
+Baterias = [];
+
 % Trafos
 Trafo1.TP = [-2 -1 0 1 2];
 Trafo1.N = .005;
@@ -88,10 +115,11 @@ outFilename_m = [outFilename_pref, '_m'];
 outFilename_mat = [outFilename_pref, 'nxn2m'];
 
 inFilename = 'PU_example4.xls';
-fileCurvaCarga = 'carga_PU_example.xlsx';
+fileCurvaCarga = 'carga_PU_example.csv';
 fileP_mec = '';
 filePPvg = '';
-fileUtilBeta = '';
+fileUtilBetaE = '';
+fileUtilBetaT = '';
 fileTemp = '';
 fileCostosTension = '';
 fileCostosPv = '';
@@ -102,7 +130,7 @@ fileCostosTras = '';
 %% Red
 [Data] = load_distflow_case(inFilename, 'bus_data_CVX', 'branch_data_CVX', Trafos, Caps, Cargas, App, Switches);
 
-[Data] = loadCargaCuartHoraria(fileCurvaCarga, Data, 'Ppu', 'Qpu');
+[Data] = loadCargaCuartHoraria(fileCurvaCarga, Data);
 
 
 %% Generadores
@@ -126,9 +154,11 @@ fileCostosTras = '';
 
 % Configuraciones manuales
 
-[utilCarg, betaT] = utilBetas(fileUtilBeta);
+[betaE] = utilBetasE(fileUtilBetaE);
 
-[Data] = cargaUtilDefault(Data, tgPhi, utilCarg, betaT, Cargas, App);
+[betaT] = utilBetasT(fileUtilBetaT);
+
+[Data] = cargaUtilDefault(Data, tgPhi, betaE, betaT, Cargas, App);
 
 %% Parametros de Storage
 

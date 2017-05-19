@@ -15,7 +15,7 @@ vars = [];
 for i = 1:length(uniqueVars)
 	var.name = uniqueVars{i};
 	var.data = zeros(n,length(csv.hora));
-    var.undefined = true;
+    var.undefBus = true;
 	vars = [vars;var];
 end
 for i = 1:length(splheader)
@@ -29,12 +29,12 @@ for i = 1:length(splheader)
             vars(j).data = csv.nums(:,i)';
 		elseif strcmp(textInd,'all') % para todos los nodos
             vars(j).data = ones(n,1)*csv.nums(:,i)';
-            vars(j).undefined = false;
+            vars(j).undefBus = false;
 		else
 			[ind, status] = str2num(textInd);
 			if status && ind <= n % para indice
 				vars(j).data(ind,:) = csv.nums(:,i)';
-                vars(j).undefined = false;
+                vars(j).undefBus = false;
 			end
 		end
 	end
