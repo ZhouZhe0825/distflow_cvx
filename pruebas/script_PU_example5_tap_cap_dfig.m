@@ -11,22 +11,22 @@ TopSecs = 60;
 
 %% Declaracion de constantes
 
-NodosGeneracionEolica = [5 6];
+% NodosGeneracionEolica = [5 6];
 % NodosGeneracionSolar = [];
 NodosBaterias = [];
 
 % Eolicos
 Eol1.nod = 5;
 Eol1.type = @Dfig_200kw;
-Eol1.fileG = '';
-Eol1.fileC = '';
+Eol1.fileG = 'Dfig_200kw_P_n_.csv';
+Eol1.fileC = 'costosDfig.csv';
 
 Eol2.nod = 6;
 Eol2.type = @Dfig_200kw;
-Eol2.fileG = '';
-Eol2.fileC = '';
+Eol2.fileG = 'Dfig_200kw_P_n_.csv';
+Eol2.fileC = 'costosDfig.csv';
 
-Eolicos = [];
+Eolicos = [Eol1;Eol2];
 
 % Solar
 Pv1.nod = 4;
@@ -121,8 +121,6 @@ outFilename_mat = [outFilename_pref, 'nxn2m'];
 
 inFilename = 'PU_example5.xls';
 fileCurvaCarga = 'carga_PU_example.csv';
-fileP_mec = '';
-filePPvg = '';
 fileUtilBetaE = '';
 fileUtilBetaT = '';
 fileTemp = '';
@@ -141,19 +139,11 @@ fileCostosTras = '';
 %% Generadores
 % Eolicos
 
-[Data] = cargaEolicosDefault(Data);
-
-[P_mec, n_] = p_mecN_(fileP_mec);
-
-[Data] = Dfig_200kw(Data, NodosGeneracionEolica, P_mec, n_);
+[Data] = cargaEolicosDefault(Data, Eolicos);
 
 % Fotovoltaicos
 
 [Data] = cargaPvDefault(Data, Solares);
-
-% [pPvg] = pPvgs(filePPvg);
-% 
-% [Data] = PvGen_sm(Data,NodosGeneracionSolar, pPvg);
 
 %% Utilidad
 
