@@ -18,7 +18,7 @@ for i = 1:length(uniqueVars)
     var.undefBus = true;
 	vars = [vars;var];
 end
-for i = 1:length(splheader)
+for i = 1:size(splheader,1)
 	j = 1;
 	while j <= length(vars) && strcmp(splheader{i,1},vars(j).name) == 0
 		j = j+1;

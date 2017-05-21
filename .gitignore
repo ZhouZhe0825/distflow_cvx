@@ -8,3 +8,7 @@ codigo/carga/reshapeDataNxN\.asv
 *.bak
 
 *.asv
+
+p_gurobi/
+
+p_mosek/

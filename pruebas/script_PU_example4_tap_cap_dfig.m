@@ -12,7 +12,7 @@ TopSecs = 60;
 %% Declaracion de constantes
 
 NodosGeneracionEolica = [5];
-NodosGeneracionSolar = [];
+% NodosGeneracionSolar = [];
 NodosBaterias = [];
 
 % Eolicos
@@ -26,13 +26,13 @@ Eolicos = [];
 % Solar
 Pv1.nod = 4;
 Pv1.type = @PvGen_sm;
-Pv1.fileG = '';
-Pv1.fileC = '';
+Pv1.fileG = 'pvgen.csv';
+Pv1.fileC = 'costosPv.csv';
 
 Pv2.nod = 7;
 Pv2.type = @PvGen_sm;
-Pv2.fileG = '';
-Pv2.fileC = '';
+Pv2.fileG = 'pvgen.csv';
+Pv2.fileC = 'costosPv.csv';
 
 Solares = [];
 
@@ -144,11 +144,11 @@ fileCostosTras = '';
     
 % Fotovoltaicos
 
-[Data] = cargaPvDefault(Data);
+[Data] = cargaPvDefault(Data, Solares);
 
-[pPvg] = pPvgs(filePPvg);
-
-[Data] = PvGen_sm(Data,NodosGeneracionSolar, pPvg);
+% [pPvg] = pPvgs(filePPvg);
+% 
+% [Data] = PvGen_sm(Data,NodosGeneracionSolar, pPvg);
 
 %% Utilidad
 
@@ -191,10 +191,17 @@ Config.Etapas = 4*CantHorasEtapa;
 Config.workspace_var_file = outFilename_mat;
 
 % Centralizado
-Config.Centr{1, 1} = 'MSK_DPAR_MIO_TOL_REL_RELAX_INT';
-Config.Centr{1, 2} = 0.01;
-Config.Centr{2, 1} = 'MSK_DPAR_OPTIMIZER_MAX_TIME';
-Config.Centr{2, 2} = 600;
+Config.Centr = [];
+% Mosek
+% Config.Centr{1, 1} = 'MSK_DPAR_MIO_TOL_REL_RELAX_INT';
+% Config.Centr{1, 2} = 0.01;
+% Config.Centr{2, 1} = 'MSK_DPAR_OPTIMIZER_MAX_TIME';
+% Config.Centr{2, 2} = 600;
+% Gurobi
+% Config.Centr{1, 1} = 'MIPGap';
+% Config.Centr{1, 2} = 0.01;1
+% Config.Centr{2, 1} = 'TimeLimit';
+% Config.Centr{2, 2} = 600;
 
 %% Llamada al modelo
 
