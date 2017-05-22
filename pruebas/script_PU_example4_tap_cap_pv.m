@@ -11,10 +11,6 @@ TopSecs = 60;
 
 %% Declaracion de constantes
 
-% NodosGeneracionEolica = [];
-% NodosGeneracionSolar = [4 7];
-NodosBaterias = [];
-
 % Eolicos
 Eol1.nod = 5;
 Eol1.type = @Dfig_200kw;
@@ -38,7 +34,8 @@ Solares = [Pv1; Pv2];
 
 % Baterias
 Bat1.nod = 5;
-Bat.type = @Bat_def;
+Bat1.type = @Bat_def;
+Bat1.EIni = .5;
 
 Baterias = [];
 
@@ -105,7 +102,6 @@ Switches.all = false;
 
 
 tgPhi = .2;
-EIni_ct = .5;
 
 %% Nombres de archivos
 % 
@@ -159,7 +155,7 @@ fileCostosTras = 'costosTrasmision.csv';
 % Configuraciones manuales
  
 % Parametros de Baterias
-[Data] = Bat_def(Data,EIni_ct,NodosBaterias);
+[Data] = cargaBatDefault(Data, Baterias);
 
 %% Costos
 [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos);
@@ -195,10 +191,10 @@ leyenda = ['------------------------------------ ' outFilename_mat ' -----------
 
 [Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
 
-[diff_m_nxn] = checkEqualStructs(VarM2NxN(Var_m, Data), Var_nxn, 'Var_m', 'Var_nxn', 1e-5)
+% [diff_m_nxn] = checkEqualStructs(VarM2NxN(Var_m, Data), Var_nxn, 'Var_m', 'Var_nxn', 1e-5)
 
-xlswrite([Config.workspace_var_file '_diffs.xlsx'], diff_m_nxn);
+% xlswrite([Config.workspace_var_file '_diffs.xlsx'], diff_m_nxn);
 
-printSalidasDistflowNxN(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_nxn, [], [], [], [], []);
-printSalidasDistflowM(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_m, [], [], [], [], []);
+% printSalidasDistflowNxN(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_nxn, [], [], [], [], []);
+% printSalidasDistflowM(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_m, [], [], [], [], []);
 

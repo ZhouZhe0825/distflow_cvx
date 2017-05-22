@@ -317,7 +317,7 @@ cvx_begin
 		expression cStb(n, Config.Etapas);
 
 		DlEStb <= 0;
-		DlEStb <= EStb - Data.St.Bat.ETop*Data.St.Bat.kapa;
+		DlEStb <= EStb - Data.St.Bat.ETop.*Data.St.Bat.kapa;
 
 
 		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
@@ -338,7 +338,7 @@ cvx_begin
 		
 		tfopt_expr = tfopt_expr + ...
 			sum(Data.St.Bat.I(:,Config.Etapas).*Data.St.Bat.beta(:,Config.Etapas).* ...
-				((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas)*Data.St.Bat.gama).^2) + Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
+				((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas).*Data.St.Bat.gama(:,Config.Etapas)).^2) + Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
 
 		EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
 		EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
