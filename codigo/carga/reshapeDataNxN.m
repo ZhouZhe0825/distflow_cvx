@@ -26,11 +26,11 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 	DataNxN.Red.Bus.indCap	 = 	replicateMat3_3(	DataNxN.Red.Bus.indCap	,Config.Etapas);
 	DataNxN.Red.Bus.indTap	 = 	replicateMat3_3(	DataNxN.Red.Bus.indTap	,Config.Etapas);
 	DataNxN.Red.Bus.Ncp	 = 	replicateMat3_3(	DataNxN.Red.Bus.Ncp	,Config.Etapas);
-	DataNxN.Red.Bus.Ntr	 = 	replicateMat3_3(	DataNxN.Red.Bus.Ntr	,Config.Etapas);
+	DataNxN.Red.Bus.Tap	 = 	replicateMat3_3(	DataNxN.Red.Bus.Tap	,Config.Etapas);
 	DataNxN.Red.Bus.pCLow	 = 	replicateMat3_2(	DataNxN.Red.Bus.pCLow(:,Et)	,1);
 	DataNxN.Red.Bus.qCLow	 = 	replicateMat3_2(	DataNxN.Red.Bus.qCLow(:,Et)	,1);
-	DataNxN.Red.Bus.TapLow	 = 	replicateMat3_3(	DataNxN.Red.Bus.TapLow	,Config.Etapas);
-	DataNxN.Red.Bus.TapTop	 = 	replicateMat3_3(	DataNxN.Red.Bus.TapTop	,Config.Etapas);
+	DataNxN.Red.Bus.NtrLow	 = 	replicateMat3_3(	DataNxN.Red.Bus.NtrLow	,Config.Etapas);
+	DataNxN.Red.Bus.NtrTop	 = 	replicateMat3_3(	DataNxN.Red.Bus.NtrTop	,Config.Etapas);
 	DataNxN.Red.Bus.uLow	 = 	replicateMat3_3(	DataNxN.Red.Bus.uLow	,Config.Etapas);
 	DataNxN.Red.Bus.uTop	 = 	replicateMat3_3(	DataNxN.Red.Bus.uTop	,Config.Etapas);
 

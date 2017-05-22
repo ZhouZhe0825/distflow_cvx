@@ -45,8 +45,8 @@ Bat1.EIni = .5;
 Baterias = [];
 
 % Trafos
-Trafo1.TP = [0];
-Trafo1.N = .005;
+Trafo1.N = [0];
+Trafo1.TP = .005;
 Trafo1.nod = 1;
 Trafo1.ini = 0;
 Trafo1.cambio = 1;

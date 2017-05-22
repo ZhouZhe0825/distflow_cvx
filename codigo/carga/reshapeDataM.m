@@ -40,11 +40,11 @@ function [DataM] = reshapeDataM(Data, Config)
 	DataM.Red.Bus.indCap = DataM.Red.Bus.indCap * one;
 	DataM.Red.Bus.indTap = DataM.Red.Bus.indTap * one;
 	DataM.Red.Bus.Ncp = DataM.Red.Bus.Ncp * one;
-	DataM.Red.Bus.Ntr = DataM.Red.Bus.Ntr * one;
+	DataM.Red.Bus.Tap = DataM.Red.Bus.Tap * one;
 	DataM.Red.Bus.pCLow = full(DataM.Red.Bus.pCLow(:,(1:lenEt)));
 	DataM.Red.Bus.qCLow = full(DataM.Red.Bus.qCLow(:,(1:lenEt)));
-	DataM.Red.Bus.TapLow = DataM.Red.Bus.TapLow * one;
-	DataM.Red.Bus.TapTop = DataM.Red.Bus.TapTop * one;
+	DataM.Red.Bus.NtrLow = DataM.Red.Bus.NtrLow * one;
+	DataM.Red.Bus.NtrTop = DataM.Red.Bus.NtrTop * one;
 	DataM.Red.Bus.uLow = DataM.Red.Bus.uLow * one;
 	DataM.Red.Bus.uTop = DataM.Red.Bus.uTop * one;
 

@@ -24,8 +24,8 @@ for i=1:length(Tupmind)
 	Tdownm(i) = find(Tind == Tdownmind(i));
 end
 
-tnnLow = (1 + Data.Red.Bus.TapLow.*Data.Red.Bus.Ntr);
-tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
+tnnLow = (1 + Data.Red.Bus.NtrLow.*Data.Red.Bus.Tap);
+tnnTop = (1 + Data.Red.Bus.NtrTop.*Data.Red.Bus.Tap);
 
 NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
 NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
@@ -108,7 +108,7 @@ cvx_begin
 	variable cDv(n, Config.Etapas); % Modulo^2 de la tension
 	variable nn(n, Config.Etapas);
 	variable nv(n, Config.Etapas);
-	variable Tap(n, Config.Etapas) integer;
+	variable Ntr(n, Config.Etapas) integer;
 
 	variable pC(n, Config.Etapas); % Consumo de potencia activa en el nodo i
 	variable qC(n, Config.Etapas); % Consumo de potencia reactiva en el nodo i
@@ -159,8 +159,8 @@ cvx_begin
 	CapDif(:,1) = Data.Red.Bus.CapIni;
 	CapDif(:,(2:Config.Etapas)) = Cap(:,(2:Config.Etapas)) - Cap(:,(1:Config.Etapas-1));
 
-	TapDif(:,1) = Data.Red.Bus.TapIni;
-	TapDif(:,(2:Config.Etapas)) = Tap(:,(2:Config.Etapas)) - Tap(:,(1:Config.Etapas-1));
+	TapDif(:,1) = Data.Red.Bus.NtrIni;
+	TapDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
 		
 	tfopt_expr = ...
 		sum(Data.Cost.piPTras.*pGTras,1) ...
@@ -211,8 +211,8 @@ cvx_begin
 	norms(lNorm,2,3) <= l + (VertI*Data.Red.Bus.uTop.^2).*z;
 	
 	% Restriccion de la tension
-	nn >= (1 + Tap.*Data.Red.Bus.Ntr).^2;
-	nn <= (tnnTop + tnnLow).*(1 + Tap.*Data.Red.Bus.Ntr) - (tnnTop.*tnnLow);
+	nn >= (1 + Ntr.*Data.Red.Bus.Tap).^2;
+	nn <= (tnnTop + tnnLow).*(1 + Ntr.*Data.Red.Bus.Tap) - (tnnTop.*tnnLow);
 
 	nv >= nn.*(Data.Red.Bus.uLow.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uLow.^2);
 	nv >= nn.*(Data.Red.Bus.uTop.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uTop.^2);
@@ -220,8 +220,8 @@ cvx_begin
 	nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
 	nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
 	
-	Tap >= Data.Red.Bus.TapLow;
-	Tap <= Data.Red.Bus.TapTop;
+	Ntr >= Data.Red.Bus.NtrLow;
+	Ntr <= Data.Red.Bus.NtrTop;
 	
 	vExpr = VertI*nv - VertJ*v - 2 * (Data.Red.Branch.r.*P + Data.Red.Branch.x.*Q) + ((Data.Red.Branch.r).^2 + (Data.Red.Branch.x).^2) .* l;
 	
@@ -589,7 +589,7 @@ Var.Red.Bus.v	 = 	v	;
 Var.Red.Bus.cDv	 = 	cDv	;
 Var.Red.Bus.nn	 = 	nn	;
 Var.Red.Bus.nv	 = 	nv	;
-Var.Red.Bus.Tap	 = 	Tap	;
+Var.Red.Bus.Ntr	 = 	Ntr	;
 
 Var.Red.Bus.pC	 = 	pC	;
 Var.Red.Bus.qC	 = 	qC	;

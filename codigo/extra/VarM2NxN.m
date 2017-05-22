@@ -16,7 +16,7 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 	VarNxN.Red.Bus.cDv	 = permute(full(	VarM.Red.Bus.cDv	), [1 3 2]);
 	VarNxN.Red.Bus.nn	 = permute(full(	VarM.Red.Bus.nn	), [1 3 2]);
 	VarNxN.Red.Bus.nv	 = permute(full(	VarM.Red.Bus.nv	), [1 3 2]);
-	VarNxN.Red.Bus.Tap	 = permute(full(	VarM.Red.Bus.Tap	), [1 3 2]);
+	VarNxN.Red.Bus.Ntr	 = permute(full(	VarM.Red.Bus.Ntr	), [1 3 2]);
 
 	VarNxN.Red.Bus.pC	 = permute(full(	VarM.Red.Bus.pC	), [1 3 2]);
 	VarNxN.Red.Bus.qC	 = permute(full(	VarM.Red.Bus.qC	), [1 3 2]);

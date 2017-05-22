@@ -38,8 +38,8 @@ function [Var, opt, status] = df_OpSis(Data, Config, findOpt, DistrInfo)
 	NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
 	NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
 
-	tnnLow = (1 + Data.Red.Bus.TapLow.*Data.Red.Bus.Ntr);
-	tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
+	tnnLow = (1 + Data.Red.Bus.NtrLow.*Data.Red.Bus.Ntr);
+	tnnTop = (1 + Data.Red.Bus.NtrTop.*Data.Red.Bus.Ntr);
 
 	isSymT = isequal(matOverTime(Data.Red.Branch.T), matOverTime(Data.Red.Branch.T)');
 
@@ -134,7 +134,7 @@ function [Var, opt, status] = df_OpSis(Data, Config, findOpt, DistrInfo)
             CapDif(:,1,1) = Data.Red.Bus.CapIni;
             CapDif(:,1,(2:Config.Etapas)) = Cap(:,1,(2:Config.Etapas)) - Cap(:,1,(1:Config.Etapas-1));
 
-            TapDif(:,1,1) = Data.Red.Bus.TapIni;
+            TapDif(:,1,1) = Data.Red.Bus.NtrIni;
             TapDif(:,1,(2:Config.Etapas)) = Tap(:,1,(2:Config.Etapas)) - Tap(:,1,(1:Config.Etapas-1));
 
             tfopt_expr = sum(Data.Cost.cdv .* cDv + Data.Red.cambioCap*CapDif(:,1,:).^2 + Data.Cost.cTap.*TapDif(:,1,:).^2,1);
@@ -172,8 +172,8 @@ function [Var, opt, status] = df_OpSis(Data, Config, findOpt, DistrInfo)
 			nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
 			nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
 
-			Tap >= Data.Red.Bus.TapLow(:,1,:);
-			Tap <= Data.Red.Bus.TapTop(:,1,:);
+			Tap >= Data.Red.Bus.NtrLow(:,1,:);
+			Tap <= Data.Red.Bus.NtrTop(:,1,:);
 
 			tvEqR = - 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 			tvEqL = (repmat(nv, [1 n 1]) - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T;

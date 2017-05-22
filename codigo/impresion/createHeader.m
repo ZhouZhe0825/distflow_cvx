@@ -2,7 +2,7 @@ function [Header] = createHeader(Var, Data, Config, cantTaps, cantCaps, cantCarg
 
 	horas = loadHoras();
 
-	Taps = matOverTime(abs(Data.Red.Bus.Ntr + Data.Red.Bus.TapLow + Data.Red.Bus.TapTop));
+	Taps = matOverTime(abs(Data.Red.Bus.Tap + Data.Red.Bus.NtrLow + Data.Red.Bus.NtrTop));
 	indTaps = find(Taps == 1);
 	Caps = matOverTime(abs(Data.Red.Bus.Ncp + Data.Red.Bus.CapLow + Data.Red.Bus.CapTop));
 	indCaps = find(Caps == 1);
@@ -19,9 +19,9 @@ function [Header] = createHeader(Var, Data, Config, cantTaps, cantCaps, cantCarg
 
     if cantTaps > 0
         for i = 1:cantTaps
-            Header.Main{1+i,1} = ['Tap' num2str(i) '_n_' num2str(indTaps(i))];
+            Header.Main{1+i,1} = ['Ntr' num2str(i) '_n_' num2str(indTaps(i))];
         end
-        Header.Main((2:1+cantTaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Tap(indTaps,:,:)))');
+        Header.Main((2:1+cantTaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Ntr(indTaps,:,:)))');
     end
 
     if cantCaps > 0

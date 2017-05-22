@@ -53,18 +53,18 @@ end
 
 
 %% Transformadores
-Data.Red.Bus.TapLow = Data.Red.Bus.uLow * 0;
-Data.Red.Bus.TapTop = Data.Red.Bus.TapLow;
-Data.Red.Bus.TapIni = Data.Red.Bus.TapLow;
-Data.Red.Bus.indTap = Data.Red.Bus.TapLow;
-Data.Red.Bus.Ntr = zeros(n, 1);
+Data.Red.Bus.NtrLow = Data.Red.Bus.uLow * 0;
+Data.Red.Bus.NtrTop = Data.Red.Bus.NtrLow;
+Data.Red.Bus.NtrIni = Data.Red.Bus.NtrLow;
+Data.Red.Bus.indTap = Data.Red.Bus.NtrLow;
+Data.Red.Bus.Tap = zeros(n, 1);
 
 for estT = 1:size(Trafos,1)
-	Data.Red.Bus.TapLow(Trafos(estT).nod) = min(Trafos(estT).TP);
-	Data.Red.Bus.TapTop(Trafos(estT).nod) = max(Trafos(estT).TP);
-	Data.Red.Bus.TapIni(Trafos(estT).nod) = Trafos(estT).ini;
+	Data.Red.Bus.NtrLow(Trafos(estT).nod) = min(Trafos(estT).N);
+	Data.Red.Bus.NtrTop(Trafos(estT).nod) = max(Trafos(estT).N);
+	Data.Red.Bus.NtrIni(Trafos(estT).nod) = Trafos(estT).ini;
 	Data.Red.Bus.indTap(Trafos(estT).nod) = 1;
-	Data.Red.Bus.Ntr(Trafos(estT).nod) = Trafos(estT).N;
+	Data.Red.Bus.Tap(Trafos(estT).nod) = Trafos(estT).TP;
 end
 
 %% Capacitores
