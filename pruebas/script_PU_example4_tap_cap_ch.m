@@ -98,6 +98,15 @@ App2.tgPhi = .2;
 
 App = [App1, App2];
 
+% Aires acondicionados
+Ac1.nod = [2;3;4;5;6;7;8;9];
+Ac1.fileT = 'ac.csv';
+Ac1.tempIni = 21;
+Ac1.epsilon = .16;
+Ac1.eta = 1666.67;
+
+ACs = [];
+
 % Switches
 Switches.i = [];
 Switches.j = [];
@@ -115,7 +124,7 @@ outFilename_mat = [outFilename_pref, 'nxn2m'];
 inFilename = 'PU_example4.xls';
 fileCurvaCarga = 'carga_PU_example.csv';
 fileUtilBetaT = 'betaT.csv';
-fileTemp = '';
+fileTemp = 'tempInvierno.csv';
 fileCostosTension = 'costosTension.csv';
 fileCostosTras = 'costosTrasmision.csv';
 
@@ -145,16 +154,14 @@ fileCostosTras = 'costosTrasmision.csv';
 
 % Aire Acondicionado
 
-[Data.temp] = cargarTempInvierno(fileTemp);
+[Data] = cargaACDefault(Data, fileTemp, ACs);
 
-[Data] = cargaACDefault(Data);
-
-% Configuraciones manuales
- 
 % Parametros de Baterias
+
 [Data] = cargaBatDefault(Data, Baterias);
 
 %% Costos
+
 [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos);
 
 %% Configuracion de parametros de solvers para problemas y subproblemas

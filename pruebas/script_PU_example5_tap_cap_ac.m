@@ -103,6 +103,15 @@ App2.tgPhi = .2;
 
 App = [App1, App2];
 
+% Aires acondicionados
+Ac1.nod = [2;3;4;5;6;7;8;9];
+Ac1.fileT = 'ac.csv';
+Ac1.tempIni = 21;
+Ac1.epsilon = .16;
+Ac1.eta = 1666.67;
+
+ACs = [Ac1];
+
 % Switches
 Switches.i = [];
 Switches.j = [];
@@ -120,7 +129,7 @@ outFilename_mat = [outFilename_pref, 'nxn2m'];
 inFilename = 'PU_example5.xls';
 fileCurvaCarga = 'carga_PU_example.csv';
 fileUtilBetaT = 'betaT.csv';
-fileTemp = '';
+fileTemp = 'tempInvierno.csv';
 fileCostosTension = 'costosTension.csv';
 fileCostosTras = 'costosTrasmision.csv';
 
@@ -150,25 +159,14 @@ fileCostosTras = 'costosTrasmision.csv';
 
 % Aire Acondicionado
 
-[Data.temp] = cargarTempInvierno(fileTemp);
+[Data] = cargaACDefault(Data, fileTemp, ACs);
 
-[Data] = cargaACDefault(Data);
-
-% Configuraciones manuales
-Data.St.AC.I = zeros(size(Data.Red.Branch.T,1),1);
-Data.St.AC.I(Data.Red.Bus.indCons) = 1;
-Data.St.AC.tempLow = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * 19;
-Data.St.AC.tempTop = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * 25;
-Data.St.AC.tempPref = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * 22;
-Data.St.AC.tempIni = Data.St.AC.I * 21;
-Data.St.AC.epsilon = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * .16;
-Data.St.AC.eta = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * 1666.67;
-Data.St.AC.beta = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * .2;
- 
 % Parametros de Baterias
+
 [Data] = cargaBatDefault(Data, Baterias);
 
 %% Costos
+
 [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos);
 
 %% Configuracion de parametros de solvers para problemas y subproblemas
