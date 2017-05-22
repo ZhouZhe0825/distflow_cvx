@@ -63,6 +63,7 @@ Carga1.qC = Carga1.pC *.015;
 Carga1.dur = 3;
 Carga1.nMultipTop = 1.1;
 Carga1.nMultipLow = .75;
+Carga1.fileU = 'betaE.csv';
 Carga1.nod = 5;
 
 Carga2.TP = [0 1];
@@ -71,6 +72,7 @@ Carga2.qC = Carga2.pC *.015;
 Carga2.dur = 2;
 Carga2.nMultipTop = 1.1;
 Carga2.nMultipLow = .75;
+Carga2.fileU = 'betaE.csv';
 Carga2.nod = 4;
 
 Cargas = [];
@@ -83,6 +85,7 @@ App1.Top = .8;
 App1.nMultipTop = 1.05;
 App1.nMultipLow = .95;
 App1.alpha = 0;
+App1.tgPhi = .2;
 
 App2.I = 2;
 App2.Pref = .2;
@@ -91,6 +94,7 @@ App2.Top = .2;
 App2.nMultipTop = 1.05;
 App2.nMultipLow = .95;
 App2.alpha = 0.1;
+App2.tgPhi = .2;
 
 App = [App1, App2];
 
@@ -101,8 +105,6 @@ Switches.cY = .1;
 Switches.all = false;
 
 
-tgPhi = .2;
-
 %% Nombres de archivos
 % 
 outFilename_pref = 'PU_example4_tap_cap';
@@ -112,8 +114,7 @@ outFilename_mat = [outFilename_pref, 'nxn2m'];
 
 inFilename = 'PU_example4.xls';
 fileCurvaCarga = 'carga_PU_example.csv';
-fileUtilBetaE = '';
-fileUtilBetaT = '';
+fileUtilBetaT = 'betaT.csv';
 fileTemp = '';
 fileCostosTension = 'costosTension.csv';
 fileCostosTras = 'costosTrasmision.csv';
@@ -138,11 +139,7 @@ fileCostosTras = 'costosTrasmision.csv';
 
 % Configuraciones manuales
 
-[betaE] = utilBetasE(fileUtilBetaE);
-
-[betaT] = utilBetasT(fileUtilBetaT);
-
-[Data] = cargaUtilDefault(Data, tgPhi, betaE, betaT, Cargas, App);
+[Data] = cargaUtilDefault(Data, fileUtilBetaT, Cargas, App);
 
 %% Parametros de Storage
 

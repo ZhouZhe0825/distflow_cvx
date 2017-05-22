@@ -1,8 +1,18 @@
-function [betaE] = utilBetasE(filename)
+function [betaE] = utilBetasE(Data,Cargas)
 
-betaE = ones(96,1);
-betaE(1) = .125;
-betaE(2) = .375;
-betaE(3) = .625;
-betaE(4) = .875;
-
+	n = size(Data.Red.Branch.T,1);
+    et = size(Data.Red.Bus.pCLow,2);
+    betaE = zeros(n,et);
+    for i = 1:length(Cargas)
+        [vars] = loadCsvData(Cargas(i).fileU,n);
+        lenVar = length(vars);
+        betaE_aux = [];
+        if lenVar == 1
+            if strcmp(vars(1).name, 'betaE') && vars(1).undefBus
+                betaE_aux = vars(1).data;
+            end
+        end
+        if ~isempty(betaE_aux)
+            betaE(Cargas(i).nod,:) = betaE_aux;
+        end
+    end

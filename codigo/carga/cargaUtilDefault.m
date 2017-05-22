@@ -1,14 +1,10 @@
-function [Data] = cargaUtilDefault(Data, tgPhi, betaE, betaT, Cargas, App)
+function [Data] = cargaUtilDefault(Data, fileUtilBetaT, Cargas, App)
 
-Data.Util.tgPhi = tgPhi;
+[Data.Util.betaE] = utilBetasE(Data,Cargas);
 
-Data.Util.betaT = zeros(size(Data.Red.Bus.pCLow,1),size(betaT,1));
-Data.Util.betaT(Data.Red.Bus.indCons,:) = ones(length(Data.Red.Bus.indCons),1)*betaT';
+[Data.Util.betaT] = utilBetasT(Data,fileUtilBetaT);
 
-Data.Util.betaE = zeros(size(Data.Red.Bus.pCLow));
-for estCg = 1:size(Cargas,1)
-	Data.Util.betaE(Cargas(estCg).nod,:) = betaE;
-end
+Data.Util.tgPhi = zeros(size(App));
 
 Data.Util.pzCnPref = repmat(full(Data.Red.Bus.pCLow), [1,1,length(App)]);
 Data.Util.pzCnLow = Data.Util.pzCnPref;
@@ -19,6 +15,7 @@ for a = 1:length(App)
     Data.Util.pzCnPref(:,:,app.I) = Data.Util.pzCnPref(:,:,app.I) * app.Pref;
     Data.Util.pzCnLow(:,:,app.I) = Data.Util.pzCnLow(:,:,app.I) * app.Low * app.nMultipLow;
     Data.Util.pzCnTop(:,:,app.I) = Data.Util.pzCnTop(:,:,app.I) * app.Top * app.nMultipTop;
+    Data.Util.tgPhi(a) = app.tgPhi;
 end
 
 Data.Util.pzCnPrefE = Data.ClNI.pC;
