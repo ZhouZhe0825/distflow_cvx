@@ -119,10 +119,8 @@ fileCurvaCarga = 'carga_PU_example.csv';
 fileUtilBetaE = '';
 fileUtilBetaT = '';
 fileTemp = '';
-fileCostosTension = '';
-fileCostosPv = '';
-fileCostosDfig = '';
-fileCostosTras = '';
+fileCostosTension = 'costosTension.csv';
+fileCostosTras = 'costosTrasmision.csv';
 
 %% Carga de datos
 %% Red
@@ -173,15 +171,7 @@ Data.St.AC.beta = repmat(Data.St.AC.I, [1, size(Data.temp,2)]) * .2;
 [Data] = Bat_def(Data,EIni_ct,NodosBaterias);
 
 %% Costos
-[mHor, delta, cdv] = costosTension(fileCostosTension);
-
-[piPTrasHor, piQmtrasHor, piQMtrasHor] = costosTrasmision(fileCostosTras);
-
-[rhopPv,rhomqPv,rhoMqPv] = costosPv(fileCostosPv);
-
-[rhopWi,rhomqWi,rhoMqWi] = costosDfig(fileCostosDfig);
-
-[Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, mHor, cdv, delta, rhopPv, rhomqPv, rhoMqPv, rhopWi, rhomqWi, rhoMqWi, piPTrasHor, piQmtrasHor, piQMtrasHor);
+[Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos);
 
 %% Configuracion de parametros de solvers para problemas y subproblemas
 % Subproblemas distribuidos

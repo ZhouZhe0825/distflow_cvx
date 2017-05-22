@@ -9,7 +9,7 @@ function [Data] = loadCargaCuartHoraria(filename, Data)
         for i = 1:lenVar
             if strcmp(vars(i).name, 'pCLow') && ~vars(i).undefBus
                 pCLow = vars(i).data;
-            elseif  strcmp(vars(i).name, 'qCLow') && ~vars(i).undefBus
+            elseif strcmp(vars(i).name, 'qCLow') && ~vars(i).undefBus
                 qCLow = vars(i).data;
             end
         end

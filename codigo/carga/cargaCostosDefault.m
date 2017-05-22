@@ -1,20 +1,12 @@
-function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, mHor, cdv, delta, rhopPv, rhomqPv, rhoMqPv, rhopWi, rhomqWi, rhoMqWi, piPTrasHor, piQmtrasHor, piQMtrasHor)
+function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos)
 
-Data.Cost.rhopPv = rhopPv;
-Data.Cost.rhomqPv = rhomqPv;
-Data.Cost.rhoMqPv = rhoMqPv;
+[Data.Cost.m, Data.Cost.delta, Data.Cost.cdv] = costosTension(Data,fileCostosTension);
 
-Data.Cost.rhopWi = rhopWi;
-Data.Cost.rhomqWi = rhomqWi;
-Data.Cost.rhoMqWi = rhoMqWi;
+[Data.Cost.piPTras, Data.Cost.piQmtras, Data.Cost.piQMtras] = costosTrasmision(Data,fileCostosTras);
 
-Data.Cost.piPTras = Data.Gen.Tras.I * piPTrasHor';
-Data.Cost.piQmtras = Data.Gen.Tras.I * piQmtrasHor';
-Data.Cost.piQMtras = Data.Gen.Tras.I * piQMtrasHor';
+[Data.Cost.rhopPv, Data.Cost.rhomqPv, Data.Cost.rhoMqPv] = costosPv(Data,Solares);
 
-Data.Cost.m = mHor';
-Data.Cost.delta = delta;
-Data.Cost.cdv = cdv;
+[Data.Cost.rhopWi, Data.Cost.rhomqWi, Data.Cost.rhoMqWi] = costosDfig(Data,Eolicos);
 
 Data.Cost.cCap = Data.Red.Bus.indCap;
 for i = 1:length(Caps)

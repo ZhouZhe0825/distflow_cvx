@@ -42,20 +42,21 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 	
 	
 	
-	DataNxN.Cost.cdv	 = 	replicateMat3_3(	DataNxN.Cost.cdv	,Config.Etapas);
+	DataNxN.Cost.cdv	 = 	replicateMat3_2(	DataNxN.Cost.cdv(:,Et)	,1);
 	DataNxN.Cost.cCap	 = 	replicateMat3_3(	DataNxN.Cost.cCap	,Config.Etapas);
 	DataNxN.Cost.cTap	 = 	replicateMat3_3(	DataNxN.Cost.cTap	,Config.Etapas);
 	DataNxN.Cost.cY	 = 	replicateMat3_3(	DataNxN.Cost.cY	,Config.Etapas);
-	DataNxN.Cost.m	 = 	replicateMat3_1(	DataNxN.Cost.m(:,Et)	,Buses);
+	DataNxN.Cost.delta	 = 	replicateMat3_2(	DataNxN.Cost.delta(:,Et)	,1);
+	DataNxN.Cost.m	 = 	replicateMat3_2(	DataNxN.Cost.m(:,Et)	,1);
 	DataNxN.Cost.piPTras	 = 	replicateMat3_2(	DataNxN.Cost.piPTras(:,Et)	,1);
 	DataNxN.Cost.piQmtras	 = 	replicateMat3_2(	DataNxN.Cost.piQmtras(:,Et)	,1);
 	DataNxN.Cost.piQMtras	 = 	replicateMat3_2(	DataNxN.Cost.piQMtras(:,Et)	,1);
-	DataNxN.Cost.rhopPv	 = 	replicateMat3_3(	DataNxN.Cost.rhopPv	,Config.Etapas);
-	DataNxN.Cost.rhomqPv	 = 	replicateMat3_3(	DataNxN.Cost.rhomqPv	,Config.Etapas);
-	DataNxN.Cost.rhoMqPv	 = 	replicateMat3_3(	DataNxN.Cost.rhoMqPv	,Config.Etapas);
-	DataNxN.Cost.rhopWi	= replicateMat3_3(	DataNxN.Cost.rhopWi	, Config.Etapas);
-	DataNxN.Cost.rhomqWi	= replicateMat3_3(	DataNxN.Cost.rhomqWi	, Config.Etapas);
-	DataNxN.Cost.rhoMqWi	= replicateMat3_3(	DataNxN.Cost.rhoMqWi	, Config.Etapas);
+	DataNxN.Cost.rhopPv	 = 	replicateMat3_2(	DataNxN.Cost.rhopPv(:,Et)	,1);
+	DataNxN.Cost.rhomqPv	 = 	replicateMat3_2(	DataNxN.Cost.rhomqPv(:,Et)	,1);
+	DataNxN.Cost.rhoMqPv	 = 	replicateMat3_2(	DataNxN.Cost.rhoMqPv(:,Et)	,1);
+	DataNxN.Cost.rhopWi	= replicateMat3_2(	DataNxN.Cost.rhopWi(:,Et)	, 1);
+	DataNxN.Cost.rhomqWi	= replicateMat3_2(	DataNxN.Cost.rhomqWi(:,Et)	, 1);
+	DataNxN.Cost.rhoMqWi	= replicateMat3_2(	DataNxN.Cost.rhoMqWi(:,Et)	, 1);
 
 	
 	% DataNxN.Gen.DFIG.cr	= replicateMat4_3(	DataNxN.Gen.DFIG.cr	, Config.Etapas);

@@ -55,21 +55,22 @@ function [DataM] = reshapeDataM(Data, Config)
 	
 	
 	
-	DataM.Cost.cdv = full(DataM.Cost.cdv) * one;
+	DataM.Cost.cdv = DataM.Cost.cdv(:,(1:lenEt));
 	DataM.Cost.cCap = DataM.Cost.cCap * one;
 	DataM.Cost.cTap = DataM.Cost.cTap * one;
 	DataM.Cost.cY = repmat(full(DataM.Cost.cY), [1 1 lenEt]);
 	DataM.Cost.cY = NxNxT2MxT(VertI,VertJ,DataM.Cost.cY);
+    DataM.Cost.delta = DataM.Cost.delta(:,(1:lenEt));
 	DataM.Cost.m = DataM.Cost.m(:,(1:lenEt));
 	DataM.Cost.piPTras = DataM.Cost.piPTras(:,(1:lenEt));
 	DataM.Cost.piQmtras = DataM.Cost.piQmtras(:,(1:lenEt));
 	DataM.Cost.piQMtras = DataM.Cost.piQMtras(:,(1:lenEt));
-	DataM.Cost.rhopPv	 = DataM.Cost.rhopPv * one;
-	DataM.Cost.rhomqPv	 = DataM.Cost.rhomqPv * one;
-	DataM.Cost.rhoMqPv	 = DataM.Cost.rhoMqPv * one;
-	DataM.Cost.rhopWi = DataM.Cost.rhopWi * one;
-	DataM.Cost.rhomqWi = DataM.Cost.rhomqWi * one;
-	DataM.Cost.rhoMqWi = DataM.Cost.rhoMqWi * one;
+	DataM.Cost.rhopPv	 = DataM.Cost.rhopPv(:,(1:lenEt));
+	DataM.Cost.rhomqPv	 = DataM.Cost.rhomqPv(:,(1:lenEt));
+	DataM.Cost.rhoMqPv	 = DataM.Cost.rhoMqPv(:,(1:lenEt));
+	DataM.Cost.rhopWi = DataM.Cost.rhopWi(:,(1:lenEt));
+	DataM.Cost.rhomqWi = DataM.Cost.rhomqWi(:,(1:lenEt));
+	DataM.Cost.rhoMqWi = DataM.Cost.rhoMqWi(:,(1:lenEt));
 
 
 

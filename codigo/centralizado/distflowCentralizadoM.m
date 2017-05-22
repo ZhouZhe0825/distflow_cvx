@@ -229,8 +229,8 @@ cvx_begin
 	0 <= vExpr + (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
 
 	cDv >= 0;
-	cDv >= (v - (1+Data.Cost.delta))*diag(Data.Cost.m);
-	cDv >= (v - (1-Data.Cost.delta))*diag(-Data.Cost.m);
+	cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));
+	cDv >= - Data.Cost.m.*(v - (1-Data.Cost.delta));
 
 	% Restricciones de arcos de la Red
 	z(Tupm,:) + z(Tdownm,:) == y(Tupm,:);

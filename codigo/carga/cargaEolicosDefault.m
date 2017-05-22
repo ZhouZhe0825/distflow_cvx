@@ -71,7 +71,7 @@ function [Data] = cargaEolicosDefault(Data,Eolicos)
             for j = 1:lenVar
                 if strcmp(vars(j).name, 'P_mec') && vars(j).undefBus
                     P_mec = vars(j).data;
-                elseif  strcmp(vars(j).name, 'n_') && vars(j).undefBus
+                elseif strcmp(vars(j).name, 'n_') && vars(j).undefBus
                     n_ = vars(j).data;
                 end
             end
