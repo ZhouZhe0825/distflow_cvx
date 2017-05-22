@@ -48,8 +48,8 @@ Trafo1.cambio = 1;
 Trafos = [Trafo1];
 
 % Caps
-Cap1.TP = [0];
-Cap1.N = .005;
+Cap1.N = [0];
+Cap1.TP = .005;
 Cap1.nod = 9;
 Cap1.ini = 0;
 Cap1.cambio = 1;

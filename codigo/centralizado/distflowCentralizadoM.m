@@ -27,16 +27,16 @@ end
 tnnLow = (1 + Data.Red.Bus.NtrLow.*Data.Red.Bus.Tap);
 tnnTop = (1 + Data.Red.Bus.NtrTop.*Data.Red.Bus.Tap);
 
-NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
-NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
+NcpCapL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow;
+NcpCapT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop;
 
-NcpvL = Data.Red.Bus.Ncp.*(Data.Red.Bus.uLow).^2;
-NcpvT = Data.Red.Bus.Ncp.*(Data.Red.Bus.uTop).^2;
+NcpvL = Data.Red.Bus.Cap.*(Data.Red.Bus.uLow).^2;
+NcpvT = Data.Red.Bus.Cap.*(Data.Red.Bus.uTop).^2;
 
-NcpCapLvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uLow).^2;
-NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
-NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
-NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
+NcpCapLvL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow.*(Data.Red.Bus.uLow).^2;
+NcpCapTvT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop.*(Data.Red.Bus.uTop).^2;
+NcpCapLvT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow.*(Data.Red.Bus.uTop).^2;
+NcpCapTvL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop.*(Data.Red.Bus.uLow).^2;
 
 
 % Aire Acondicionado
@@ -120,7 +120,7 @@ cvx_begin
 	variable qG(n, Config.Etapas); % Potencia reactiva generada en el nodo i
 
 	variable qCp(n, Config.Etapas); % reactive power demand in i
-	variable Cap(n, Config.Etapas) integer;
+	variable Ncp(n, Config.Etapas) integer;
 	
 	variable pGTras(n, Config.Etapas);
 	variable qGTras(n, Config.Etapas);
@@ -148,26 +148,26 @@ cvx_begin
  	expression lNorm(m, Config.Etapas, 3);
 	expression vExpr(n, Config.Etapas);
 	expression vApp(n, Config.Etapas, 2);
-	expression CapDif(n,Config.Etapas);
-	expression TapDif(n,Config.Etapas);
+	expression NcpDif(n,Config.Etapas);
+	expression NtrDif(n,Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas,1); 
 	expression fopt_expr; 
 	
 	
 	%% Funcion objetivo
-	CapDif(:,1) = Data.Red.Bus.CapIni;
-	CapDif(:,(2:Config.Etapas)) = Cap(:,(2:Config.Etapas)) - Cap(:,(1:Config.Etapas-1));
+	NcpDif(:,1) = Data.Red.Bus.NcpIni;
+	NcpDif(:,(2:Config.Etapas)) = Ncp(:,(2:Config.Etapas)) - Ncp(:,(1:Config.Etapas-1));
 
-	TapDif(:,1) = Data.Red.Bus.NtrIni;
-	TapDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
+	NtrDif(:,1) = Data.Red.Bus.NtrIni;
+	NtrDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
 		
 	tfopt_expr = ...
 		sum(Data.Cost.piPTras.*pGTras,1) ...
 		+ sum(Data.Cost.cdv.*cDv,1) ...
 		+ sum(cqGTras,1) ...
-		+ sum(Data.Cost.cCap.*(CapDif.^2),1) ...
-		+ sum(Data.Cost.cTap.*(TapDif.^2),1) ...
+		+ sum(Data.Cost.cCap.*(NcpDif.^2),1) ...
+		+ sum(Data.Cost.cTap.*(NtrDif.^2),1) ...
 		+ sum(Data.Cost.cY.*y,1) ...
 		+ sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1) ...
 		;
@@ -191,13 +191,13 @@ cvx_begin
 	qN - qC + qG == 0;
 	
 	% Restricciones de capacitores
-	Cap >= Data.Red.Bus.CapLow;
-	Cap <= Data.Red.Bus.CapTop;
+	Ncp >= Data.Red.Bus.NcpLow;
+	Ncp <= Data.Red.Bus.NcpTop;
 
-	qCp >= NcpCapL.*v + NcpvL.*Cap - NcpCapLvL;
-	qCp >= NcpCapT.*v + NcpvT.*Cap - NcpCapTvT;
-	qCp <= NcpCapL.*v + NcpvT.*Cap - NcpCapLvT;
-	qCp <= NcpCapT.*v + NcpvL.*Cap - NcpCapTvL;
+	qCp >= NcpCapL.*v + NcpvL.*Ncp - NcpCapLvL;
+	qCp >= NcpCapT.*v + NcpvT.*Ncp - NcpCapTvT;
+	qCp <= NcpCapL.*v + NcpvT.*Ncp - NcpCapLvT;
+	qCp <= NcpCapT.*v + NcpvL.*Ncp - NcpCapTvL;
 	
 	% Restricciones conica de corriente
 	lQoL(:,:,1) = 2 * P;
@@ -601,7 +601,7 @@ Var.Red.Bus.pG	 = 	pG	;
 Var.Red.Bus.qG	 = 	qG	;
 
 Var.Red.Bus.qCp	 = 	qCp	;
-Var.Red.Bus.Cap	 = 	Cap	;
+Var.Red.Bus.Ncp	 = 	Ncp	;
 
 Var.Red.Bus.PTras	 = 	pGTras	;
 Var.Red.Bus.QTras	 = 	qGTras	;

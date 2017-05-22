@@ -21,11 +21,11 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 	% 4D
 	DataNxN.Red.Bus.alpha	 = 	replicateMat4_4(	DataNxN.Red.Bus.alpha	,Config.Etapas);
 	% 3D
-	DataNxN.Red.Bus.CapLow	 = 	replicateMat3_3(	DataNxN.Red.Bus.CapLow	,Config.Etapas);
-	DataNxN.Red.Bus.CapTop	 = 	replicateMat3_3(	DataNxN.Red.Bus.CapTop	,Config.Etapas);
+	DataNxN.Red.Bus.NcpLow	 = 	replicateMat3_3(	DataNxN.Red.Bus.NcpLow	,Config.Etapas);
+	DataNxN.Red.Bus.NcpTop	 = 	replicateMat3_3(	DataNxN.Red.Bus.NcpTop	,Config.Etapas);
 	DataNxN.Red.Bus.indCap	 = 	replicateMat3_3(	DataNxN.Red.Bus.indCap	,Config.Etapas);
 	DataNxN.Red.Bus.indTap	 = 	replicateMat3_3(	DataNxN.Red.Bus.indTap	,Config.Etapas);
-	DataNxN.Red.Bus.Ncp	 = 	replicateMat3_3(	DataNxN.Red.Bus.Ncp	,Config.Etapas);
+	DataNxN.Red.Bus.Cap	 = 	replicateMat3_3(	DataNxN.Red.Bus.Cap	,Config.Etapas);
 	DataNxN.Red.Bus.Tap	 = 	replicateMat3_3(	DataNxN.Red.Bus.Tap	,Config.Etapas);
 	DataNxN.Red.Bus.pCLow	 = 	replicateMat3_2(	DataNxN.Red.Bus.pCLow(:,Et)	,1);
 	DataNxN.Red.Bus.qCLow	 = 	replicateMat3_2(	DataNxN.Red.Bus.qCLow(:,Et)	,1);

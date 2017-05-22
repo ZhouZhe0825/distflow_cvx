@@ -68,19 +68,19 @@ for estT = 1:size(Trafos,1)
 end
 
 %% Capacitores
-Data.Red.Bus.CapLow = Data.Red.Bus.uLow * 0;
-Data.Red.Bus.CapTop = Data.Red.Bus.CapLow;
-Data.Red.Bus.CapIni = Data.Red.Bus.CapLow;
-Data.Red.Bus.indCap = Data.Red.Bus.CapLow;
-Data.Red.Bus.Ncp = zeros(n, 1);
+Data.Red.Bus.NcpLow = Data.Red.Bus.uLow * 0;
+Data.Red.Bus.NcpTop = Data.Red.Bus.NcpLow;
+Data.Red.Bus.NcpIni = Data.Red.Bus.NcpLow;
+Data.Red.Bus.indCap = Data.Red.Bus.NcpLow;
+Data.Red.Bus.Cap = zeros(n, 1);
 
 
 for estC = 1:size(Caps,1)
-	Data.Red.Bus.CapLow(Caps(estC).nod) = min(Caps(estC).TP);
-	Data.Red.Bus.CapTop(Caps(estC).nod) = max(Caps(estC).TP);
-	Data.Red.Bus.CapIni(Caps(estC).nod) = Caps(estC).ini;
+	Data.Red.Bus.NcpLow(Caps(estC).nod) = min(Caps(estC).N);
+	Data.Red.Bus.NcpTop(Caps(estC).nod) = max(Caps(estC).N);
+	Data.Red.Bus.NcpIni(Caps(estC).nod) = Caps(estC).ini;
 	Data.Red.Bus.indCap(Caps(estC).nod) = 1;
-	Data.Red.Bus.Ncp(Caps(estC).nod) = Caps(estC).N;
+	Data.Red.Bus.Cap(Caps(estC).nod) = Caps(estC).TP;
 end
 
 %% Trasmision

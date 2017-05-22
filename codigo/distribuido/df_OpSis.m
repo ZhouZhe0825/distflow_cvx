@@ -27,16 +27,16 @@ function [Var, opt, status] = df_OpSis(Data, Config, findOpt, DistrInfo)
 	FreeY = Data.Red.Branch.T .* (1 - (Data.Red.Branch.yTop .* Data.Red.Branch.yLow));
 	NoT = 1 - Data.Red.Branch.T;
 
-	NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
-	NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
+	NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.NcpLow;
+	NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.NcpTop;
 
 	NcpvL = Data.Red.Bus.Ncp.*(Data.Red.Bus.uLow).^2;
 	NcpvT = Data.Red.Bus.Ncp.*(Data.Red.Bus.uTop).^2;
 
-	NcpCapLvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uLow).^2;
-	NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
-	NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
-	NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
+	NcpCapLvL = Data.Red.Bus.Ncp.*Data.Red.Bus.NcpLow.*(Data.Red.Bus.uLow).^2;
+	NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.NcpTop.*(Data.Red.Bus.uTop).^2;
+	NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.NcpLow.*(Data.Red.Bus.uTop).^2;
+	NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.NcpTop.*(Data.Red.Bus.uLow).^2;
 
 	tnnLow = (1 + Data.Red.Bus.NtrLow.*Data.Red.Bus.Ntr);
 	tnnTop = (1 + Data.Red.Bus.NtrTop.*Data.Red.Bus.Ntr);
@@ -117,8 +117,8 @@ function [Var, opt, status] = df_OpSis(Data, Config, findOpt, DistrInfo)
             qN(Data.Red.Bus.indCG0,:,:) == 0;
             
 
-			Cap >= Data.Red.Bus.CapLow;
-			Cap <= Data.Red.Bus.CapTop;
+			Cap >= Data.Red.Bus.NcpLow;
+			Cap <= Data.Red.Bus.NcpTop;
 
 			% Restricciones de potencias de la red
 % % % % 			if fixed
@@ -131,7 +131,7 @@ function [Var, opt, status] = df_OpSis(Data, Config, findOpt, DistrInfo)
 % % % % 			end
 
 			%% Funcion objetivo
-            CapDif(:,1,1) = Data.Red.Bus.CapIni;
+            CapDif(:,1,1) = Data.Red.Bus.NcpIni;
             CapDif(:,1,(2:Config.Etapas)) = Cap(:,1,(2:Config.Etapas)) - Cap(:,1,(1:Config.Etapas-1));
 
             TapDif(:,1,1) = Data.Red.Bus.NtrIni;

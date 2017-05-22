@@ -28,7 +28,7 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 	VarNxN.Red.Bus.qG	 = permute(full(	VarM.Red.Bus.qG	), [1 3 2]);
 
 	VarNxN.Red.Bus.qCp	 = permute(full(	VarM.Red.Bus.qCp	), [1 3 2]);
-	VarNxN.Red.Bus.Cap	 = permute(full(	VarM.Red.Bus.Cap	), [1 3 2]);
+	VarNxN.Red.Bus.Ncp	 = permute(full(	VarM.Red.Bus.Ncp	), [1 3 2]);
 
 	VarNxN.Red.Bus.PTras	 = permute(full(	VarM.Red.Bus.PTras	), [1 3 2]);
 	VarNxN.Red.Bus.QTras	 = permute(full(	VarM.Red.Bus.QTras	), [1 3 2]);
