@@ -191,10 +191,10 @@ leyenda = ['------------------------------------ ' outFilename_mat ' -----------
 
 [Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
 
-% [diff_m_nxn] = checkEqualStructs(VarM2NxN(Var_m, Data), Var_nxn, 'Var_m', 'Var_nxn', 1e-5)
+[diff_m_nxn] = checkEqualStructs(VarM2NxN(Var_m, Data), Var_nxn, 'Var_m', 'Var_nxn', 1e-5)
 
-% xlswrite([Config.workspace_var_file '_diffs.xlsx'], diff_m_nxn);
+xlswrite([Config.workspace_var_file '_diffs.xlsx'], diff_m_nxn);
 
-% printSalidasDistflowNxN(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_nxn, [], [], [], [], []);
-% printSalidasDistflowM(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_m, [], [], [], [], []);
+printSalidasDistflowNxN(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_nxn, [], [], [], [], []);
+printSalidasDistflowM(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_m, [], [], [], [], []);
 
