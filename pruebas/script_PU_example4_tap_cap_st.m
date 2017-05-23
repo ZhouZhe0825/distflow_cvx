@@ -1,34 +1,23 @@
-tol = 5e-8;
-CantHorasEtapa = 1;
-iniEtapa = 1;
-
-gama = .25;
-
-gama_ini = gama;
-gama_fin = gama;
-TopIT = 6;
-TopSecs = 60;
-
-%% Declaracion de constantes
+%% Declaracion de parametros de simulacion
 
 % Eolicos
 Eol1.nod = 5;
 Eol1.type = @Dfig_200kw;
-Eol1.fileG = 'Dfig_200kw_P_n_.csv';
-Eol1.fileC = 'costosDfig.csv';
+Eol1.fileG = 'casos\gen\dfig\Dfig_200kw_P_n_.csv';
+Eol1.fileC = 'casos\costos\dfig\costosDfig.csv';
 
 Eolicos = [];
 
 % Solar
 Pv1.nod = 4;
 Pv1.type = @PvGen_sm;
-Pv1.fileG = 'pvgen.csv';
-Pv1.fileC = 'costosPv.csv';
+Pv1.fileG = 'casos\gen\pv\pvgen.csv';
+Pv1.fileC = 'casos\costos\pv\costosPv.csv';
 
 Pv2.nod = 7;
 Pv2.type = @PvGen_sm;
-Pv2.fileG = 'pvgen.csv';
-Pv2.fileC = 'costosPv.csv';
+Pv2.fileG = 'casos\gen\pv\pvgen.csv';
+Pv2.fileC = 'casos\costos\pv\costosPv.csv';
 
 Solares = [];
 
@@ -63,7 +52,7 @@ Carga1.qC = Carga1.pC *.015;
 Carga1.dur = 3;
 Carga1.nMultipTop = 1.1;
 Carga1.nMultipLow = .75;
-Carga1.fileU = 'betaE.csv';
+Carga1.fileU = 'casos\util\betaE.csv';
 Carga1.nod = 5;
 
 Carga2.TP = [0 1];
@@ -72,7 +61,7 @@ Carga2.qC = Carga2.pC *.015;
 Carga2.dur = 2;
 Carga2.nMultipTop = 1.1;
 Carga2.nMultipLow = .75;
-Carga2.fileU = 'betaE.csv';
+Carga2.fileU = 'casos\util\betaE.csv';
 Carga2.nod = 4;
 
 Cargas = [];
@@ -96,11 +85,11 @@ App2.nMultipLow = .95;
 App2.alpha = 0.1;
 App2.tgPhi = .2;
 
-App = [App1, App2];
+App = [App1;App2];
 
 % Aires acondicionados
 Ac1.nod = [2;3;4;5;6;7;8;9];
-Ac1.fileT = 'ac.csv';
+Ac1.fileT = 'casos\PU_example\ac\ac.csv';
 Ac1.tempIni = 21;
 Ac1.epsilon = .16;
 Ac1.eta = 1666.67;
@@ -116,59 +105,20 @@ Switches.all = false;
 
 %% Nombres de archivos
 % 
-outFilename_pref = 'PU_example4_tap_cap_st';
-outFilename_nxn = [outFilename_pref, '_nxn'];
-outFilename_m = [outFilename_pref, '_m'];
-outFilename_mat = [outFilename_pref, 'nxn2m'];
+inFilename = 'casos\PU_example\PU_example4.xls';
+fileCurvaCarga = 'casos\PU_example\cargas\carga_PU_example.csv';
+fileUtilBetaT = 'casos\util\betaT.csv';
+fileTemp = 'casos\temp\tempInvierno.csv';
+fileCostosTension = 'casos\costos\tension\costosTension.csv';
+fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
 
-inFilename = 'PU_example4.xls';
-fileCurvaCarga = 'carga_PU_example.csv';
-fileUtilBetaT = 'betaT.csv';
-fileTemp = 'tempInvierno.csv';
-fileCostosTension = 'costosTension.csv';
-fileCostosTras = 'costosTrasmision.csv';
+%% Configuracion de simulacion
+iniEtapa = 1;
+CantHorasEtapa = 1;
 
-%% Carga de datos
-%% Red
-[Data] = load_distflow_case(inFilename, 'bus_data_CVX', 'branch_data_CVX', Trafos, Caps, Cargas, App, Switches);
-
-[Data] = loadCargaCuartHoraria(fileCurvaCarga, Data);
-
-
-%% Generadores
-% Eolicos
-
-[Data] = cargaEolicosDefault(Data, Eolicos);
-
-% Fotovoltaicos
-
-[Data] = cargaPvDefault(Data, Solares);
-
-%% Utilidad
-
-% Configuraciones manuales
-
-[Data] = cargaUtilDefault(Data, fileUtilBetaT, Cargas, App);
-
-%% Parametros de Storage
-
-% Aire Acondicionado
-
-[Data] = cargaACDefault(Data, fileTemp, ACs);
-
-% Parametros de Baterias
-
-[Data] = cargaBatDefault(Data, Baterias);
-
-%% Costos
-
-[Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos);
-
-%% Configuracion de parametros de solvers para problemas y subproblemas
-% Subproblemas distribuidos
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
-Config.workspace_var_file = outFilename_mat;
+Config.outFilename = 'PU_example4_tap_cap_st';
 
 % Centralizado
 Config.Centr = [];
@@ -183,22 +133,11 @@ Config.Centr = [];
 % Config.Centr{2, 1} = 'TimeLimit';
 % Config.Centr{2, 2} = 600;
 
-%% Llamada al modelo
+%% Carga de datos
 
-cantTaps = length(Trafos);
-cantCaps = length(Caps);
-cantCargs = length(Cargas);
+[Data] = loadData(Trafos, Caps, Switches, App, Eolicos, Solares, Baterias, Cargas, ACs, inFilename, fileCurvaCarga, fileUtilBetaT, fileTemp, fileCostosTension, fileCostosTras);
 
-leyenda = ['------------------------------------ ' outFilename_mat ' ------------------------------------']
+%% Correr Simulacion
 
-[Var_nxn, opt_nxn, DataNxN] = llamarCentralizadoNxN(Data, Config);
-
-[Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
-
-[diff_m_nxn] = checkEqualStructs(VarM2NxN(Var_m, Data), Var_nxn, 'Var_m', 'Var_nxn', 1e-5)
-
-xlswrite([Config.workspace_var_file '_diffs.xlsx'], diff_m_nxn);
-
-printSalidasDistflowNxN(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_nxn, [], [], [], [], []);
-printSalidasDistflowM(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, outFilename_m, [], [], [], [], []);
+runSimulation(Data, Trafos, Caps, Switches, App, Eolicos, Solares, Baterias, Cargas, ACs, inFilename, fileCurvaCarga, fileUtilBetaT, fileTemp, fileCostosTension, fileCostosTras, Config)
 

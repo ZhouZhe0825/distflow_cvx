@@ -1,4 +1,4 @@
-function [Data] = loadCargaCuartHoraria(filename, Data)
+function [Data] = loadCargaCuartHoraria(Data, filename)
 
 	n = size(Data.Red.Branch.T,1);
     [vars] = loadCsvData(filename,n);
