@@ -11,7 +11,7 @@ function [Data] = cargaPvDefault(Data, Solares)
 	Data.Gen.Pv.cr = Data.Gen.Pv.I;
     
     for i =1:length(Solares)
-        [vars] = loadCsvData(Solares(i).fileG,n);
+        [vars] = loadCsvDataSeries(Solares(i).fileG,n);
 
         pPvg = [];
         
@@ -22,14 +22,17 @@ function [Data] = cargaPvDefault(Data, Solares)
             end
         end
         if ~isempty(pPvg)
-            [sTop_ct, pgTop_ct, cv_ct, cr_ct] = Solares(i).type();
+            fields = {'sTop_ct', 'pgTop_ct', 'cv_ct', 'cr_ct'};
+            S = loadCsvDef(Solares(i).type(), fields);
             Data.Gen.Pv.I(Solares(i).nod) = 1;
-            Data.Gen.Pv.sTop(Solares(i).nod,:) = sTop_ct;
+            Data.Gen.Pv.sTop(Solares(i).nod,:) = S.sTop_ct;
             Data.Gen.Pv.xiTop(Solares(i).nod,:) = Data.Gen.Pv.sTop(Solares(i).nod,:) .^ 2;											
-            Data.Gen.Pv.pgTop(Solares(i).nod,:) = pgTop_ct;
-            Data.Gen.Pv.cv(Solares(i).nod,:) = cv_ct;
-            Data.Gen.Pv.cr(Solares(i).nod,:) = cr_ct;
+            Data.Gen.Pv.pgTop(Solares(i).nod,:) = S.pgTop_ct;
+            Data.Gen.Pv.cv(Solares(i).nod,:) = S.cv_ct;
+            Data.Gen.Pv.cr(Solares(i).nod,:) = S.cr_ct;
             Data.Gen.Pv.pPvg(Solares(i).nod,:) = pPvg;
+
+            
         end
 
     end

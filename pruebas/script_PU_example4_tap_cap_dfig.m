@@ -2,7 +2,7 @@
 
 % Eolicos
 Eol1.nod = 5;
-Eol1.type = @Dfig_200kw;
+Eol1.type = 'casos\gen\dfig\Dfig_200kw_def.csv';
 Eol1.fileG = 'casos\gen\dfig\Dfig_200kw_P_n_.csv';
 Eol1.fileC = 'casos\costos\dfig\costosDfig.csv';
 
@@ -10,12 +10,12 @@ Eolicos = [Eol1];
 
 % Solar
 Pv1.nod = 4;
-Pv1.type = @PvGen_sm;
+Pv1.type = 'casos\gen\pv\pv_def.csv';
 Pv1.fileG = 'casos\gen\pv\pvgen.csv';
 Pv1.fileC = 'casos\costos\pv\costosPv.csv';
 
 Pv2.nod = 7;
-Pv2.type = @PvGen_sm;
+Pv2.type = 'casos\gen\pv\pv_def.csv';
 Pv2.fileG = 'casos\gen\pv\pvgen.csv';
 Pv2.fileC = 'casos\costos\pv\costosPv.csv';
 
@@ -23,7 +23,7 @@ Solares = [];
 
 % Baterias
 Bat1.nod = 5;
-Bat1.type = @Bat_def;
+Bat1.type = 'casos\bat\bat_def.csv';
 Bat1.EIni = .5;
 
 Baterias = [];

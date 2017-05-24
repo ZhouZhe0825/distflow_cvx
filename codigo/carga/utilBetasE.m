@@ -4,7 +4,7 @@ function [betaE] = utilBetasE(Data,Cargas)
     et = size(Data.Red.Bus.pCLow,2);
     betaE = zeros(n,et);
     for i = 1:length(Cargas)
-        [vars] = loadCsvData(Cargas(i).fileU,n);
+        [vars] = loadCsvDataSeries(Cargas(i).fileU,n);
         lenVar = length(vars);
         betaE_aux = [];
         if lenVar == 1

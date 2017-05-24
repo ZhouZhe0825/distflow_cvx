@@ -1,4 +1,4 @@
-function [vars] = loadCsvData(filename,n)
+function [vars] = loadCsvDataSeries(filename,n)
 
 aux = importdata(filename);
 csv.nums = aux.data;

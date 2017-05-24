@@ -3,7 +3,7 @@ function [betaT] = utilBetasT(Data,filename)
 	n = size(Data.Red.Branch.T,1);
     et = size(Data.Red.Bus.pCLow,2);
     betaT = zeros(n,et);
-    [vars] = loadCsvData(filename,n);
+    [vars] = loadCsvDataSeries(filename,n);
     lenVar = length(vars);
     betaT_aux = [];
     if lenVar == 1

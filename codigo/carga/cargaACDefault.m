@@ -17,7 +17,7 @@ function [Data] = cargaACDefault(Data, fileTemp, ACs)
 
 
     for i =1:length(ACs)
-        [vars] = loadCsvData(ACs(i).fileT,n);
+        [vars] = loadCsvDataSeries(ACs(i).fileT,n);
 
         tempLow = [];
         tempTop = [];

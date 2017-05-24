@@ -1,7 +1,7 @@
 function [piPTras, piQmtras, piQMtras] = costosTrasmision(Data,filename)
 
 	n = size(Data.Red.Branch.T,1);
-    [vars] = loadCsvData(filename,n);
+    [vars] = loadCsvDataSeries(filename,n);
     lenVar = length(vars);
     piPTras = [];
     piQMtras = [];
