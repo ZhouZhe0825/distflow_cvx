@@ -73,15 +73,31 @@ function runSimulation(Data, Trafos, Caps, Switches, App, Eolicos, Solares, Bate
 
 	leyenda = ['------------------------------------ ' Config.outFilename ' ------------------------------------']
 
-	[Var_nxn, opt_nxn, DataNxN] = llamarCentralizadoNxN(Data, Config);
+    Var_nxn = [];
+    opt_nxn = [];
+    DataNxN = [];
+    if Config.runNxN
+    	[Var_nxn, opt_nxn, DataNxN] = llamarCentralizadoNxN(Data, Config);
+    else
+        [DataNxN] = reshapeDataNxN(Data, Config);
+    end
 
-	[Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
+    Var_m = [];
+    opt_m = [];
+    DataM = [];
+    if Config.runM
+    	[Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
+    end
 
 	save([outputDirOutputs, '\outputs.mat'],'Var_nxn','opt_nxn','DataNxN','Config','Var_m','opt_m','DataM');
 
 	diary('off');
 
-	printSalidasDistflowNxN(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_nxn'], [], [], [], [], []);
-	printSalidasDistflowM(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_m'], [], [], [], [], []);
+    if Config.runNxN
+        printSalidasDistflowNxN(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_nxn'], [], [], [], [], []);
+    end
+    if Config.runM
+        printSalidasDistflowM(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_m'], [], [], [], [], []);
+    end
 	
 end

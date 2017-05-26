@@ -119,6 +119,8 @@ CantHorasEtapa = 1;
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
 Config.outFilename = 'PU_example4_tap_cap_pv';
+Config.runNxN = true;
+Config.runM = true;
 
 % Centralizado
 Config.Centr = [];

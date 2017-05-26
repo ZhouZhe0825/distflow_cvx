@@ -1,4 +1,4 @@
-function [Data] = load_distflow_case(xls_file, bus_sheet, branch_sheet, Trafos, Caps, Cargas, App, Switches, cambioTap, cambioCap)
+function [Data] = load_distflow_case(xls_file, bus_sheet, branch_sheet, Trafos, Caps, Cargas, App, Switches)
 
 
 
