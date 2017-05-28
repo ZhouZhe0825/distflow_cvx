@@ -12,5 +12,5 @@ function [betaT] = utilBetasT(Data,filename)
         end
     end
     if ~isempty(betaT_aux)
-        betaT(Data.Red.Bus.indCons,:) = ones(size(Data.Red.Bus.indCons))*betaT_aux;
+        betaT = Data.Red.Bus.Icons*betaT_aux;
     end

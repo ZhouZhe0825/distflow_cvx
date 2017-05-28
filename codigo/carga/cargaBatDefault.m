@@ -1,29 +1,5 @@
 function [Data] = cargaBatDefault(Data, Baterias)
 
-    n = size(Data.Red.Branch.T,1);
-
-    
-	Data.St.Bat.I = zeros(size(Data.Red.Branch.T,1),1);
-	Data.St.Bat.cv = Data.St.Bat.I;
-	Data.St.Bat.cr = Data.St.Bat.I;
-	Data.St.Bat.epsilon = Data.St.Bat.I;
-	Data.St.Bat.eta = Data.St.Bat.I;
-	Data.St.Bat.pgTop = Data.St.Bat.I;
-	Data.St.Bat.pgLow = Data.St.Bat.I;
-	Data.St.Bat.sTop = Data.St.Bat.I;
-	Data.St.Bat.ETop = Data.St.Bat.I;
-	Data.St.Bat.ELow = Data.St.Bat.I;
-	Data.St.Bat.beta = Data.St.Bat.I;
-	Data.St.Bat.wU = Data.St.Bat.I;
-	Data.St.Bat.wOm = Data.St.Bat.I;
-	Data.St.Bat.m1 = Data.St.Bat.I;
-	Data.St.Bat.m2 = Data.St.Bat.I;
-	Data.St.Bat.m3 = Data.St.Bat.I;
-    Data.St.Bat.EIni = Data.St.Bat.I;
-    Data.St.Bat.xiTop = Data.St.Bat.I;
-    Data.St.Bat.kapa = Data.St.Bat.I;
-    Data.St.Bat.gama = Data.St.Bat.I;
-
     for i =1:length(Baterias)
             fields = {...
                 'cv','cr','epsilon','eta','pgTop','pgLow','sTop','ETop',...

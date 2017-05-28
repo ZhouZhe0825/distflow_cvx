@@ -8,12 +8,12 @@ function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTen
 
 [Data.Cost.rhopWi, Data.Cost.rhomqWi, Data.Cost.rhoMqWi] = costosDfig(Data,Eolicos);
 
-Data.Cost.cCap = Data.Red.Bus.indCap;
+Data.Cost.cCap = Data.Red.Bus.Icap;
 for i = 1:length(Caps)
 	Data.Cost.cCap(Caps(i).nod) = Caps(i).cambio;
 end    
 
-Data.Cost.cTap = Data.Red.Bus.indTap;
+Data.Cost.cTap = Data.Red.Bus.Itap;
 for i = 1:length(Trafos)
 	Data.Cost.cTap(Trafos(i).nod) = Trafos(i).cambio;
 end    

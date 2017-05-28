@@ -4,17 +4,6 @@ function [Data] = cargaACDefault(Data, fileTemp, ACs)
 
     n = size(Data.Red.Branch.T,1);
     et = size(Data.Red.Bus.pCLow,2);    
- 
-    Data.dt = .25;
-    Data.St.AC.I = zeros(size(Data.Red.Branch.T,1),1);
-    Data.St.AC.tempLow = zeros(n,et);
-    Data.St.AC.tempTop = zeros(n,et);
-    Data.St.AC.tempPref = zeros(n,et);
-    Data.St.AC.tempIni = Data.St.AC.I;
-    Data.St.AC.epsilon = zeros(n,et);
-    Data.St.AC.eta = zeros(n,et);
-    Data.St.AC.beta = zeros(n,et);
-
 
     for i =1:length(ACs)
         [vars] = loadCsvDataSeries(ACs(i).fileT,n);
@@ -41,13 +30,13 @@ function [Data] = cargaACDefault(Data, fileTemp, ACs)
         if ~isempty(tempLow) && ~isempty(tempTop) && ~isempty(tempPref) && ~isempty(beta)
 
             Data.St.AC.I(ACs(1).nod) = 1;
-            Data.St.AC.tempLow = tempLow;
-            Data.St.AC.tempTop = tempTop;
-            Data.St.AC.tempPref = tempPref;
-            Data.St.AC.tempIni = Data.St.AC.I * ACs(i).tempIni;
-            Data.St.AC.epsilon = repmat(Data.St.AC.I, [1, et]) * ACs(i).epsilon;
-            Data.St.AC.eta = repmat(Data.St.AC.I, [1, et]) * ACs(i).eta;
-            Data.St.AC.beta = beta;
+            Data.St.AC.tempLow(:,:) = tempLow;
+            Data.St.AC.tempTop(:,:) = tempTop;
+            Data.St.AC.tempPref(:,:) = tempPref;
+            Data.St.AC.tempIni(:,:) = Data.St.AC.I * ACs(i).tempIni;
+            Data.St.AC.epsilon(:,:) = repmat(Data.St.AC.I, [1, et]) * ACs(i).epsilon;
+            Data.St.AC.eta(:,:) = repmat(Data.St.AC.I, [1, et]) * ACs(i).eta;
+            Data.St.AC.beta(:,:) = beta;
             
             
         end

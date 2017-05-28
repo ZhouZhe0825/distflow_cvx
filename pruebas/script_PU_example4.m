@@ -34,7 +34,7 @@ Trafo1.TP = .005;
 Trafo1.nod = 1;
 Trafo1.ini = 0;
 Trafo1.cambio = 1;
-Trafos = [Trafo1];
+Trafos = [];
 
 % Caps
 Cap1.N = [0];
@@ -42,7 +42,7 @@ Cap1.TP = .005;
 Cap1.nod = 9;
 Cap1.ini = 0;
 Cap1.cambio = 1;
-Caps = [Cap1];
+Caps = [];
 
 
 % Cargas
@@ -114,7 +114,7 @@ fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
 
 %% Configuracion de simulacion
 iniEtapa = 1;
-CantHorasEtapa = 1;
+CantHorasEtapa = .25;
 
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
