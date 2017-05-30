@@ -562,7 +562,7 @@ toc
 Var.Red.Branch.P = P;
 Var.Red.Branch.Q = Q;
 Var.Red.Branch.l = l;
-Var.Red.Branch.z = z;
+Var.Red.Branch.z = round(z);
 Var.Red.Branch.y = y;
 Var.Red.Bus.w = w;
 

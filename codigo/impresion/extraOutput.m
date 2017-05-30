@@ -31,7 +31,7 @@ function extraOutput(Var, Data, Config, Header, outFilename)
 	lzr = l .* Data.Red.Branch.r .* z;
 
 	PQv = (P.^2 + Q.^2) ./ repmat(v, [1 n 1]).*Data.Red.Branch.T;
-	lRel = PQv ./ (l+eps);
+	lRel = abs(PQv) ./ (abs(l)+eps);
 	lRelz = lRel .* z;
 
     printVarNx1xT(h_p, Header.Bus, Header.Main, outFilename, 'pC - pG div pN');

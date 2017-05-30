@@ -24,12 +24,13 @@ Data.Red.Branch.r(:,:) = r+r';
 Data.Red.Branch.x(:,:) = x+x';
 Data.Red.Branch.lTop(:,:) = lTop+lTop';
 Data.Red.Branch.yTop(:,:) = Data.Red.Branch.T;
-Data.Red.Branch.yLow(:,:) = Data.Red.Branch.T * 0;
+Data.Red.Branch.yLow(:,:) = Data.Red.Branch.T;
 Data.Red.Branch.Tswitches(:,:) = Data.Red.Branch.T*0;
 
 if Switches.all
+    % Todos los arcos son decidibles
 	Data.Red.Branch.Tswitches(:,:) = Data.Red.Branch.T;
-    Data.Red.Branch.yLow(:,:) = Data.Red.Branch.T;
+    Data.Red.Branch.yLow(:,:) = Data.Red.Branch.T*0;
 end
     
 for i=1:length(Switches.i)
