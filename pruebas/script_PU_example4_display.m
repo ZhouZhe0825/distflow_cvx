@@ -20,26 +20,23 @@ Caps = [];
 Cargas = [];
 
 % Appliances
-App1.I = 1;
-App1.Pref = .8;
-App1.Low = .8;
-App1.Top = .8;
-App1.nMultipTop = 1.05;
-App1.nMultipLow = .95;
-App1.alpha = 0;
-App1.tgPhi = .2;
+App(1).I = 1;
+App(1).Pref = .8;
+App(1).Low = .8;
+App(1).Top = .8;
+App(1).nMultipTop = 1.05;
+App(1).nMultipLow = .95;
+App(1).alpha = 0;
+App(1).tgPhi = .2;
 
-App2.I = 2;
-App2.Pref = .2;
-App2.Low = 0;
-App2.Top = .2;
-App2.nMultipTop = 1.05;
-App2.nMultipLow = .95;
-App2.alpha = 0.1;
-App2.tgPhi = .2;
-
-App = [App1;App2];
-clear App1 App2;
+App(2).I = 2;
+App(2).Pref = .2;
+App(2).Low = 0;
+App(2).Top = .2;
+App(2).nMultipTop = 1.05;
+App(2).nMultipLow = .95;
+App(2).alpha = 0.1;
+App(2).tgPhi = .2;
 
 % Aires acondicionados
 ACs = [];
