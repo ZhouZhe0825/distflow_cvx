@@ -1,30 +1,31 @@
-function [Data] = loadData(Trafos, Caps, Switches, App, Eolicos, Solares, Baterias, Cargas, ACs, inFilename, fileCurvaCarga, fileUtilBetaT, fileTemp, fileCostosTension, fileCostosTras)
+function [Data] = loadData(DflowD)
 
-    [n,et,app] = DimensionDefault(inFilename,'bus_data_CVX',fileCurvaCarga,App);
+    [n,et,app] = DimensionDefault(DflowD.inFilename,'bus_data_CVX',DflowD.fileCurvaCarga,DflowD.App);
     Data = DataDefault(n,et,app);
 
 	%% Carga de datos
 	% Red
-	[Data] = load_distflow_case(Data, inFilename, 'bus_data_CVX', 'branch_data_CVX', Trafos, Caps, Cargas, App, Switches);
+	[Data] = load_distflow_case(Data, DflowD.inFilename, 'bus_data_CVX', 'branch_data_CVX', ...
+        DflowD.Trafos, DflowD.Caps, DflowD.Cargas, DflowD.App, DflowD.Switches);
 
-	[Data] = loadCargaCuartHoraria(Data, fileCurvaCarga);
+	[Data] = loadCargaCuartHoraria(Data, DflowD.fileCurvaCarga);
 
 	% Eolicos
-	[Data] = cargaEolicosDefault(Data, Eolicos);
+	[Data] = cargaEolicosDefault(Data, DflowD.Eolicos);
 
 	% Fotovoltaicos
-	[Data] = cargaPvDefault(Data, Solares);
+	[Data] = cargaPvDefault(Data, DflowD.Solares);
 
 	% Utilidad
-	[Data] = cargaUtilDefault(Data, fileUtilBetaT, Cargas, App);
+	[Data] = cargaUtilDefault(Data, DflowD.fileUtilBetaT, DflowD.Cargas, DflowD.App);
 
 	% Aire Acondicionado
-	[Data] = cargaACDefault(Data, fileTemp, ACs);
+	[Data] = cargaACDefault(Data, DflowD.fileTemp, DflowD.ACs);
 
 	% Baterias
-	[Data] = cargaBatDefault(Data, Baterias);
+	[Data] = cargaBatDefault(Data, DflowD.Baterias);
 
 	% Costos
-	[Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos);
+	[Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.fileCostosTension, DflowD.fileCostosTras, DflowD.Solares, DflowD.Eolicos);
 
 end

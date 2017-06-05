@@ -29,7 +29,14 @@ function [Data] = cargaACDefault(Data, fileTemp, ACs)
         end
         if ~isempty(tempLow) && ~isempty(tempTop) && ~isempty(tempPref) && ~isempty(beta)
 
-            Data.St.AC.I(ACs(1).nod) = 1;
+            nodsB = max(sign(abs(beta)),[],2);
+            nodsTT = max(sign(abs(tempTop)),[],2);
+            nodsTL = max(sign(abs(tempLow)),[],2);
+            nodsTP = max(sign(abs(tempPref)),[],2);
+            
+            nods = max(max(max(nodsB,nodsTT),nodsTL),nodsTP);
+            
+            Data.St.AC.I = nods;
             Data.St.AC.tempLow(:,:) = tempLow;
             Data.St.AC.tempTop(:,:) = tempTop;
             Data.St.AC.tempPref(:,:) = tempPref;

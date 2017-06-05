@@ -1,7 +1,7 @@
-function runSimulation(Data, Trafos, Caps, Switches, App, Eolicos, Solares, Baterias, Cargas, ACs, inFilename, fileCurvaCarga, fileUtilBetaT, fileTemp, fileCostosTension, fileCostosTras, Config)
-	cantTaps = length(Trafos);
-	cantCaps = length(Caps);
-	cantCargs = length(Cargas);
+function runSimulation(Data, DflowD, Config)
+	cantTaps = length(DflowD.Trafos);
+	cantCaps = length(DflowD.Caps);
+	cantCargs = length(DflowD.Cargas);
 
 	date_post = datestr(now,'yyyymmdd_HHMMSS');
 
@@ -11,8 +11,8 @@ function runSimulation(Data, Trafos, Caps, Switches, App, Eolicos, Solares, Bate
 	mkdir(outputDirInputs);
 	mkdir(outputDirOutputs);
 
-	for i = 1:length(Eolicos)
-		eol = Eolicos(i);
+	for i = 1:length(DflowD.Eolicos)
+		eol = DflowD.Eolicos(i);
 		newFileG = ['eol',num2str(i),'fileG.csv'];
 		newFileC = ['eol',num2str(i),'fileC.csv'];
 		copyrename(eol.fileG,newFileG,outputDirInputs);
@@ -20,8 +20,8 @@ function runSimulation(Data, Trafos, Caps, Switches, App, Eolicos, Solares, Bate
 		eol.fileG = [outputDirInputs, '\', newFileG];
 		eol.fileC = [outputDirInputs, '\', newFileC];
 	end
-	for i = 1:length(Solares)
-		sol = Solares(i);
+	for i = 1:length(DflowD.Solares)
+		sol = DflowD.Solares(i);
 		newFileG = ['sol',num2str(i),'fileG.csv'];
 		newFileC = ['sol',num2str(i),'fileC.csv'];
 		copyrename(sol.fileG,newFileG,outputDirInputs);
@@ -29,39 +29,38 @@ function runSimulation(Data, Trafos, Caps, Switches, App, Eolicos, Solares, Bate
 		sol.fileG = [outputDirInputs, '\', newFileG];
 		sol.fileC = [outputDirInputs, '\', newFileC];
 	end
-	for i = 1:length(Cargas)
-		carg = Cargas(i);
+	for i = 1:length(DflowD.Cargas)
+		carg = DflowD.Cargas(i);
 		newFileU = ['carg',num2str(i),'fileU.csv'];
 		copyrename(carg.fileU,newFileU,outputDirInputs);
 		carg.fileU = [outputDirInputs, '\', newFileU];
 	end
-	for i = 1:length(ACs)
-		ac = ACs(i);
+	for i = 1:length(DflowD.ACs)
+		ac = DflowD.ACs(i);
 		newFileT = ['ac',num2str(i),'fileT.csv'];
 		copyrename(ac.fileT,newFileT,outputDirInputs);
 		ac.fileT = [outputDirInputs, '\', newFileT];
 	end
-	copyrename(inFilename,'inFilename.xls',outputDirInputs);
-	inFilename = [outputDirInputs, '\inFilename.xls'];
+	copyrename(DflowD.inFilename,'inFilename.xls',outputDirInputs);
+	DflowD.inFilename = [outputDirInputs, '\inFilename.xls'];
 
-	copyrename(fileCurvaCarga,'fileCurvaCarga.csv',outputDirInputs);
-	fileCurvaCarga = [outputDirInputs, '\fileCurvaCarga.csv'];
+	copyrename(DflowD.fileCurvaCarga,'fileCurvaCarga.csv',outputDirInputs);
+	DflowD.fileCurvaCarga = [outputDirInputs, '\fileCurvaCarga.csv'];
 
-	copyrename(fileUtilBetaT,'betaT.csv',outputDirInputs);
-	fileUtilBetaT = [outputDirInputs, '\betaT.csv'];
+	copyrename(DflowD.fileUtilBetaT,'betaT.csv',outputDirInputs);
+	DflowD.fileUtilBetaT = [outputDirInputs, '\betaT.csv'];
 
-	copyrename(fileTemp,'fileTemp.csv',outputDirInputs);
-	fileTemp = [outputDirInputs, '\fileTemp.csv'];
+	copyrename(DflowD.fileTemp,'fileTemp.csv',outputDirInputs);
+	DflowD.fileTemp = [outputDirInputs, '\fileTemp.csv'];
 
-	copyrename(fileCostosTension,'fileCostosTension.csv',outputDirInputs);
-	fileCostosTension = [outputDirInputs, '\fileCostosTension.csv'];
+	copyrename(DflowD.fileCostosTension,'fileCostosTension.csv',outputDirInputs);
+	DflowD.fileCostosTension = [outputDirInputs, '\fileCostosTension.csv'];
 
-	copyrename(fileCostosTras,'fileCostosTras.csv',outputDirInputs);
-	fileCostosTras = [outputDirInputs, '\fileCostosTras.csv'];
+	copyrename(DflowD.fileCostosTras,'fileCostosTras.csv',outputDirInputs);
+	DflowD.fileCostosTras = [outputDirInputs, '\fileCostosTras.csv'];
 
 	save([outputDirInputs,'\inputs.mat'],...
-		'Data','inFilename','Trafos','Caps','Cargas','App','Switches','fileCurvaCarga','Eolicos','Solares',...
-		'fileUtilBetaT','fileTemp','Baterias', 'ACs','fileCostosTension','fileCostosTras','Config');
+		'Data','DflowD','Config');
 
 	diary([outputDirOutputs, '\console.log']);
 
