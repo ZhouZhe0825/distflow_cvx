@@ -1,6 +1,5 @@
 function DflowD = cargaDflowDDefault()
 
-	DflowD.Data = [];
 	DflowD.Trafos = [];
 	DflowD.ACs = [];
 
@@ -25,12 +24,12 @@ function DflowD = cargaDflowDDefault()
 	DflowD.Caps = [];
 	DflowD.Cargas = [];
 	DflowD.Eolicos = [];
-	DflowD.fileCostosTension = [];
-	DflowD.fileCostosTras = [];
-	DflowD.fileCurvaCarga = [];
-	DflowD.fileTemp = [];
-	DflowD.fileUtilBetaT = [];
-	DflowD.inFilename = [];
+	DflowD.fileCostosTension = '';
+	DflowD.fileCostosTras = '';
+	DflowD.fileCurvaCarga = '';
+	DflowD.fileTemp = '';
+	DflowD.fileUtilBetaT = '';
+	DflowD.inFilename = '';
 	DflowD.Solares = [];
 
 	DflowD.Switches.all = true;

@@ -1,31 +1,35 @@
 function [Data] = loadData(DflowD)
 
-    [n,et,app] = DimensionDefault(DflowD.inFilename,'bus_data_CVX',DflowD.fileCurvaCarga,DflowD.App);
-    Data = DataDefault(n,et,app);
+    Data = [];
 
-	%% Carga de datos
-	% Red
-	[Data] = load_distflow_case(Data, DflowD.inFilename, 'bus_data_CVX', 'branch_data_CVX', ...
-        DflowD.Trafos, DflowD.Caps, DflowD.Cargas, DflowD.App, DflowD.Switches);
+    if ~strcmp(DflowD.inFilename,'') && ~strcmp(DflowD.fileCurvaCarga,'')
+        [n,et,app] = DimensionDefault(DflowD.inFilename,'bus_data_CVX',DflowD.fileCurvaCarga,DflowD.App);
+        Data = DataDefault(n,et,app);
 
-	[Data] = loadCargaCuartHoraria(Data, DflowD.fileCurvaCarga);
+        %% Carga de datos
+        % Red
+        [Data] = load_distflow_case(Data, DflowD.inFilename, 'bus_data_CVX', 'branch_data_CVX', ...
+            DflowD.Trafos, DflowD.Caps, DflowD.Cargas, DflowD.App, DflowD.Switches);
 
-	% Eolicos
-	[Data] = cargaEolicosDefault(Data, DflowD.Eolicos);
+        [Data] = loadCargaCuartHoraria(Data, DflowD.fileCurvaCarga);
 
-	% Fotovoltaicos
-	[Data] = cargaPvDefault(Data, DflowD.Solares);
+        % Eolicos
+        [Data] = cargaEolicosDefault(Data, DflowD.Eolicos);
 
-	% Utilidad
-	[Data] = cargaUtilDefault(Data, DflowD.fileUtilBetaT, DflowD.Cargas, DflowD.App);
+        % Fotovoltaicos
+        [Data] = cargaPvDefault(Data, DflowD.Solares);
 
-	% Aire Acondicionado
-	[Data] = cargaACDefault(Data, DflowD.fileTemp, DflowD.ACs);
+        % Utilidad
+        [Data] = cargaUtilDefault(Data, DflowD.fileUtilBetaT, DflowD.Cargas, DflowD.App);
 
-	% Baterias
-	[Data] = cargaBatDefault(Data, DflowD.Baterias);
+        % Aire Acondicionado
+        [Data] = cargaACDefault(Data, DflowD.fileTemp, DflowD.ACs);
 
-	% Costos
-	[Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.fileCostosTension, DflowD.fileCostosTras, DflowD.Solares, DflowD.Eolicos);
+        % Baterias
+        [Data] = cargaBatDefault(Data, DflowD.Baterias);
+
+        % Costos
+        [Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.fileCostosTension, DflowD.fileCostosTras, DflowD.Solares, DflowD.Eolicos);
+    end
 
 end
