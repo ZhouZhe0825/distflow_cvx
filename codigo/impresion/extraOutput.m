@@ -16,10 +16,10 @@ function extraOutput(Var, Data, Config, Header, outFilename)
     Q = Var.Red.Branch.Q;
     l = Var.Red.Branch.l;
     z = Var.Red.Branch.z;
-    nv = Var.Red.Bus.nv;
+    nv = Var.Red.Branch.nv;
     v = Var.Red.Bus.v;
 
-    tvEqL = (repmat(nv, [1 n 1]) - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T;
+    tvEqL = (nv - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T;
     tvEqR = - 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
     tvEqz = repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z);
     l0 = (tvEqL + tvEqR - tvEqz).*TnoG;

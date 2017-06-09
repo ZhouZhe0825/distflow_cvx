@@ -5,7 +5,8 @@ DflowD = cargaDflowDDefault();
 % Trafos
 Trafo1.N = [-2 2];
 Trafo1.TP = .005;
-Trafo1.nod = 1;
+Trafo1.nodI = 1;
+Trafo1.nodJ = 2;
 Trafo1.ini = 0;
 Trafo1.cambio = 1;
 DflowD.Trafos = [Trafo1];

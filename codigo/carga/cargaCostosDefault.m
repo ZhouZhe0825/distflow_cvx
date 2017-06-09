@@ -13,9 +13,11 @@ for i = 1:length(Caps)
 	Data.Cost.cCap(Caps(i).nod) = Caps(i).cambio;
 end    
 
-Data.Cost.cTap = Data.Red.Bus.Itap;
+Data.Cost.cTap = Data.Red.Branch.Itap*0;
 for i = 1:length(Trafos)
-	Data.Cost.cTap(Trafos(i).nod) = Trafos(i).cambio;
+	Data.Cost.cTap(Trafos(i).nodI,Trafos(i).nodJ) = Trafos(i).cambio;
 end    
+
+Data.Cost.cTap = Data.Cost.cTap + Data.Cost.cTap';
 
 Data.Cost.cY = Data.Red.Branch.T .* Switches.cY;

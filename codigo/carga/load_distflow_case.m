@@ -56,12 +56,19 @@ end
 
 %% Transformadores
 for estT = 1:size(Trafos,1)
-	Data.Red.Bus.NtrLow(Trafos(estT).nod) = min(Trafos(estT).N);
-	Data.Red.Bus.NtrTop(Trafos(estT).nod) = max(Trafos(estT).N);
-	Data.Red.Bus.NtrIni(Trafos(estT).nod) = Trafos(estT).ini;
-	Data.Red.Bus.Itap(Trafos(estT).nod) = 1;
-	Data.Red.Bus.Tap(Trafos(estT).nod) = Trafos(estT).TP;
+	Data.Red.Branch.NtrLow(Trafos(estT).nodI, Trafos(estT).nodJ) = min(Trafos(estT).N);
+	Data.Red.Branch.NtrTop(Trafos(estT).nodI, Trafos(estT).nodJ) = max(Trafos(estT).N);
+	Data.Red.Branch.NtrIni(Trafos(estT).nodI, Trafos(estT).nodJ) = Trafos(estT).ini;
+	Data.Red.Branch.Itap(Trafos(estT).nodI, Trafos(estT).nodJ) = 1;
+	Data.Red.Branch.Tap(Trafos(estT).nodI, Trafos(estT).nodJ) = Trafos(estT).TP;
 end
+
+Data.Red.Branch.NtrLow = Data.Red.Branch.NtrLow + Data.Red.Branch.NtrLow';
+Data.Red.Branch.NtrTop = Data.Red.Branch.NtrTop + Data.Red.Branch.NtrTop';
+Data.Red.Branch.NtrIni = Data.Red.Branch.NtrIni + Data.Red.Branch.NtrIni';
+Data.Red.Branch.Itap = Data.Red.Branch.Itap + Data.Red.Branch.Itap';
+Data.Red.Branch.Tap  = Data.Red.Branch.Tap + Data.Red.Branch.Tap';
+
 
 %% Capacitores
 for estC = 1:size(Caps,1)

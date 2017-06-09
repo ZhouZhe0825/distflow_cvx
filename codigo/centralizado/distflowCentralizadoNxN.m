@@ -15,8 +15,8 @@ TnoG(:,G,:) = zeros(n,length(G),Config.Etapas);
 
 NoT = 1 - Data.Red.Branch.T;
 
-tnnLow = (1 + Data.Red.Bus.NtrLow.*Data.Red.Bus.Tap);
-tnnTop = (1 + Data.Red.Bus.NtrTop.*Data.Red.Bus.Tap);
+tnnLow = (1 + Data.Red.Branch.NtrLow.*Data.Red.Branch.Tap);
+tnnTop = (1 + Data.Red.Branch.NtrTop.*Data.Red.Branch.Tap);
 
 NcpCapL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow;
 NcpCapT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop;
@@ -88,9 +88,9 @@ cvx_begin
 
 	variable v(n,1, Config.Etapas); % Modulo^2 de la tension
 	variable cDv(n,1, Config.Etapas); % Modulo^2 de la tension
-	variable nn(n,1, Config.Etapas);
-	variable nv(n,1, Config.Etapas);
-	variable Ntr(n,1, Config.Etapas) integer;
+	variable nn(n,n, Config.Etapas);
+	variable nv(n,n, Config.Etapas);
+	variable Ntr(n,n, Config.Etapas) integer;
 
 	variable pC(n,1, Config.Etapas); % Consumo de potencia activa en el nodo i
 	variable qC(n,1, Config.Etapas); % Consumo de potencia reactiva en el nodo i
@@ -131,7 +131,7 @@ cvx_begin
 	expression vExpr(n,n,Config.Etapas);
 	expression vApp(n, 1, Config.Etapas, 2);
 	expression NcpDif(n,1,Config.Etapas);
-	expression NtrDif(n,1,Config.Etapas);
+	expression NtrDif(n,n,Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas); 
 	expression fopt_expr; 
@@ -141,15 +141,15 @@ cvx_begin
 	NcpDif(:,1,1) = Data.Red.Bus.NcpIni;
 	NcpDif(:,1,(2:Config.Etapas)) = Ncp(:,1,(2:Config.Etapas)) - Ncp(:,1,(1:Config.Etapas-1));
 
-	NtrDif(:,1,1) = Data.Red.Bus.NtrIni;
-	NtrDif(:,1,(2:Config.Etapas)) = Ntr(:,1,(2:Config.Etapas)) - Ntr(:,1,(1:Config.Etapas-1));
+	NtrDif(:,:,1) = Data.Red.Branch.NtrIni;
+	NtrDif(:,:,(2:Config.Etapas)) = Ntr(:,:,(2:Config.Etapas)) - Ntr(:,:,(1:Config.Etapas-1));
 
 	tfopt_expr = ...
 		sum(Data.Cost.piPTras .* pGTras,1) ...
 		+ sum(Data.Cost.cdv .* cDv,1) ...
 		+ sum(cqGTras,1) ...
 		+ sum(Data.Cost.cCap.*NcpDif.^2,1) ...
-		+ sum(Data.Cost.cTap.*NtrDif.^2,1) ...
+		+ sum(sum(Data.Cost.cTap.*NtrDif.^2,1),2) ...
 		+ sum(sum(Data.Cost.cY.*y,1),2) ...
 		+ sum(Data.Util.betaT(:,1,:,1).*(pCn(:,1,:,1) - Data.Util.pzCnPref(:,1,:,1)).^2,1) ...
 		;
@@ -193,19 +193,19 @@ cvx_begin
 	norms(lNorm,2,4) <= Data.Red.Branch.T.*(l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
 
 	% Restriccion de la tension
-	nn >= (1 + Ntr.*Data.Red.Bus.Tap).^2;
-	nn <= (tnnTop + tnnLow).*(1 + Ntr.*Data.Red.Bus.Tap) - (tnnTop.*tnnLow);
+	nn >= (1 + Ntr.*Data.Red.Branch.Tap).^2;
+	nn <= (tnnTop + tnnLow).*(1 + Ntr.*Data.Red.Branch.Tap) - (tnnTop.*tnnLow);
 
-	nv >= nn.*(Data.Red.Bus.uLow.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uLow.^2);
-	nv >= nn.*(Data.Red.Bus.uTop.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uTop.^2);
+	nv >= nn.*repmat(Data.Red.Bus.uLow.^2, [1 n 1]) + (tnnLow.^2).*repmat(v, [1 n 1]) - (tnnLow.^2).*repmat(Data.Red.Bus.uLow.^2, [1 n 1]);
+	nv >= nn.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]) + (tnnTop.^2).*repmat(v, [1 n 1]) - (tnnTop.^2).*repmat(Data.Red.Bus.uTop.^2, [1 n 1]);
 
-	nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
-	nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
+	nv <= nn.*repmat(Data.Red.Bus.uLow.^2, [1 n 1]) + (tnnTop.^2).*repmat(v, [1 n 1]) - (tnnTop.^2).*repmat(Data.Red.Bus.uLow.^2, [1 n 1]);
+	nv <= nn.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]) + (tnnLow.^2).*repmat(v, [1 n 1]) - (tnnLow.^2).*repmat(Data.Red.Bus.uTop.^2, [1 n 1]);
 
-	Ntr >= Data.Red.Bus.NtrLow;
-	Ntr <= Data.Red.Bus.NtrTop;
+	Ntr >= Data.Red.Branch.NtrLow;
+	Ntr <= Data.Red.Branch.NtrTop;
 
-	vExpr = (repmat(nv, [1 n 1]) - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T ...
+	vExpr = (nv - repmat(permute(v, [2 1 3]), [n 1 1])).*Data.Red.Branch.T ...
 	- 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
 
 	0 >= (vExpr - Data.Red.Branch.T.*repmat(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2, [1 n 1]).*(1-z));
@@ -568,9 +568,9 @@ Var.Red.Bus.w = w;
 
 Var.Red.Bus.v = v;
 Var.Red.Bus.cDv = cDv;
-Var.Red.Bus.nn = nn;
-Var.Red.Bus.nv = nv;
-Var.Red.Bus.Ntr = Ntr;
+Var.Red.Branch.nn = nn;
+Var.Red.Branch.nv = nv;
+Var.Red.Branch.Ntr = Ntr;
 
 Var.Red.Bus.pC = pC;
 Var.Red.Bus.qC = qC;

@@ -2,10 +2,8 @@ function [Header] = createHeader(Var, Data, Config, cantTaps, cantCaps, cantCarg
 
 	horas = loadHoras();
 
-	Taps = matOverTime(abs(Data.Red.Bus.Tap + Data.Red.Bus.NtrLow + Data.Red.Bus.NtrTop));
-	indTaps = find(Taps == 1);
-	Caps = matOverTime(abs(Data.Red.Bus.Cap + Data.Red.Bus.NcpLow + Data.Red.Bus.NcpTop));
-	indCaps = find(Caps == 1);
+    [rowTap, colTap, ~] = find(triu(Data.Red.Branch.Itap) == 1);
+	indCaps = find(Data.Red.Bus.Icap == 1);
 
 	nodCh = find(Data.ClNI.I == 1);
 	indHeadEt = (2:1+Config.Etapas);
@@ -19,14 +17,14 @@ function [Header] = createHeader(Var, Data, Config, cantTaps, cantCaps, cantCarg
 
     if cantTaps > 0
         for i = 1:cantTaps
-            Header.Main{1+i,1} = ['Ntr' num2str(i) '_n_' num2str(indTaps(i))];
+            Header.Main{1+i,1} = ['Ntr_i' num2str(rowTap(i)) '_j_' num2str(colTap(i))];
+            Header.Main(2+i,indHeadEt) = num2cell(squeeze(round(Var.Red.Branch.Ntr(rowTap(i),colTap(i),:)))');
         end
-        Header.Main((2:1+cantTaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Ntr(indTaps,:,:)))');
     end
 
     if cantCaps > 0
         for i = 1:cantCaps
-            Header.Main{1+cantTaps+i,1} = ['Ncp' num2str(i) '_n_' num2str(indCaps(i))];
+            Header.Main{1+cantTaps+i,1} = ['Ncp_n_' num2str(indCaps(i))];
         end
         Header.Main((2+cantTaps:1+cantTaps+cantCaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Ncp(indCaps,:,:)))');
     end

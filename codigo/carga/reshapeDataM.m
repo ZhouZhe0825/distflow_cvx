@@ -25,29 +25,31 @@ function [DataM] = reshapeDataM(Data, Config)
 	DataM.Red.Branch.x = repmat(full(DataM.Red.Branch.x), [1 1 lenEt]);
 	DataM.Red.Branch.yLow = repmat(full(DataM.Red.Branch.yLow), [1 1 lenEt]);
 	DataM.Red.Branch.yTop = repmat(full(DataM.Red.Branch.yTop), [1 1 lenEt]);
+	DataM.Red.Branch.NtrLow = repmat(full(DataM.Red.Branch.NtrLow), [1 1 lenEt]);
+	DataM.Red.Branch.NtrTop = repmat(full(DataM.Red.Branch.NtrTop), [1 1 lenEt]);
+	DataM.Red.Branch.Tap = repmat(full(DataM.Red.Branch.Tap), [1 1 lenEt]);
 
 	DataM.Red.Branch.lTop = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.lTop);
 	DataM.Red.Branch.r = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.r);
 	DataM.Red.Branch.x = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.x);
 	DataM.Red.Branch.yLow = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.yLow);
 	DataM.Red.Branch.yTop = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.yTop);
-
+	DataM.Red.Branch.NtrLow = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.NtrLow);
+	DataM.Red.Branch.NtrTop = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.NtrTop);
+	DataM.Red.Branch.NtrIni = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.NtrIni);
+	DataM.Red.Branch.Tap = NxNxT2MxT(VertI,VertJ,DataM.Red.Branch.Tap);
+    
+    
 	a1 = repmat(DataM.Red.Bus.alpha(:,1), [1 lenEt 2]);
 	a1(:,:,2) = repmat(DataM.Red.Bus.alpha(:,2), [1 lenEt]);
 	DataM.Red.Bus.alpha = a1;
 	DataM.Red.Bus.NcpLow = DataM.Red.Bus.NcpLow * one;
 	DataM.Red.Bus.NcpTop = DataM.Red.Bus.NcpTop * one;
-	DataM.Red.Bus.Icap = DataM.Red.Bus.Icap * one;
-	DataM.Red.Bus.Itap = DataM.Red.Bus.Itap * one;
 	DataM.Red.Bus.Cap = DataM.Red.Bus.Cap * one;
-	DataM.Red.Bus.Tap = DataM.Red.Bus.Tap * one;
 	DataM.Red.Bus.pCLow = full(DataM.Red.Bus.pCLow(:,(1:lenEt)));
 	DataM.Red.Bus.qCLow = full(DataM.Red.Bus.qCLow(:,(1:lenEt)));
-	DataM.Red.Bus.NtrLow = DataM.Red.Bus.NtrLow * one;
-	DataM.Red.Bus.NtrTop = DataM.Red.Bus.NtrTop * one;
 	DataM.Red.Bus.uLow = DataM.Red.Bus.uLow * one;
 	DataM.Red.Bus.uTop = DataM.Red.Bus.uTop * one;
-
 	
 	DataM.ClNI.pC = DataM.ClNI.pC * one;
 	DataM.ClNI.qC = DataM.ClNI.qC * one;
@@ -57,7 +59,8 @@ function [DataM] = reshapeDataM(Data, Config)
 	
 	DataM.Cost.cdv = DataM.Cost.cdv(:,(1:lenEt));
 	DataM.Cost.cCap = DataM.Cost.cCap * one;
-	DataM.Cost.cTap = DataM.Cost.cTap * one;
+	DataM.Cost.cTap = repmat(full(DataM.Cost.cTap), [1 1 lenEt]);
+	DataM.Cost.cTap = NxNxT2MxT(VertI,VertJ,DataM.Cost.cTap);
 	DataM.Cost.cY = repmat(full(DataM.Cost.cY), [1 1 lenEt]);
 	DataM.Cost.cY = NxNxT2MxT(VertI,VertJ,DataM.Cost.cY);
     DataM.Cost.delta = DataM.Cost.delta(:,(1:lenEt));
