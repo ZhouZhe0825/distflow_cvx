@@ -38,15 +38,20 @@ lenAC = length(AC);
 nodSt = find(Data.St.Bat.I == 1);
 lenSt = length(nodSt);
 
+M = [];
 if lenSt > 0
-	M = zeros(2,2,n,1,Config.Etapas);
+	M = zeros(Config.Etapas,Config.Etapas,n);
 	for i = 1:n
-		for et = 1: Config.Etapas
-			M(:,:,i,1,et) = Data.St.Bat.I(i,1,et)*[Data.St.Bat.m1(i,1,et) -Data.St.Bat.m2(i,1,et)/2; ...
+		for et = 1: Config.Etapas-1
+			Maux = Data.St.Bat.I(i,1,et)*[Data.St.Bat.m1(i,1,et) -Data.St.Bat.m2(i,1,et)/2; ...
 				-Data.St.Bat.m2(i,1,et)/2 Data.St.Bat.m1(i,1,et)];
+            M((et:et+1),(et:et+1),i) = M((et:et+1),(et:et+1),i) + Maux;
 		end
 	end
 end
+
+
+
 
 % Cargas No interrumpibles
 nodCh = find(Data.ClNI.I == 1);
@@ -311,20 +316,11 @@ cvx_begin
 
 		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
 
-		% Modelado de Config.Etapas
-		for et = 1: Config.Etapas
-			for i = 1:n
-				if et == 1
-					cStb(i,et) = cStb(i,et) + [pStgb(i,1,et) 0] * M(:,:,i,1,et) * [pStgb(i,1,et); 0];
-				else
-					cStb(i,et) = cStb(i,et) + [pStgb(i,1,et) pStgb(i,1, et-1)] * M(:,:,i,1,et) * [pStgb(i,1,et); pStgb(i,1, et-1)];
-				end
-			end
-		end
-		
-		tfopt_expr = tfopt_expr + sum(cStb,1);
-		
-		tfopt_expr = tfopt_expr + ...
+        for i = 1:n
+            cStb(i,1,Config.Etapas) = cStb(i,1,Config.Etapas) + (squeeze(pStgb(i,1,:))' * M(:,:,i) * squeeze(pStgb(i,1,:))).*Data.St.Bat.I(i,1,Config.Etapas);
+        end
+        
+		tfopt_expr = tfopt_expr + sum(cStb,1) + ...
 			sum(Data.St.Bat.I(:,:,Config.Etapas).*Data.St.Bat.beta(:,1,Config.Etapas).* ...
 				((Data.St.Bat.ETop(:,1,Config.Etapas) - EStb(:,1,Config.Etapas).*Data.St.Bat.gama(:,1,Config.Etapas)).^2) + Data.St.Bat.wU(:,1,Config.Etapas),1)./Config.Etapas;
 

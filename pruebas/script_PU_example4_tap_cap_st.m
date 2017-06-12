@@ -7,7 +7,11 @@ Bat1.nod = 5;
 Bat1.type = 'casos\bat\bat_def.csv';
 Bat1.EIni = .5;
 
-DflowD.Baterias = [Bat1];
+Bat2.nod = 8;
+Bat2.type = 'casos\bat\bat_def.csv';
+Bat2.EIni = .5;
+
+DflowD.Baterias = [Bat1;Bat2];
 
 % Trafos
 Trafo1.N = [-2 2];

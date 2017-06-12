@@ -50,11 +50,12 @@ NotSt = find(sign(sum(abs(Data.St.Bat.I),2)) == 0);
 
 M = [];
 if nSt > 0
-	M = zeros(2,2,nSt,Config.Etapas);
+	M = zeros(Config.Etapas,Config.Etapas,nSt);
 	for i = 1:nSt
-		for et = 1: Config.Etapas
-			M(:,:,i,et) = [Data.St.Bat.m1(St(i),et) -Data.St.Bat.m2(St(i),et)/2; ...
+		for et = 1: Config.Etapas-1
+			Maux = [Data.St.Bat.m1(St(i),et) -Data.St.Bat.m2(St(i),et)/2; ...
 				-Data.St.Bat.m2(St(i),et)/2 Data.St.Bat.m1(St(i),et)];
+            M((et:et+1),(et:et+1),i) = M((et:et+1),(et:et+1),i) + Maux;
 		end
 	end
 end
@@ -320,22 +321,11 @@ cvx_begin
 
 
 		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
+        for i = 1:nSt
+            cStb(St(i),Config.Etapas) = cStb(St(i),Config.Etapas) + pStgb(i,:) * M(:,:,i) * pStgb(i,:)';
+        end
 
-		% Modelado de Config.Etapas
-		for et = 1: Config.Etapas
-			for i = 1:nSt
-				j = St(i);
-				if et == 1
-					cStb(j,et) = cStb(j,et) + [pStgb(i,et) 0] * M(:,:,i,et) * [pStgb(i,et); 0];
-				else
-					cStb(j,et) = cStb(j,et) + [pStgb(i,et) pStgb(i,et-1)] * M(:,:,i,et) * [pStgb(i,et); pStgb(i,et-1)];
-				end
-			end
-		end
-		
-		tfopt_expr = tfopt_expr + sum(cStb,1);
-		
-		tfopt_expr = tfopt_expr + ...
+		tfopt_expr = tfopt_expr + sum(cStb,1) + ...
 			sum(Data.St.Bat.I(:,Config.Etapas).*Data.St.Bat.beta(:,Config.Etapas).* ...
 				((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas).*Data.St.Bat.gama(:,Config.Etapas)).^2) + Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
 

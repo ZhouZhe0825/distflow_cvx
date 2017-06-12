@@ -18,7 +18,7 @@ function [Header] = createHeader(Var, Data, Config, cantTaps, cantCaps, cantCarg
     if cantTaps > 0
         for i = 1:cantTaps
             Header.Main{1+i,1} = ['Ntr_i' num2str(rowTap(i)) '_j_' num2str(colTap(i))];
-            Header.Main(2+i,indHeadEt) = num2cell(squeeze(round(Var.Red.Branch.Ntr(rowTap(i),colTap(i),:)))');
+            Header.Main(1+i,indHeadEt) = num2cell(squeeze(round(Var.Red.Branch.Ntr(rowTap(i),colTap(i),:)))');
         end
     end
 
