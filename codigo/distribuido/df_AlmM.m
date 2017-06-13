@@ -13,11 +13,12 @@ nSt = length(St);
 
 M = [];
 if nSt > 0
-	M = zeros(2,2,nSt,Config.Etapas);
+	M = zeros(Config.Etapas,Config.Etapas,nSt);
 	for i = 1:nSt
-		for et = 1: Config.Etapas
-			M(:,:,i,et) = [Data.St.Bat.m1(St(i),et) -Data.St.Bat.m2(St(i),et)/2; ...
+		for et = 1: Config.Etapas-1
+			Maux = [Data.St.Bat.m1(St(i),et) -Data.St.Bat.m2(St(i),et)/2; ...
 				-Data.St.Bat.m2(St(i),et)/2 Data.St.Bat.m1(St(i),et)];
+            M((et:et+1),(et:et+1),i) = M((et:et+1),(et:et+1),i) + Maux;
 		end
 	end
 end
@@ -47,36 +48,25 @@ cvx_begin quiet
 	variable sStb(nSt, Config.Etapas);
 	variable pStgb(nSt, Config.Etapas);
 	variable xiStb(nSt, Config.Etapas);
-	variable EStb(nSt, Config.Etapas);
-	variable DlEStb(nSt, Config.Etapas);
+	variable EStb(n, Config.Etapas);
+	variable DlEStb(n, Config.Etapas);
 
 	expression StbNorm(nSt, Config.Etapas,2);
 	expression EStbAnt(nSt, Config.Etapas);
 	expression cStb(n, Config.Etapas);
 
 	DlEStb <= 0;
-	DlEStb <= EStb - Data.St.Bat.ETop*Data.St.Bat.kapa;
+	DlEStb <= EStb - Data.St.Bat.ETop.*Data.St.Bat.kapa;
 
 
-	cStb = (Data.St.Bat.wOm(St,:) + Data.St.Bat.m3(St,:).*(DlEStb.^2)); % falta termino de m2
-
-	% Modelado de Config.Etapas
-	for et = 1: Config.Etapas
-		for i = 1:nSt
-			j = St(i);
-			if et == 1
-				cStb(j,et) = cStb(j,et) + [pStgb(i,et) 0] * M(:,:,i,et) * [pStgb(i,et); 0];
-			else
-				cStb(j,et) = cStb(j,et) + [pStgb(i,et) pStgb(i,et-1)] * M(:,:,i,et) * [pStgb(i,et); pStgb(i,et-1)];
-			end
-		end
+	cStb = Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2); % falta termino de m2
+	for i = 1:nSt
+		cStb(St(i),Config.Etapas) = cStb(St(i),Config.Etapas) + pStgb(i,:) * M(:,:,i) * pStgb(i,:)';
 	end
 
-	tfopt_expr = tfopt_expr + sum(cStb,1);
-
-	tfopt_expr = ...
-			sum(Data.St.Bat.I(:,Config.Etapas).*Data.St.Bat.beta(:,Config.Etapas).* ...
-			((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas)*Data.St.Bat.gama).^2) ...
+	tfopt_expr = sum(cStb,1) + ...
+			sum(Data.St.Bat.beta(:,Config.Etapas).* ...
+			((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas).*Data.St.Bat.gama(:,Config.Etapas)).^2) ...
 			+ Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
 
 	tfopt_virt = DistrInfo.muT(St,:) .* pStb + DistrInfo.lambdaT(St,:) .* qStb;
@@ -88,10 +78,10 @@ cvx_begin quiet
 	fopt_expr = sum(tfopt_expr) + sum(tfopt_virt) + sum(tfopt_conv);
 
 	EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
-	EStbAnt(:,(2:Config.Etapas)) = EStb(:,(1:Config.Etapas-1));
+	EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
 
 	pStb == pStgb - (Data.St.Bat.cv(St,:).*sStb + Data.St.Bat.cr(St,:).*xiStb);
-	EStb == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - Data.St.Bat.eta(St,:).*pStgb*Data.dt;
+	EStb(St,:) == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - Data.St.Bat.eta(St,:).*pStgb*Data.dt;
 
 	StbNorm(:,:,1) = pStgb;
 	StbNorm(:,:,2) = qStb;
@@ -102,10 +92,10 @@ cvx_begin quiet
 	pStb <= Data.St.Bat.pgTop(St,:);
 	sStb <= Data.St.Bat.sTop(St,:);
 	xiStb <= Data.St.Bat.xiTop(St,:);
-	EStb <= Data.St.Bat.ETop(St,:);
+	EStb(St,:) <= Data.St.Bat.ETop(St,:);
 
 	pStb >= Data.St.Bat.pgLow(St,:);
-	EStb >= Data.St.Bat.ELow(St,:);
+	EStb(St,:) >= Data.St.Bat.ELow(St,:);
 
 	fopt_expr = sum(tfopt_expr + tfopt_virt + tfopt_conv);
 	minimize fopt_expr
@@ -117,18 +107,18 @@ toc
 % pasaje a NxNxT
 
 % Baterias
-Var.St.Bat.pStb = zeros(n, Config.ETapas);
+Var.St.Bat.pStb = zeros(n, Config.Etapas);
 Var.St.Bat.pStb(St,:) = pStb;
-Var.St.Bat.pStgb = pStb*0;
+Var.St.Bat.pStgb = zeros(n, Config.Etapas);
 Var.St.Bat.pStgb(St,:) = pStgb;
-Var.St.Bat.qStb = pStb*0;
+Var.St.Bat.qStb = zeros(n, Config.Etapas);
 Var.St.Bat.qStb(St,:) = qStb;
-Var.St.Bat.sStb = pStb*0;
+Var.St.Bat.sStb = zeros(n, Config.Etapas);
 Var.St.Bat.sStb(St,:) = sStb;
-Var.St.Bat.xiStb = pStb*0;
+Var.St.Bat.xiStb = zeros(n, Config.Etapas);
 Var.St.Bat.xiStb(St,:) = xiStb;
-Var.St.Bat.EStb = pStb*0;
-Var.St.Bat.EStb(St,:) = EStb;
+Var.St.Bat.EStb = zeros(n, Config.Etapas);
+Var.St.Bat.EStb(St,:) = EStb(St,:);
 
 
 Var.Red.Bus.pG = Var.St.Bat.pStb;

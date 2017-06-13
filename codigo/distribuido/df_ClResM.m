@@ -63,6 +63,7 @@ cvx_begin quiet
 		vApp(:,:,app) = DistrInfo.ClRes.v;
 		uLowApp(:,:,app) = Data.Red.Bus.uLow(:,:);
 		uTopApp(:,:,app) = Data.Red.Bus.uTop(:,:);
+        qCApp(:,:,app) == pCApp(:,:,app).*Data.Util.tgPhi(app)
 	end
 
 	pCApp >= Data.Red.Bus.alpha.*(Data.Util.pzCnLow.*vApp + pCn.*uLowApp.^2 - Data.Util.pzCnLow.*uLowApp.^2) + (1-Data.Red.Bus.alpha).* pCn; 
@@ -70,8 +71,6 @@ cvx_begin quiet
 
 	pCApp <= Data.Red.Bus.alpha.*(Data.Util.pzCnTop.*vApp + pCn.*uLowApp.^2 - Data.Util.pzCnTop.*uLowApp.^2) + (1-Data.Red.Bus.alpha).* pCn;
 	pCApp <= Data.Red.Bus.alpha.*(Data.Util.pzCnLow.*vApp + pCn.*uTopApp.^2 - Data.Util.pzCnLow.*uTopApp.^2) + (1-Data.Red.Bus.alpha).* pCn;
-
-	qCApp == pCApp.*Data.Util.tgPhi;
 
 	pCn >= Data.Util.pzCnLow;
 	pCn <= Data.Util.pzCnTop;

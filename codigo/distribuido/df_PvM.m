@@ -24,21 +24,6 @@ for i=1:length(Tupmind)
 	Tdownm(i) = find(Tind == Tdownmind(i));
 end
 
-tnnLow = (1 + Data.Red.Bus.TapLow.*Data.Red.Bus.Ntr);
-tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
-
-NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
-NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
-
-NcpvL = Data.Red.Bus.Ncp.*(Data.Red.Bus.uLow).^2;
-NcpvT = Data.Red.Bus.Ncp.*(Data.Red.Bus.uTop).^2;
-
-NcpCapLvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uLow).^2;
-NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
-NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
-NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
-
-
 % Fotovoltaico
 Pv = DistrInfo.Bus;
 nPv = length(Pv);
@@ -69,11 +54,10 @@ cvx_begin quiet
 	% Variables de generadores solares
 	variable sPv(nPv, Config.Etapas);
 	variable xiPv(nPv, Config.Etapas); % module of square complex current in i
-	variable cqPv(n, Config.Etapas);
+	variable cqPv(nPv, Config.Etapas);
 	expression SPvNorm(nPv, Config.Etapas,2);
 
-	tfopt_expr = tfopt_expr ...
-		+ sum(Data.Cost.rhopPv .* pPv) ...
+	tfopt_expr = sum(Data.Cost.rhopPv(Pv,:) .* pPv) ...
 		+ sum(cqPv) ...
 	;
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
@@ -82,8 +66,8 @@ cvx_begin quiet
 
 	tfopt_virt = DistrInfo.muT(Pv,:) .* pPv + DistrInfo.lambdaT(Pv,:) .* qPv;
 
-	cqPv >= - Data.Cost.rhomqPv .* qPv;
-	cqPv >= Data.Cost.rhoMqPv .* qPv;
+	cqPv >= - Data.Cost.rhomqPv(Pv,:) .* qPv;
+	cqPv >= Data.Cost.rhoMqPv(Pv,:) .* qPv;
 
 	pPv == (Data.Gen.Pv.pPvg(Pv,:) - (Data.Gen.Pv.cv(Pv,:).*sPv + Data.Gen.Pv.cr(Pv,:).*xiPv));
 
@@ -103,11 +87,13 @@ cvx_end
 toc
 
 %% Construccion de la estructura de solucion
-Var.Gen.Pv.pPv = pPv;
-Var.Gen.Pv.qPv = qPv;
-Var.Gen.Pv.s = pPv*0;
+Var.Gen.Pv.pPv = zeros(n, Config.Etapas);
+Var.Gen.Pv.pPv(Pv,:) = pPv;
+Var.Gen.Pv.qPv = zeros(n, Config.Etapas);
+Var.Gen.Pv.qPv(Pv,:) = qPv;
+Var.Gen.Pv.s = zeros(n, Config.Etapas);
 Var.Gen.Pv.s(Pv,:) = sPv;
-Var.Gen.Pv.xi = pPv*0;
+Var.Gen.Pv.xi = zeros(n, Config.Etapas);
 Var.Gen.Pv.xi(Pv,:) = xiPv;
 
 Var.Red.Bus.pG = Var.Gen.Pv.pPv;

@@ -1,4 +1,4 @@
-function [Var, opt, status] = distflowCentralizadoM(Data, Config)
+function [Var, opt] = distflowCentralizadoM(Data, Config)
 
 %% Inicializacion
 VertI = VertIMat(Data.Red.Branch.T);
@@ -26,19 +26,19 @@ for i=1:length(Tupmind)
 	Tdownm(i) = find(Tind == Tdownmind(i));
 end
 
-tnnLow = (1 + Data.Red.Bus.TapLow.*Data.Red.Bus.Ntr);
-tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
+tnnLow = (1 + Data.Red.Branch.NtrLow.*Data.Red.Branch.Tap);
+tnnTop = (1 + Data.Red.Branch.NtrTop.*Data.Red.Branch.Tap);
 
-NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
-NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
+NcpCapL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow;
+NcpCapT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop;
 
-NcpvL = Data.Red.Bus.Ncp.*(Data.Red.Bus.uLow).^2;
-NcpvT = Data.Red.Bus.Ncp.*(Data.Red.Bus.uTop).^2;
+NcpvL = Data.Red.Bus.Cap.*(Data.Red.Bus.uLow).^2;
+NcpvT = Data.Red.Bus.Cap.*(Data.Red.Bus.uTop).^2;
 
-NcpCapLvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uLow).^2;
-NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
-NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
-NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
+NcpCapLvL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow.*(Data.Red.Bus.uLow).^2;
+NcpCapTvT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop.*(Data.Red.Bus.uTop).^2;
+NcpCapLvT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow.*(Data.Red.Bus.uTop).^2;
+NcpCapTvL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop.*(Data.Red.Bus.uLow).^2;
 
 
 % Aire Acondicionado
@@ -46,17 +46,18 @@ AC = find(Data.St.AC.I == 1);
 nAC = length(AC);
 
 % Baterias
-St = find(sign(sum(abs(Data.St.Bat.I),2)) == 1);
+St = find(Data.St.Bat.I == 1);
 nSt = length(St);
-NotSt = find(sign(sum(abs(Data.St.Bat.I),2)) == 0);
+NotSt = find(Data.St.Bat.I == 0);
 
 M = [];
 if nSt > 0
-	M = zeros(2,2,nSt,Config.Etapas);
+	M = zeros(Config.Etapas,Config.Etapas,nSt);
 	for i = 1:nSt
-		for et = 1: Config.Etapas
-			M(:,:,i,et) = [Data.St.Bat.m1(St(i),et) -Data.St.Bat.m2(St(i),et)/2; ...
+		for et = 1: Config.Etapas-1
+			Maux = [Data.St.Bat.m1(St(i),et) -Data.St.Bat.m2(St(i),et)/2; ...
 				-Data.St.Bat.m2(St(i),et)/2 Data.St.Bat.m1(St(i),et)];
+            M((et:et+1),(et:et+1),i) = M((et:et+1),(et:et+1),i) + Maux;
 		end
 	end
 end
@@ -82,9 +83,9 @@ P_mecWnd = Data.Gen.DFIG.P_mec;
 n_Wnd = Data.Gen.DFIG.n_;
 
 % Fotovoltaico
-Pv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 1);
+Pv = find(Data.Gen.Pv.I == 1);
 nPv = length(Pv);
-NotPv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 0);
+NotPv = find(Data.Gen.Pv.I == 0);
 
 
 %% Modelo programacion matematica
@@ -112,12 +113,12 @@ cvx_begin
 
 	variable v(n, Config.Etapas); % Modulo^2 de la tension
 	variable cDv(n, Config.Etapas); % Modulo^2 de la tension
-	variable nn(n, Config.Etapas);
-	variable nv(n, Config.Etapas);
+	variable nn(m, Config.Etapas);
+	variable nv(m, Config.Etapas);
 	if fixed
-		variable Tap(n, Config.Etapas);
+		variable Ntr(m, Config.Etapas);
 	else
-		variable Tap(n, Config.Etapas) integer;
+		variable Ntr(m, Config.Etapas) integer;
 	end
 
 	variable pC(n, Config.Etapas); % Consumo de potencia activa en el nodo i
@@ -136,9 +137,9 @@ cvx_begin
 
 	variable qCp(n, Config.Etapas); % reactive power demand in i
  	if fixed
-		variable Cap(n, Config.Etapas);
+		variable Ncp(n, Config.Etapas);
 	else
-		variable Cap(n, Config.Etapas) integer;
+		variable Ncp(n, Config.Etapas) integer;
 	end
 
 	variable pGTras(n, Config.Etapas);
@@ -167,27 +168,27 @@ cvx_begin
  	expression lNorm(m, Config.Etapas, 3);
 	expression vExpr(n, Config.Etapas);
 	expression vApp(n, Config.Etapas, 2);
-	expression CapDif(n,Config.Etapas);
-	expression TapDif(n,Config.Etapas);
+	expression NcpDif(n,Config.Etapas);
+	expression NtrDif(m,Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas,1); 
 	expression fopt_expr; 
 
 
 	%% Funcion objetivo
-	CapDif(:,1) = Data.Red.Bus.CapIni;
-	CapDif(:,(2:Config.Etapas)) = Cap(:,(2:Config.Etapas)) - Cap(:,(1:Config.Etapas-1));
+	NcpDif(:,1) = Data.Red.Bus.NcpIni;
+	NcpDif(:,(2:Config.Etapas)) = Ncp(:,(2:Config.Etapas)) - Ncp(:,(1:Config.Etapas-1));
 
-	TapDif(:,1) = Data.Red.Bus.TapIni;
-	TapDif(:,(2:Config.Etapas)) = Tap(:,(2:Config.Etapas)) - Tap(:,(1:Config.Etapas-1));
+	NtrDif(:,1) = Data.Red.Branch.NtrIni;
+	NtrDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
 
 	tfopt_expr = ...
 		sum(Data.Cost.piPTras.*pGTras,1) ...
 		+ sum(Data.Cost.cdv.*cDv,1) ...
 		+ sum(cqGTras,1) ...
-		+ sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2),1) ...
-		+ sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2),1) ...
-		+ sum(Data.Red.Branch.cY.*y,1) ...
+		+ sum(Data.Cost.cCap.*(NcpDif.^2),1) ...
+		+ sum(Data.Cost.cTap.*(NtrDif.^2),1) ...
+		+ sum(Data.Cost.cY.*y,1) ...
 		+ sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1) ...
 		;
 
@@ -215,13 +216,13 @@ cvx_begin
 	end
 
 	% Restricciones de capacitores
-	Cap >= Data.Red.Bus.CapLow;
-	Cap <= Data.Red.Bus.CapTop;
+	Ncp >= Data.Red.Bus.NcpLow;
+	Ncp <= Data.Red.Bus.NcpTop;
 
-	qCp >= NcpCapL.*v + NcpvL.*Cap - NcpCapLvL;
-	qCp >= NcpCapT.*v + NcpvT.*Cap - NcpCapTvT;
-	qCp <= NcpCapL.*v + NcpvT.*Cap - NcpCapLvT;
-	qCp <= NcpCapT.*v + NcpvL.*Cap - NcpCapTvL;
+	qCp >= NcpCapL.*v + NcpvL.*Ncp - NcpCapLvL;
+	qCp >= NcpCapT.*v + NcpvT.*Ncp - NcpCapTvT;
+	qCp <= NcpCapL.*v + NcpvT.*Ncp - NcpCapLvT;
+	qCp <= NcpCapT.*v + NcpvL.*Ncp - NcpCapTvL;
 
 	% Restricciones conica de corriente
 	lQoL(:,:,1) = 2 * P;
@@ -235,26 +236,26 @@ cvx_begin
 	norms(lNorm,2,3) <= l + (VertI*Data.Red.Bus.uTop.^2).*z;
 
 	% Restriccion de la tension
-	nn >= (1 + Tap.*Data.Red.Bus.Ntr).^2;
-	nn <= (tnnTop + tnnLow).*(1 + Tap.*Data.Red.Bus.Ntr) - (tnnTop.*tnnLow);
+	nn >= (1 + Ntr.*Data.Red.Branch.Tap).^2;
+	nn <= (tnnTop + tnnLow).*(1 + Ntr.*Data.Red.Branch.Tap) - (tnnTop.*tnnLow);
 
-	nv >= nn.*(Data.Red.Bus.uLow.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uLow.^2);
-	nv >= nn.*(Data.Red.Bus.uTop.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uTop.^2);
+	nv >= nn.*(VertI*(Data.Red.Bus.uLow.^2)) + (tnnLow.^2).*(VertI*v) - (tnnLow.^2).*(VertI*Data.Red.Bus.uLow.^2);
+	nv >= nn.*(VertI*(Data.Red.Bus.uTop.^2)) + (tnnTop.^2).*(VertI*v) - (tnnTop.^2).*(VertI*Data.Red.Bus.uTop.^2);
 
-	nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
-	nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
+	nv <= nn.*(VertI*(Data.Red.Bus.uLow.^2)) + (tnnTop.^2).*(VertI*v) - (tnnTop.^2).*(VertI*Data.Red.Bus.uLow.^2);
+	nv <= nn.*(VertI*(Data.Red.Bus.uTop.^2)) + (tnnLow.^2).*(VertI*v) - (tnnLow.^2).*(VertI*Data.Red.Bus.uTop.^2);
 
-	Tap >= Data.Red.Bus.TapLow;
-	Tap <= Data.Red.Bus.TapTop;
+	Ntr >= Data.Red.Branch.NtrLow;
+	Ntr <= Data.Red.Branch.NtrTop;
 
-	vExpr = VertI*nv - VertJ*v - 2 * (Data.Red.Branch.r.*P + Data.Red.Branch.x.*Q) + ((Data.Red.Branch.r).^2 + (Data.Red.Branch.x).^2) .* l;
+	vExpr = nv - VertJ*v - 2 * (Data.Red.Branch.r.*P + Data.Red.Branch.x.*Q) + ((Data.Red.Branch.r).^2 + (Data.Red.Branch.x).^2) .* l;
 
 	0 >= vExpr - (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
 	0 <= vExpr + (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
 
 	cDv >= 0;
-	cDv >= (v - (1+Data.Cost.delta))*diag(Data.Cost.m);
-	cDv >= (v - (1-Data.Cost.delta))*diag(-Data.Cost.m);
+	cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));
+	cDv >= - Data.Cost.m.*(v - (1-Data.Cost.delta));
 
 	% Restricciones de arcos de la Red
 	z(Tupm,:) + z(Tdownm,:) == y(Tupm,:);
@@ -291,6 +292,7 @@ cvx_begin
 		vApp(:,:,app) = v(:,:);
 		uLowApp(:,:,app) = Data.Red.Bus.uLow(:,:);
 		uTopApp(:,:,app) = Data.Red.Bus.uTop(:,:);
+        qCApp(:,:,app) == pCApp(:,:,app).*Data.Util.tgPhi(app)
 	end
 
 	pCApp >= Data.Red.Bus.alpha.*(Data.Util.pzCnLow.*vApp + pCn.*uLowApp.^2 - Data.Util.pzCnLow.*uLowApp.^2) + (1-Data.Red.Bus.alpha).* pCn; 
@@ -298,8 +300,6 @@ cvx_begin
 
 	pCApp <= Data.Red.Bus.alpha.*(Data.Util.pzCnTop.*vApp + pCn.*uLowApp.^2 - Data.Util.pzCnTop.*uLowApp.^2) + (1-Data.Red.Bus.alpha).* pCn;
 	pCApp <= Data.Red.Bus.alpha.*(Data.Util.pzCnLow.*vApp + pCn.*uTopApp.^2 - Data.Util.pzCnLow.*uTopApp.^2) + (1-Data.Red.Bus.alpha).* pCn;
-
-	qCApp == pCApp.*Data.Util.tgPhi;
 
 	pCn >= Data.Util.pzCnLow;
 	pCn <= Data.Util.pzCnTop;
@@ -341,28 +341,17 @@ cvx_begin
 		expression cStb(n, Config.Etapas);
 
 		DlEStb <= 0;
-		DlEStb <= EStb - Data.St.Bat.ETop*Data.St.Bat.kapa;
+		DlEStb <= EStb - Data.St.Bat.ETop.*Data.St.Bat.kapa;
 
 
-		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
-
-		% Modelado de Config.Etapas
-		for et = 1: Config.Etapas
-			for i = 1:nSt
-				j = St(i);
-				if et == 1
-					cStb(j,et) = cStb(j,et) + [pStgb(i,et) 0] * M(:,:,i,et) * [pStgb(i,et); 0];
-				else
-					cStb(j,et) = cStb(j,et) + [pStgb(i,et) pStgb(i,et-1)] * M(:,:,i,et) * [pStgb(i,et); pStgb(i,et-1)];
-				end
-			end
+		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)); % falta termino de m2
+		for i = 1:nSt
+            cStb(St(i),Config.Etapas) = cStb(St(i),Config.Etapas) + pStgb(i,:) * M(:,:,i) * pStgb(i,:)';
 		end
 
-		tfopt_expr = tfopt_expr + sum(cStb,1);
-
-		tfopt_expr = tfopt_expr + ...
-			sum(Data.St.Bat.I(:,Config.Etapas).*Data.St.Bat.beta(:,Config.Etapas).* ...
-				((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas)*Data.St.Bat.gama).^2) + Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
+		tfopt_expr = tfopt_expr + sum(cStb,1) + ...
+			sum(Data.St.Bat.beta(:,Config.Etapas).* ...
+				((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas).*Data.St.Bat.gama(:,Config.Etapas)).^2) + Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
 
 		EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
 		EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
@@ -497,17 +486,17 @@ cvx_begin
 		% Modelo de Red interna
 		vdfigI == v(indWn,:);
 
-		PdfigIE == Data.Gen.DFIG.rIE .* ldfigIE - pWigdfigE;
-		PdfigIF == Data.Gen.DFIG.rIF .* ldfigIF + pCdfigF;
-		PdfigOR == Data.Gen.DFIG.rOR .* ldfigOR - pWigdfigR;
+		PdfigIE == Data.Gen.DFIG.rIE(indWn,:) .* ldfigIE - pWigdfigE;
+		PdfigIF == Data.Gen.DFIG.rIF(indWn,:) .* ldfigIF + pCdfigF;
+		PdfigOR == Data.Gen.DFIG.rOR(indWn,:) .* ldfigOR - pWigdfigR;
 
-		QdfigIE == Data.Gen.DFIG.xIE .* ldfigIE - qWigdfigE;
-		QdfigIF == Data.Gen.DFIG.xIF .* ldfigIF - qCdfigF;
-		QdfigOR == n_Wnd .* Data.Gen.DFIG.xOR .* ldfigOR - qWigdfigR;
+		QdfigIE == Data.Gen.DFIG.xIE(indWn,:) .* ldfigIE - qWigdfigE;
+		QdfigIF == Data.Gen.DFIG.xIF(indWn,:) .* ldfigIF - qCdfigF;
+		QdfigOR == n_Wnd(indWn,:) .* Data.Gen.DFIG.xOR(indWn,:) .* ldfigOR - qWigdfigR;
 
-		vdfigE == vdfigI - 2*(Data.Gen.DFIG.rIE .* PdfigIE + Data.Gen.DFIG.xIE .* QdfigIE) + (Data.Gen.DFIG.rIE.^2 + Data.Gen.DFIG.xIE.^2) .* ldfigIE;
-		vdfigF == vdfigI - 2*(Data.Gen.DFIG.rIF .* PdfigIF + Data.Gen.DFIG.xIF .* QdfigIF) + (Data.Gen.DFIG.rIF.^2 + Data.Gen.DFIG.xIF.^2) .* ldfigIF;
-		vdfigR == vdfigO - 2*(Data.Gen.DFIG.rOR .* PdfigOR + n_Wnd.*Data.Gen.DFIG.xOR .* QdfigOR) + (Data.Gen.DFIG.rOR.^2 + n_Wnd.^2 .* Data.Gen.DFIG.xOR.^2) .* ldfigOR;
+		vdfigE == vdfigI - 2*(Data.Gen.DFIG.rIE(indWn,:) .* PdfigIE + Data.Gen.DFIG.xIE(indWn,:) .* QdfigIE) + (Data.Gen.DFIG.rIE(indWn,:).^2 + Data.Gen.DFIG.xIE(indWn,:).^2) .* ldfigIE;
+		vdfigF == vdfigI - 2*(Data.Gen.DFIG.rIF(indWn,:) .* PdfigIF + Data.Gen.DFIG.xIF(indWn,:) .* QdfigIF) + (Data.Gen.DFIG.rIF(indWn,:).^2 + Data.Gen.DFIG.xIF(indWn,:).^2) .* ldfigIF;
+		vdfigR == vdfigO - 2*(Data.Gen.DFIG.rOR(indWn,:) .* PdfigOR + n_Wnd(indWn,:).*Data.Gen.DFIG.xOR(indWn,:) .* QdfigOR) + (Data.Gen.DFIG.rOR(indWn,:).^2 + n_Wnd(indWn,:).^2 .* Data.Gen.DFIG.xOR(indWn,:).^2) .* ldfigOR;
 
 		% Corriente
 		lQoLdfigIE(:,:,1) = 2*PdfigIE;
@@ -525,28 +514,28 @@ cvx_begin
 		lQoLdfigOR(:,:,3) = ldfigOR - vdfigO;
 		norms(lQoLdfigOR,2,3) - (ldfigOR + vdfigO) <= 0;
 
-		Data.Gen.DFIG.lTopIF >= ldfigIF;
-		Data.Gen.DFIG.lTopOR >= ldfigOR;
+		Data.Gen.DFIG.lTopIF(indWn,:) >= ldfigIF;
+		Data.Gen.DFIG.lTopOR(indWn,:) >= ldfigOR;
 
-		(Data.Gen.DFIG.lTopIE - ldfigIE).*P_mecSigWnd >= 0;
-		(Data.Gen.DFIG.sTopF - sdfigF).*P_mecSigWnd >= 0;
-		(Data.Gen.DFIG.sTopR - sdfigR).*P_mecSigWnd >= 0;
-		(Data.Gen.DFIG.xiTopF - xidfigF).*P_mecSigWnd >= 0;
-		(Data.Gen.DFIG.xiTopR - xidfigR).*P_mecSigWnd >= 0;
+		(Data.Gen.DFIG.lTopIE(indWn,:)).*P_mecSigWnd(indWn,:) - ldfigIE >= 0;
+		(Data.Gen.DFIG.sTopF(indWn,:)).* P_mecSigWnd(indWn,:) - sdfigF >= 0;
+		(Data.Gen.DFIG.sTopR(indWn,:)) .* P_mecSigWnd(indWn,:) - sdfigR >= 0;
+		(Data.Gen.DFIG.xiTopF(indWn,:)).*P_mecSigWnd(indWn,:) - xidfigF >= 0;
+		(Data.Gen.DFIG.xiTopR(indWn,:)).*P_mecSigWnd(indWn,:) - xidfigR >= 0;
 
-		vdfigE >= Data.Gen.DFIG.uLowE.^2;
-		vdfigE <= Data.Gen.DFIG.uTopE.^2;
+		vdfigE >= Data.Gen.DFIG.uLowE(indWn,:).^2;
+		vdfigE <= Data.Gen.DFIG.uTopE(indWn,:).^2;
 
-		vdfigF >= Data.Gen.DFIG.uLowF.^2;
-		vdfigF <= Data.Gen.DFIG.uTopF.^2;
+		vdfigF >= Data.Gen.DFIG.uLowF(indWn,:).^2;
+		vdfigF <= Data.Gen.DFIG.uTopF(indWn,:).^2;
 
 		PQNormdfigIE(:,:,1) = PdfigIE;
 		PQNormdfigIE(:,:,2) = QdfigIE;
-		Data.Gen.DFIG.PQnormIE >= norms(PQNormdfigIE,2,3);
+		Data.Gen.DFIG.PQnormIE(indWn,:) >= norms(PQNormdfigIE,2,3);
 
 		PQNormdfigIF(:,:,1) = PdfigIF;
 		PQNormdfigIF(:,:,2) = QdfigIF;
-		Data.Gen.DFIG.PQnormIF >= norms(PQNormdfigIF,2,3);
+		Data.Gen.DFIG.PQnormIF(indWn,:) >= norms(PQNormdfigIF,2,3);
 
 		sNormdfigF(:,:,1) = pCdfigF;
 		sNormdfigF(:,:,2) = qCdfigF;
@@ -559,12 +548,12 @@ cvx_begin
 		xidfigR >= PdfigOR.^2 + QdfigOR.^2;
 
 		pCdfigF == PdfigOR ...
-			+ (Data.Gen.DFIG.cvR .* sdfigR + Data.Gen.DFIG.crR .* xidfigR) ...
-			+ (Data.Gen.DFIG.cvF .* sdfigF + Data.Gen.DFIG.crF .* xidfigF);
-		vdfigR == n_Wnd.^2*(Data.Gen.DFIG.N_er^2).*vdfigE;
-		pWigdfigE == P_mecWnd ./ (1-n_Wnd); %TODO es igual
-		pWigdfigR == -n_Wnd.*pWigdfigE;
-		qWigdfigR == n_Wnd.*(qWigdfigE);
+			+ (Data.Gen.DFIG.cvR(indWn,:) .* sdfigR + Data.Gen.DFIG.crR(indWn,:) .* xidfigR) ...
+			+ (Data.Gen.DFIG.cvF(indWn,:) .* sdfigF + Data.Gen.DFIG.crF(indWn,:) .* xidfigF);
+		vdfigR == n_Wnd(indWn,:).^2.*(repmat(Data.Gen.DFIG.N_er(indWn,:).^2,[1 Config.Etapas])).*vdfigE;
+		pWigdfigE == P_mecWnd(indWn,:) ./ (1-n_Wnd(indWn,:)); %TODO es igual
+		pWigdfigR == -n_Wnd(indWn,:).*pWigdfigE;
+		qWigdfigR == n_Wnd(indWn,:).*(qWigdfigE);
 
 	else
 		pWi == 0;
@@ -606,8 +595,8 @@ cvx_begin
 	end
 
 	if fixed
-		Cap == round(Data.Fixed.Cap);
-		Tap == round(Data.Fixed.Tap); 
+		Ncp == round(Data.Fixed.Ncp);
+		Ntr == round(Data.Fixed.Ntr); 
 		y == round(Data.Fixed.y);
 	end
 
@@ -622,15 +611,15 @@ toc
 Var.Red.Branch.P	 = 	P	;
 Var.Red.Branch.Q	 = 	Q	;
 Var.Red.Branch.l	 = 	l	;
-Var.Red.Branch.z	 = 	z	;
+Var.Red.Branch.z	 = 	round(z)	;
 Var.Red.Branch.y	 = 	y	;
 Var.Red.Bus.w	 = 	w	;
 
 Var.Red.Bus.v	 = 	v	;
 Var.Red.Bus.cDv	 = 	cDv	;
-Var.Red.Bus.nn	 = 	nn	;
-Var.Red.Bus.nv	 = 	nv	;
-Var.Red.Bus.Tap	 = 	Tap	;
+Var.Red.Branch.nn	 = 	nn	;
+Var.Red.Branch.nv	 = 	nv	;
+Var.Red.Branch.Ntr	 = 	Ntr	;
 
 Var.Red.Bus.pC	 = 	pC	;
 Var.Red.Bus.qC	 = 	qC	;
@@ -642,7 +631,7 @@ Var.Red.Bus.pG	 = 	pG	;
 Var.Red.Bus.qG	 = 	qG	;
 
 Var.Red.Bus.qCp	 = 	qCp	;
-Var.Red.Bus.Cap	 = 	Cap	;
+Var.Red.Bus.Ncp	 = 	Ncp	;
 
 Var.Red.Bus.PTras	 = 	pGTras	;
 Var.Red.Bus.QTras	 = 	qGTras	;
@@ -692,39 +681,63 @@ if lenWN > 0
 	Var.Gen.Dfig.pWi = pWi;
 	Var.Gen.Dfig.qWi = qWi;
 
-	Var.Gen.Dfig.Branch.PIE = PdfigIE';
-	Var.Gen.Dfig.Branch.PIF = PdfigIF';
-	Var.Gen.Dfig.Branch.POR = PdfigOR';
+	Var.Gen.Dfig.Branch.PIE = pWi*0;
+	Var.Gen.Dfig.Branch.PIE(indWn,:) = PdfigIE;
+	Var.Gen.Dfig.Branch.PIF = pWi*0;
+	Var.Gen.Dfig.Branch.PIF(indWn,:) = PdfigIF;
+	Var.Gen.Dfig.Branch.POR = pWi*0;
+	Var.Gen.Dfig.Branch.POR(indWn,:) = PdfigOR;
 
-	Var.Gen.Dfig.Branch.QIE = QdfigIE';
-	Var.Gen.Dfig.Branch.QIF = QdfigIF';
-	Var.Gen.Dfig.Branch.QOR = QdfigOR';
+	Var.Gen.Dfig.Branch.QIE = pWi*0;
+	Var.Gen.Dfig.Branch.QIE(indWn,:) = QdfigIE;
+	Var.Gen.Dfig.Branch.QIF = pWi*0;
+	Var.Gen.Dfig.Branch.QIF(indWn,:) = QdfigIF;
+	Var.Gen.Dfig.Branch.QOR = pWi*0;
+	Var.Gen.Dfig.Branch.QOR(indWn,:) = QdfigOR;
 
-	Var.Gen.Dfig.Branch.lIE = ldfigIE';
-	Var.Gen.Dfig.Branch.lIF = ldfigIF';
-	Var.Gen.Dfig.Branch.lOR = ldfigOR';
+	Var.Gen.Dfig.Branch.lIE = pWi*0;
+	Var.Gen.Dfig.Branch.lIE(indWn,:) = ldfigIE;
+	Var.Gen.Dfig.Branch.lIF = pWi*0;
+	Var.Gen.Dfig.Branch.lIF(indWn,:) = ldfigIF;
+	Var.Gen.Dfig.Branch.lOR = pWi*0;
+	Var.Gen.Dfig.Branch.lOR(indWn,:) = ldfigOR;
 
-	Var.Gen.Dfig.Bus.vI = vdfigI';
-	Var.Gen.Dfig.Bus.vE = vdfigE';
-	Var.Gen.Dfig.Bus.vF = vdfigF';
-	Var.Gen.Dfig.Bus.vO = vdfigO';
-	Var.Gen.Dfig.Bus.vR = vdfigR';
+	Var.Gen.Dfig.Bus.vI = pWi*0;
+	Var.Gen.Dfig.Bus.vI(indWn,:) = vdfigI;
+	Var.Gen.Dfig.Bus.vE = pWi*0;
+	Var.Gen.Dfig.Bus.vE(indWn,:) = vdfigE;
+	Var.Gen.Dfig.Bus.vF = pWi*0;
+	Var.Gen.Dfig.Bus.vF(indWn,:) = vdfigF;
+	Var.Gen.Dfig.Bus.vO = pWi*0;
+	Var.Gen.Dfig.Bus.vO(indWn,:) = vdfigO;
+	Var.Gen.Dfig.Bus.vR = pWi*0;
+	Var.Gen.Dfig.Bus.vR(indWn,:) = vdfigR;
 
-	Var.Gen.Dfig.Bus.pCF = pCdfigF';
+	Var.Gen.Dfig.Bus.pCF = pWi*0;
+	Var.Gen.Dfig.Bus.pCF(indWn,:) = pCdfigF;
 
-	Var.Gen.Dfig.Bus.qCF = qCdfigF';
+	Var.Gen.Dfig.Bus.qCF = pWi*0;
+	Var.Gen.Dfig.Bus.qCF(indWn,:) = qCdfigF;
 
-	Var.Gen.Dfig.Bus.pgE = pWigdfigE';
-	Var.Gen.Dfig.Bus.pgR = pWigdfigR';
+	Var.Gen.Dfig.Bus.pgE = pWi*0;
+	Var.Gen.Dfig.Bus.pgE(indWn,:) = pWigdfigE;
+	Var.Gen.Dfig.Bus.pgR = pWi*0;
+	Var.Gen.Dfig.Bus.pgR(indWn,:) = pWigdfigR;
 
-	Var.Gen.Dfig.Bus.qgE = qWigdfigE';
-	Var.Gen.Dfig.Bus.qgR = qWigdfigR';
+	Var.Gen.Dfig.Bus.qgE = pWi*0;
+	Var.Gen.Dfig.Bus.qgE(indWn,:) = qWigdfigE;
+	Var.Gen.Dfig.Bus.qgR = pWi*0;
+	Var.Gen.Dfig.Bus.qgR(indWn,:) = qWigdfigR;
 
-	Var.Gen.Dfig.Bus.sF = sdfigF';
-	Var.Gen.Dfig.Bus.sR = sdfigR';
+	Var.Gen.Dfig.Bus.sF = pWi*0;
+	Var.Gen.Dfig.Bus.sF(indWn,:) = sdfigF;
+	Var.Gen.Dfig.Bus.sR = pWi*0;
+	Var.Gen.Dfig.Bus.sR(indWn,:) = sdfigR;
 
-	Var.Gen.Dfig.Bus.xiF = xidfigF';
-	Var.Gen.Dfig.Bus.xiR = xidfigR';
+	Var.Gen.Dfig.Bus.xiF = pWi*0;
+	Var.Gen.Dfig.Bus.xiF(indWn,:) = xidfigF;
+	Var.Gen.Dfig.Bus.xiR = pWi*0;
+	Var.Gen.Dfig.Bus.xiR(indWn,:) = xidfigR;
 
 	Var.Gen.Dfig.Bus.n_Wnd = n_Wnd;
 	Var.Gen.Dfig.Bus.P_mecWnd = P_mecWnd;

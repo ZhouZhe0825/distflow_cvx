@@ -9,20 +9,20 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 		ConfigIni.Centr = Config.Ini;
 
 		leyenda = 'Primera vuelta centralizado'
-		[Var_centr, opt_centr, status] = distflowCentralizadoM(DataM, Config);
-		leyenda = ['Centralizado - ' status]
+		[Var_centr, opt_centr] = distflowCentralizadoM(DataM, Config);
+%         leyenda = ['Centralizado - ' status]
+% 
+% 		if isNotSolved(status)
+% 			save(Config.workspace_var_file);
+% 			return;
+% 		end
 
-		if isNotSolved(status)
-			save(Config.workspace_var_file);
-			return;
-		end
-
-		[Var_ini, opt_ini, status] = distflowCentralizadoM(DataM, ConfigIni);
-		if isNotSolved(status)
-			save(Config.workspace_var_file);
-			return;
-		end
-		leyenda = ['Inicial - ' status]
+		[Var_ini, opt_ini] = distflowCentralizadoM(DataM, ConfigIni);
+% 		if isNotSolved(status)
+% 			save(Config.workspace_var_file);
+% 			return;
+% 		end
+% 		leyenda = ['Inicial - ' status]
 
 		DataM_f = DataM;
 
@@ -36,8 +36,8 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 %		 DataM_f.Fixed.y = Var_ini.Red.Branch.y;
 %		 DataM_f.Fixed.z = Var_ini.Red.Branch.z;
 
-		DataM_f.Fixed.Cap = round(Var_ini.Red.Bus.Cap);
-		DataM_f.Fixed.Tap = round(Var_ini.Red.Bus.Tap);
+		DataM_f.Fixed.Ncp = round(Var_ini.Red.Bus.Ncp);
+		DataM_f.Fixed.Ntr = round(Var_ini.Red.Branch.Ntr);
         if isfield(Var_ini, 'ClNI')
             DataM_f.Fixed.stCh = round(Var_ini.ClNI.start);
             DataM_f.Fixed.onCh = round(Var_ini.ClNI.on);
@@ -45,7 +45,8 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 		DataM_f.Fixed.y = round(Var_ini.Red.Branch.y);
 		DataM_f.Fixed.z = round(Var_ini.Red.Branch.z);
         
-		[Var_ini_, opt_ini, status] = distflowCentralizadoM(DataM_f, ConfigIni);
+% 		[Var_ini_, opt_ini, status] = distflowCentralizadoM(DataM_f, ConfigIni);
+		[Var_ini_, opt_ini] = distflowCentralizadoM(DataM_f, ConfigIni);
 
 % 		difCap_ini = max(max(abs(DataM_f.Fixed.Cap - Var_ini.Red.Bus.Cap)));
 % 		difTap_ini = max(max(abs(DataM_f.Fixed.Tap - Var_ini.Red.Bus.Tap)));
@@ -54,7 +55,7 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 % 		dify_ini = max(max(abs(DataM_f.Fixed.y - Var_ini.Red.Branch.y)));
 % 		difz_ini = max(max(abs(DataM_f.Fixed.z - Var_ini.Red.Branch.z)));
 
-		leyenda = ['Inicial Duales - ' status]
+% 		leyenda = ['Inicial Duales - ' status]
 
 		leyenda = 'Fin centralizado'
 
@@ -62,7 +63,7 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 		Var_ini.Dual.dQn = Var_ini_.Dual.dQn;
 
 		[Var_ini] = randStart(Var_ini);
-		save(Config.workspace_var_file);
+% 		save(Config.workspace_var_file);
 	end
 	tdistr = tic;
 	nodos = size(Data.Red.Branch.T,1);
@@ -74,7 +75,7 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	DfigNodes = find(Data.Gen.DFIG.I == 1);
 	PvNodes = find(Data.Gen.Pv.I == 1);
 	AlmNodes = find(Data.St.Bat.I == 1);
-	ClResNodes = Data.Red.Bus.indCons;
+	ClResNodes = find(Data.Red.Bus.Icons == 1);
 	ClNINodes = find(Data.ClNI.I == 1);
 
 	ConsGenNodes = [TrasNodes];
@@ -183,7 +184,7 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	Ev.mu = Ev.mu(:,:,(1:it2+it-1));
 	Ev.lambda = Ev.lambda(:,:,(1:it2+it-1));
 
-	save(Config.workspace_var_file);
+% 	save(Config.workspace_var_file);
 	toc(tdistr)
 end
 
@@ -216,7 +217,7 @@ function [Var_mod] = randStart(Var)
 
 
 	if isfield(Var_mod,'St')
-		if isfield(Var_mod.Gen, 'Bat')
+		if isfield(Var_mod.St, 'Bat')
 			Var_mod.St.Bat.pStb = ones(size(Var.St.Bat.pStb)) * rnd;
 			Var_mod.St.Bat.qStb = ones(size(Var.St.Bat.qStb)) * rnd;
 
@@ -338,7 +339,7 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
     TrasNodes = find(Data.Gen.Tras.I == 1);
 	DfigNodes = find(Data.Gen.DFIG.I == 1);
 	PvNodes = find(Data.Gen.Pv.I == 1);
-	ClResNodes = Data.Red.Bus.indCons;
+	ClResNodes = find(Data.Red.Bus.Icons == 1);
 	AlmNodes = find(Data.St.Bat.I == 1);
 	OpSisNodes = (1:size(Data.Red.Branch.T,1));
 	ClNINodes = find(Data.ClNI.I == 1);
@@ -405,12 +406,12 @@ end
 
 function [Var, opt, opt_Tras, opt_Dfig, opt_Pv, opt_ClNI, opt_ClRes, opt_Alm, opt_OpSis, status] = solve_all_subproblems(Data, Config, DistrInfo, it, wbSol, opt_Tras, opt_Dfig, opt_Pv, opt_ClNI, opt_ClRes, opt_Alm, opt_OpSis, opt, Fixed)
 
-    TrasNodes = find(matOverTime(Data.Gen.Tras.I) == 1);
-	DfigNodes = find(matOverTime(Data.Gen.DFIG.I) == 1);
-	PvNodes = find(matOverTime(Data.Gen.Pv.I) == 1);
-	AlmNodes = find(matOverTime(Data.St.Bat.I) == 1);
-	ClResNodes = Data.Red.Bus.indCons;
-	ClNINodes = find(matOverTime(Data.ClNI.I) == 1);
+	TrasNodes = find(Data.Gen.Tras.I == 1);
+	DfigNodes = find(Data.Gen.DFIG.I == 1);
+	PvNodes = find(Data.Gen.Pv.I == 1);
+	AlmNodes = find(Data.St.Bat.I == 1);
+	ClResNodes = find(Data.Red.Bus.Icons == 1);
+	ClNINodes = find(Data.ClNI.I == 1);
 
 	OpSisNodes = (1:size(Data.Red.Branch.T,1));
 

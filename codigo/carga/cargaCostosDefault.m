@@ -1,26 +1,23 @@
-function [Data] = cargaCostosDefault(Data, mHor, piPTrasHor, rhoP_ct, rhoQ_ct, m, delta)
+function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos)
 
-Data.Cost.rhopPv = ones(size(Data.Gen.Pv.I)).*Data.Gen.Pv.I;
-Data.Cost.rhomqPv = ones(size(Data.Gen.Pv.I)).*Data.Gen.Pv.I;
-Data.Cost.rhoMqPv = ones(size(Data.Gen.Pv.I)).*Data.Gen.Pv.I;
+[Data.Cost.m, Data.Cost.delta, Data.Cost.cdv] = costosTension(Data,fileCostosTension);
 
-Data.Cost.piPTras = zeros(size(Data.Gen.Pv.I));
-Data.Cost.piQmtras = zeros(size(Data.Gen.Pv.I));
-Data.Cost.piQMtras = zeros(size(Data.Gen.Pv.I));
+[Data.Cost.piPTras, Data.Cost.piQmtras, Data.Cost.piQMtras] = costosTrasmision(Data,fileCostosTras);
 
-v0 = find(Data.Gen.Tras.I == 1);
-Data.Cost.piPTras(v0) = 1;
-Data.Cost.piQmtras(v0) = 1;
-Data.Cost.piQMtras(v0) = 1; 
+[Data.Cost.rhopPv, Data.Cost.rhomqPv, Data.Cost.rhoMqPv] = costosPv(Data,Solares);
 
-Data.Cost.rhopWi = zeros(length(Data.Red.Branch.T),1);
-Data.Cost.rhomqWi = zeros(length(Data.Red.Branch.T),1);
-Data.Cost.rhoMqWi = zeros(length(Data.Red.Branch.T),1);
-Data.Cost.cdv = ones(length(Data.Red.Branch.T),1);
+[Data.Cost.rhopWi, Data.Cost.rhomqWi, Data.Cost.rhoMqWi] = costosDfig(Data,Eolicos);
 
-Data.Cost.piPTras = Data.Cost.piPTras * rhoP_ct * piPTrasHor';
-Data.Cost.piQmtras = Data.Cost.piQmtras * rhoQ_ct * piPTrasHor';
-Data.Cost.piQMtras = Data.Cost.piQMtras * rhoQ_ct * piPTrasHor';
+Data.Cost.cCap = Data.Red.Bus.Icap;
+for i = 1:length(Caps)
+	Data.Cost.cCap(Caps(i).nod) = Caps(i).cambio;
+end    
 
-Data.Cost.m = m*mHor';
-Data.Cost.delta = delta;
+Data.Cost.cTap = Data.Red.Branch.Itap*0;
+for i = 1:length(Trafos)
+	Data.Cost.cTap(Trafos(i).nodI,Trafos(i).nodJ) = Trafos(i).cambio;
+end    
+
+Data.Cost.cTap = Data.Cost.cTap + Data.Cost.cTap';
+
+Data.Cost.cY = Data.Red.Branch.T .* Switches.cY;

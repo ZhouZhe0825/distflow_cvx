@@ -21,8 +21,8 @@ function printSalidasDistflowNxN(Var, Data, Config, cantTaps, cantCaps, cantCarg
 	printVarNx1xT(TreeMatTimToVectTim(Var.Red.Branch.y,Config.Etapas,TotalT), Header.Branch, Header.Main, outFilename, 'y');
 	printVarNx1xT(Var.Red.Bus.w, Header.Bus, Header.Main, outFilename, 'w');
 	printVarNx1xT(Var.Red.Bus.cDv, Header.Bus, Header.Main, outFilename, 'cDv');
-	printVarNx1xT(Var.Red.Bus.nn, Header.Bus, Header.Main, outFilename, 'nn');
-	printVarNx1xT(Var.Red.Bus.nv, Header.Bus, Header.Main, outFilename, 'nv');
+	printVarNx1xT(TreeMatTimToVectTim(Var.Red.Branch.nn,Config.Etapas,TotalT), Header.Branch, Header.Main, outFilename, 'nn');
+	printVarNx1xT(TreeMatTimToVectTim(Var.Red.Branch.nv,Config.Etapas,TotalT), Header.Branch, Header.Main, outFilename, 'nv');
 	printVarNx1xT(Var.Red.Bus.pG, Header.Bus, Header.Main, outFilename, 'pG');
 	printVarNx1xT(Var.Red.Bus.pN, Header.Bus, Header.Main, outFilename, 'pN');
 	printVarNx1xT(Var.Red.Bus.pC, Header.Bus, Header.Main, outFilename, 'pC');

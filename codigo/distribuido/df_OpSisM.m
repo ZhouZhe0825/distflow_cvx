@@ -29,19 +29,19 @@ for i=1:length(Tupmind)
 	Tdownm(i) = find(Tind == Tdownmind(i));
 end
 
-tnnLow = (1 + Data.Red.Bus.TapLow.*Data.Red.Bus.Ntr);
-tnnTop = (1 + Data.Red.Bus.TapTop.*Data.Red.Bus.Ntr);
+tnnLow = (1 + Data.Red.Branch.NtrLow.*Data.Red.Branch.Tap);
+tnnTop = (1 + Data.Red.Branch.NtrTop.*Data.Red.Branch.Tap);
 
-NcpCapL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow;
-NcpCapT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop;
+NcpCapL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow;
+NcpCapT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop;
 
-NcpvL = Data.Red.Bus.Ncp.*(Data.Red.Bus.uLow).^2;
-NcpvT = Data.Red.Bus.Ncp.*(Data.Red.Bus.uTop).^2;
+NcpvL = Data.Red.Bus.Cap.*(Data.Red.Bus.uLow).^2;
+NcpvT = Data.Red.Bus.Cap.*(Data.Red.Bus.uTop).^2;
 
-NcpCapLvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uLow).^2;
-NcpCapTvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uTop).^2;
-NcpCapLvT = Data.Red.Bus.Ncp.*Data.Red.Bus.CapLow.*(Data.Red.Bus.uTop).^2;
-NcpCapTvL = Data.Red.Bus.Ncp.*Data.Red.Bus.CapTop.*(Data.Red.Bus.uLow).^2;
+NcpCapLvL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow.*(Data.Red.Bus.uLow).^2;
+NcpCapTvT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop.*(Data.Red.Bus.uTop).^2;
+NcpCapLvT = Data.Red.Bus.Cap.*Data.Red.Bus.NcpLow.*(Data.Red.Bus.uTop).^2;
+NcpCapTvL = Data.Red.Bus.Cap.*Data.Red.Bus.NcpTop.*(Data.Red.Bus.uLow).^2;
 
 %% Modelo programacion matematica
 
@@ -64,15 +64,15 @@ cvx_begin quiet
 
 	variable v(n, Config.Etapas); % Modulo^2 de la tension
 	variable cDv(n, Config.Etapas); % Modulo^2 de la tension
-	variable nn(n, Config.Etapas);
-	variable nv(n, Config.Etapas);
-	variable Tap(n, Config.Etapas) integer;
+	variable nn(m, Config.Etapas);
+	variable nv(m, Config.Etapas);
+	variable Ntr(m, Config.Etapas) integer;
 
 	variable pN(n, Config.Etapas); % Consumo de potencia activa en el nodo i
 	variable qN(n, Config.Etapas); % Consumo de potencia reactiva en el nodo i
 
 	variable qCp(n, Config.Etapas); % reactive power demand in i
-	variable Cap(n, Config.Etapas) integer;
+	variable Ncp(n, Config.Etapas) integer;
 
 	variable pCApp(n, Config.Etapas, 2); % real power demand in i
 	variable qCApp(n, Config.Etapas, 2); % real power demand in i
@@ -84,8 +84,8 @@ cvx_begin quiet
  	expression lNorm(m, Config.Etapas, 3);
 	expression vExpr(n, Config.Etapas);
 	expression vApp(n, Config.Etapas, 2);
-	expression CapDif(n,Config.Etapas);
-	expression TapDif(n,Config.Etapas);
+	expression NcpDif(n,Config.Etapas);
+	expression NtrDif(m,Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas,1); 
 	expression tfopt_virt(Config.Etapas,1);
@@ -94,17 +94,17 @@ cvx_begin quiet
 
 
 	%% Funcion objetivo
-	CapDif(:,1) = Data.Red.Bus.CapIni;
-	CapDif(:,(2:Config.Etapas)) = Cap(:,(2:Config.Etapas)) - Cap(:,(1:Config.Etapas-1));
+	NcpDif(:,1) = Data.Red.Bus.NcpIni;
+	NcpDif(:,(2:Config.Etapas)) = Ncp(:,(2:Config.Etapas)) - Ncp(:,(1:Config.Etapas-1));
 
-	TapDif(:,1) = Data.Red.Bus.TapIni;
-	TapDif(:,(2:Config.Etapas)) = Tap(:,(2:Config.Etapas)) - Tap(:,(1:Config.Etapas-1));
+	NtrDif(:,1) = Data.Red.Branch.NtrIni;
+	NtrDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
 
 	tfopt_expr = ...
 		sum(Data.Cost.cdv.*cDv,1) ...
-		+ sum(Data.Red.cambioCap*Data.Red.Bus.indCap.*(CapDif.^2),1) ...
-		+ sum(Data.Red.cambioTap*Data.Red.Bus.indTap.*(TapDif.^2),1) ...
-		+ sum(Data.Red.Branch.cY.*y,1) ...
+		+ sum(Data.Cost.cCap.*(NcpDif.^2),1) ...
+		+ sum(Data.Cost.cTap.*(NtrDif.^2),1) ...
+		+ sum(Data.Cost.cY.*y,1) ...
 		;
 	tfopt_virt = sum(- DistrInfo.muT .* pN - DistrInfo.lambdaT .* qN + DistrInfo.lambdaT .* qCp,1);
 	tfopt_conv = sum(norms(pN - DistrInfo.OpSis.pN,2,2) ...
@@ -117,13 +117,13 @@ cvx_begin quiet
 	qN == InBr*(Q - Data.Red.Branch.x.*l) - OutBr*Q;
 
 	% Restricciones de capacitores
-	Cap >= Data.Red.Bus.CapLow;
-	Cap <= Data.Red.Bus.CapTop;
+	Ncp >= Data.Red.Bus.NcpLow;
+	Ncp <= Data.Red.Bus.NcpTop;
 
-	qCp >= NcpCapL.*v + NcpvL.*Cap - NcpCapLvL;
-	qCp >= NcpCapT.*v + NcpvT.*Cap - NcpCapTvT;
-	qCp <= NcpCapL.*v + NcpvT.*Cap - NcpCapLvT;
-	qCp <= NcpCapT.*v + NcpvL.*Cap - NcpCapTvL;
+	qCp >= NcpCapL.*v + NcpvL.*Ncp - NcpCapLvL;
+	qCp >= NcpCapT.*v + NcpvT.*Ncp - NcpCapTvT;
+	qCp <= NcpCapL.*v + NcpvT.*Ncp - NcpCapLvT;
+	qCp <= NcpCapT.*v + NcpvL.*Ncp - NcpCapTvL;
 
 	% Restricciones conica de corriente
 	lQoL(:,:,1) = 2 * P;
@@ -137,26 +137,26 @@ cvx_begin quiet
 	norms(lNorm,2,3) <= l + (VertI*Data.Red.Bus.uTop.^2).*z;
 
 	% Restriccion de la tension
-	nn >= (1 + Tap.*Data.Red.Bus.Ntr).^2;
-	nn <= (tnnTop + tnnLow).*(1 + Tap.*Data.Red.Bus.Ntr) - (tnnTop.*tnnLow);
+	nn >= (1 + Ntr.*Data.Red.Branch.Tap).^2;
+	nn <= (tnnTop + tnnLow).*(1 + Ntr.*Data.Red.Branch.Tap) - (tnnTop.*tnnLow);
 
-	nv >= nn.*(Data.Red.Bus.uLow.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uLow.^2);
-	nv >= nn.*(Data.Red.Bus.uTop.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uTop.^2);
+	nv >= nn.*(VertI*(Data.Red.Bus.uLow.^2)) + (tnnLow.^2).*(VertI*v) - (tnnLow.^2).*(VertI*Data.Red.Bus.uLow.^2);
+	nv >= nn.*(VertI*(Data.Red.Bus.uTop.^2)) + (tnnTop.^2).*(VertI*v) - (tnnTop.^2).*(VertI*Data.Red.Bus.uTop.^2);
 
-	nv <= nn.*(Data.Red.Bus.uLow.^2) + tnnTop.*v - tnnTop.*(Data.Red.Bus.uLow.^2);
-	nv <= nn.*(Data.Red.Bus.uTop.^2) + tnnLow.*v - tnnLow.*(Data.Red.Bus.uTop.^2);
+	nv <= nn.*(VertI*(Data.Red.Bus.uLow.^2)) + (tnnTop.^2).*(VertI*v) - (tnnTop.^2).*(VertI*Data.Red.Bus.uLow.^2);
+	nv <= nn.*(VertI*(Data.Red.Bus.uTop.^2)) + (tnnLow.^2).*(VertI*v) - (tnnLow.^2).*(VertI*Data.Red.Bus.uTop.^2);
 
-	Tap >= Data.Red.Bus.TapLow;
-	Tap <= Data.Red.Bus.TapTop;
+	Ntr >= Data.Red.Branch.NtrLow;
+	Ntr <= Data.Red.Branch.NtrTop;
 
-	vExpr = VertI*nv - VertJ*v - 2 * (Data.Red.Branch.r.*P + Data.Red.Branch.x.*Q) + ((Data.Red.Branch.r).^2 + (Data.Red.Branch.x).^2) .* l;
+	vExpr = nv - VertJ*v - 2 * (Data.Red.Branch.r.*P + Data.Red.Branch.x.*Q) + ((Data.Red.Branch.r).^2 + (Data.Red.Branch.x).^2) .* l;
 
 	0 >= vExpr - (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
 	0 <= vExpr + (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
 
 	cDv >= 0;
-	cDv >= (v - (1+Data.Cost.delta))*diag(Data.Cost.m);
-	cDv >= (v - (1-Data.Cost.delta))*diag(-Data.Cost.m);
+	cDv >= Data.Cost.m.*(v - (1+Data.Cost.delta));
+	cDv >= - Data.Cost.m.*(v - (1-Data.Cost.delta));
 
 	% Restricciones de arcos de la Red
 	z(Tupm,:) + z(Tdownm,:) == y(Tupm,:);
@@ -195,15 +195,15 @@ Var.Red.Bus.w	 = 	w	;
 
 Var.Red.Bus.v	 = 	v	;
 Var.Red.Bus.cDv	 = 	cDv	;
-Var.Red.Bus.nn	 = 	nn	;
-Var.Red.Bus.nv	 = 	nv	;
-Var.Red.Bus.Tap	 = 	Tap	;
+Var.Red.Branch.nn	 = 	nn	;
+Var.Red.Branch.nv	 = 	nv	;
+Var.Red.Branch.Ntr	 = 	Ntr	;
 
 Var.Red.Bus.pN	 = 	pN	;
 Var.Red.Bus.qN	 = 	qN	;
 
 Var.Red.Bus.qCp	 = 	qCp	;
-Var.Red.Bus.Cap	 = 	Cap	;
+Var.Red.Bus.Ncp	 = 	Ncp	;
 
 Var.Red.Bus.qG = Var.Red.Bus.qCp;
 

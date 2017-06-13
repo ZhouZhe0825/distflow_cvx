@@ -1,4 +1,24 @@
-function [P_mec, n_] = calculoPotenciaEolica(v, vmm, vm, vM, vMM, Omega, G, P_nMec, Np, R_, rho, ws, c1, c2, c3, c4, c5, c6, c7, lambda_opt)
+function [P_mec, n_] = calculoPotenciaEolica(v, vmm, vm, vM, vMM, Omega, G, P_nMec, Np, R_, rho, ws, c1, c2, c3, c4, c5, c6, c7, lambda_opt, windNodes)
+
+n = size(vmm,1);
+et = length(v);
+
+P_mec = zeros(n,et);
+n_ = zeros(n,et);
+
+for i = 1:length(windNodes)
+    j = windNodes(i);
+    [P_mec_j, n__j] = ...
+        calculoPotenciaEolica_(v, vmm(j), vm(j), vM(j), vMM(j), Omega(j), G(j), P_nMec(j), Np(j), R_(j), rho(j), ...
+        ws(j), c1(j), c2(j), c3(j), c4(j), c5(j), c6(j), c7(j), lambda_opt(j));
+    P_mec(j,:) = P_mec_j;
+    n_(j,:) = n__j;
+end
+
+end
+
+
+function [P_mec, n_] = calculoPotenciaEolica_(v, vmm, vm, vM, vMM, Omega, G, P_nMec, Np, R_, rho, ws, c1, c2, c3, c4, c5, c6, c7, lambda_opt)
 
 	lambda = 0; %TODO Poner bien
 	beta = 0; %TODO Poner bien
