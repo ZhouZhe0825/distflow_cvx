@@ -108,7 +108,6 @@ function [DataM] = reshapeDataM(Data, Config)
 
 	DataM.Gen.Pv.cr = DataM.Gen.Pv.cr * one;
 	DataM.Gen.Pv.cv = DataM.Gen.Pv.cv * one;
-	DataM.Gen.Pv.I = DataM.Gen.Pv.I * one;
 	DataM.Gen.Pv.pPvg = repmat(DataM.Gen.Pv.pPvg(:,(1:lenEt)), [size(VertI,2) 1]);
 	DataM.Gen.Pv.sTop = DataM.Gen.Pv.sTop * one;
 	DataM.Gen.Pv.xiTop = DataM.Gen.Pv.xiTop * one;
@@ -136,7 +135,6 @@ function [DataM] = reshapeDataM(Data, Config)
 	DataM.St.Bat.epsilon = DataM.St.Bat.epsilon * one;
 	DataM.St.Bat.eta = DataM.St.Bat.eta * one;
 	DataM.St.Bat.gama = DataM.St.Bat.gama * one;
-	DataM.St.Bat.I = DataM.St.Bat.I * one;
 	DataM.St.Bat.kapa = DataM.St.Bat.kapa * one;
 	DataM.St.Bat.m1 = DataM.St.Bat.m1 * one;
 	DataM.St.Bat.m2 = DataM.St.Bat.m2 * one;

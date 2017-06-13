@@ -9,6 +9,8 @@ InBr = VertJ';
 n = size(VertI,2);
 m = size(VertI,1);
 
+fixed = isfield(Data, 'Fixed');
+
 G = find(Data.Gen.Tras.I == 1);
 NnoG = setdiff((1:n),G);
 
@@ -44,9 +46,9 @@ AC = find(Data.St.AC.I == 1);
 nAC = length(AC);
 
 % Baterias
-St = find(sign(sum(abs(Data.St.Bat.I),2)) == 1);
+St = find(Data.St.Bat.I == 1);
 nSt = length(St);
-NotSt = find(sign(sum(abs(Data.St.Bat.I),2)) == 0);
+NotSt = find(Data.St.Bat.I == 0);
 
 M = [];
 if nSt > 0
@@ -81,9 +83,9 @@ P_mecWnd = Data.Gen.DFIG.P_mec;
 n_Wnd = Data.Gen.DFIG.n_;
 
 % Fotovoltaico
-Pv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 1);
+Pv = find(Data.Gen.Pv.I == 1);
 nPv = length(Pv);
-NotPv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 0);
+NotPv = find(Data.Gen.Pv.I == 0);
 
 
 %% Modelo programacion matematica
@@ -102,14 +104,22 @@ cvx_begin
 	variable Q(m, Config.Etapas); % Potencia reactiva en el arco i,j
 	variable l(m, Config.Etapas); % Corriente en el arco i,j
 	variable z(m, Config.Etapas);
+	if fixed
+		variable y(m, Config.Etapas);
+	else
 	variable y(m, Config.Etapas) binary;
+	end
 	variable w(n, Config.Etapas);
 		
 	variable v(n, Config.Etapas); % Modulo^2 de la tension
 	variable cDv(n, Config.Etapas); % Modulo^2 de la tension
 	variable nn(m, Config.Etapas);
 	variable nv(m, Config.Etapas);
+	if fixed
+		variable Ntr(m, Config.Etapas);
+	else
 	variable Ntr(m, Config.Etapas) integer;
+	end
 
 	variable pC(n, Config.Etapas); % Consumo de potencia activa en el nodo i
 	variable qC(n, Config.Etapas); % Consumo de potencia reactiva en el nodo i
@@ -120,8 +130,17 @@ cvx_begin
 	variable pG(n, Config.Etapas); % Potencia activa generada en el nodo i
 	variable qG(n, Config.Etapas); % Potencia reactiva generada en el nodo i
 
+	if fixed
+		dual variable dPn;
+		dual variable dQn;
+	end
+
 	variable qCp(n, Config.Etapas); % reactive power demand in i
+ 	if fixed
+		variable Ncp(n, Config.Etapas);
+	else
 	variable Ncp(n, Config.Etapas) integer;
+	end
 	
 	variable pGTras(n, Config.Etapas);
 	variable qGTras(n, Config.Etapas);
@@ -188,8 +207,13 @@ cvx_begin
 	pG == pGTras + pStb + pWi + pPv;
 	qG == qGTras + qCp + qStb + qWi + qPv;
 
+	if fixed
+		pN - pC + pG == 0 : dPn;
+		qN - qC + qG == 0 : dQn;
+	else
 	pN - pC + pG == 0;
 	qN - qC + qG == 0;
+	end
 	
 	% Restricciones de capacitores
 	Ncp >= Data.Red.Bus.NcpLow;
@@ -320,13 +344,13 @@ cvx_begin
 		DlEStb <= EStb - Data.St.Bat.ETop.*Data.St.Bat.kapa;
 
 
-		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
+		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)); % falta termino de m2
         for i = 1:nSt
             cStb(St(i),Config.Etapas) = cStb(St(i),Config.Etapas) + pStgb(i,:) * M(:,:,i) * pStgb(i,:)';
         end
 
 		tfopt_expr = tfopt_expr + sum(cStb,1) + ...
-			sum(Data.St.Bat.I(:,Config.Etapas).*Data.St.Bat.beta(:,Config.Etapas).* ...
+			sum(Data.St.Bat.beta(:,Config.Etapas).* ...
 				((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas).*Data.St.Bat.gama(:,Config.Etapas)).^2) + Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
 
 		EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
@@ -359,8 +383,13 @@ cvx_begin
 
 	%% Restricciones de cargas no interrumpibles
 	if nClNI > 0
+		if fixed
+			variable onClNI(nClNI,Config.Etapas);
+			variable stClNI(nClNI,Config.Etapas);
+		else
 		variable onClNI(nClNI,Config.Etapas) binary;
 		variable stClNI(nClNI,Config.Etapas) binary;
+		end
 
 		expression onNext(nClNI,Config.Etapas)
 		expression onClNInod(n,Config.Etapas);
@@ -381,6 +410,10 @@ cvx_begin
 		stClNI(:,1) == onClNI(:,1);
 		
 		tfopt_expr = tfopt_expr + sum(Data.Util.betaE.*((pCClNI - Data.Util.pzCnPrefE).^2),1);
+        if fixed
+            stClNI == round(Data.Fixed.stCh(ClNI,:));
+            onClNI == round(Data.Fixed.onCh(ClNI,:));
+        end
 	else
 		pCClNI == 0;
 		qCClNI == 0;
@@ -561,6 +594,13 @@ cvx_begin
 		qPv == 0;
 	end
 
+	if fixed
+		Ncp == round(Data.Fixed.Ncp);
+		Ntr == round(Data.Fixed.Ntr); 
+		y == round(Data.Fixed.y);
+	end
+
+
 	fopt_expr = sum(tfopt_expr);
 	minimize fopt_expr
 	
@@ -628,6 +668,11 @@ if nClNI > 0
 	Var.ClNI.start	 = pCClNI*0;
 	Var.ClNI.start(ClNI,:)	 = stClNI;
 
+end
+
+if fixed
+    Var.Dual.dPn = dPn;
+    Var.Dual.dQn = dQn;
 end
 
 % Eolico

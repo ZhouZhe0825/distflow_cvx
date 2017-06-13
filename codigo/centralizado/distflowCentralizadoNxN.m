@@ -2,6 +2,8 @@ function [Var, opt] = distflowCentralizadoNxN(Data, Config)
 
 %% Inicializacion
 n = size(Data.Red.Branch.T,1);
+fixed = isfield(Data, 'Fixed');
+
 
 G = find(Data.Gen.Tras.I == 1);
 NnoG = setdiff((1:n), G)';
@@ -43,7 +45,7 @@ if lenSt > 0
 	M = zeros(Config.Etapas,Config.Etapas,n);
 	for i = 1:n
 		for et = 1: Config.Etapas-1
-			Maux = Data.St.Bat.I(i,1,et)*[Data.St.Bat.m1(i,1,et) -Data.St.Bat.m2(i,1,et)/2; ...
+			Maux = Data.St.Bat.I(i)*[Data.St.Bat.m1(i,1,et) -Data.St.Bat.m2(i,1,et)/2; ...
 				-Data.St.Bat.m2(i,1,et)/2 Data.St.Bat.m1(i,1,et)];
             M((et:et+1),(et:et+1),i) = M((et:et+1),(et:et+1),i) + Maux;
 		end
@@ -88,14 +90,22 @@ cvx_begin
 	variable Q(n, n, Config.Etapas); % Potencia reactiva en el arco i,j
 	variable l(n, n, Config.Etapas); % Corriente en el arco i,j
 	variable z(n, n, Config.Etapas);
+	if fixed
+		variable y(n, n, Config.Etapas);
+	else
 	variable y(n, n, Config.Etapas) binary;
+	end
 	variable w(n,1, Config.Etapas);
 
 	variable v(n,1, Config.Etapas); % Modulo^2 de la tension
 	variable cDv(n,1, Config.Etapas); % Modulo^2 de la tension
 	variable nn(n,n, Config.Etapas);
 	variable nv(n,n, Config.Etapas);
+	if fixed
+		variable Ntr(n,n, Config.Etapas);
+	else
 	variable Ntr(n,n, Config.Etapas) integer;
+	end
 
 	variable pC(n,1, Config.Etapas); % Consumo de potencia activa en el nodo i
 	variable qC(n,1, Config.Etapas); % Consumo de potencia reactiva en el nodo i
@@ -105,6 +115,12 @@ cvx_begin
 
 	variable pG(n,1, Config.Etapas); % Potencia activa generada en el nodo i
 	variable qG(n,1, Config.Etapas); % Potencia reactiva generada en el nodo i
+
+	if fixed
+		dual variable dPn;
+		dual variable dQn;
+	end
+
 
 	variable qCp(n,1, Config.Etapas); % reactive power demand in i
 	variable Ncp(n,1, Config.Etapas) integer;
@@ -174,8 +190,13 @@ cvx_begin
 	pG == pGTras + pStb + pWi + pPv;
 	qG == qGTras + qCp + qStb + qWi + qPv;
 
+	if fixed
+		pN - pC + pG == 0 : dPn;
+		qN - qC + qG == 0 : dQn;
+	else
 	pN - pC + pG == 0;
 	qN - qC + qG == 0;
+	end
 
 	% Restricciones de capacitores
 	Ncp >= Data.Red.Bus.NcpLow;
@@ -314,14 +335,14 @@ cvx_begin
 		DlEStb <= EStb - Data.St.Bat.ETop.*Data.St.Bat.kapa;
 
 
-		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)).*Data.St.Bat.I; % falta termino de m2
+		cStb = (Data.St.Bat.wOm + Data.St.Bat.m3.*(DlEStb.^2)); % falta termino de m2
 
         for i = 1:n
-            cStb(i,1,Config.Etapas) = cStb(i,1,Config.Etapas) + (squeeze(pStgb(i,1,:))' * M(:,:,i) * squeeze(pStgb(i,1,:))).*Data.St.Bat.I(i,1,Config.Etapas);
+            cStb(i,1,Config.Etapas) = cStb(i,1,Config.Etapas) + (squeeze(pStgb(i,1,:))' * M(:,:,i) * squeeze(pStgb(i,1,:))).*Data.St.Bat.I(i);
         end
         
 		tfopt_expr = tfopt_expr + sum(cStb,1) + ...
-			sum(Data.St.Bat.I(:,:,Config.Etapas).*Data.St.Bat.beta(:,1,Config.Etapas).* ...
+			sum(Data.St.Bat.beta(:,1,Config.Etapas).* ...
 				((Data.St.Bat.ETop(:,1,Config.Etapas) - EStb(:,1,Config.Etapas).*Data.St.Bat.gama(:,1,Config.Etapas)).^2) + Data.St.Bat.wU(:,1,Config.Etapas),1)./Config.Etapas;
 
 		EStbAnt(:,1,1) = Data.St.Bat.EIni(:,1,1);
@@ -336,13 +357,13 @@ cvx_begin
 		
 		xiStb >= pStgb.^2 + qStb.^2;
 
-		pStb <= Data.St.Bat.pgTop.*Data.St.Bat.I;
-		sStb <= Data.St.Bat.sTop.*Data.St.Bat.I;
-		xiStb <= Data.St.Bat.xiTop.*Data.St.Bat.I;
-		EStb <= Data.St.Bat.ETop.*Data.St.Bat.I;
+		pStb <= Data.St.Bat.pgTop;
+		sStb <= Data.St.Bat.sTop;
+		xiStb <= Data.St.Bat.xiTop;
+		EStb <= Data.St.Bat.ETop;
 
-		pStb >= Data.St.Bat.pgLow.*Data.St.Bat.I;
-		EStb >= Data.St.Bat.ELow.*Data.St.Bat.I;
+		pStb >= Data.St.Bat.pgLow;
+		EStb >= Data.St.Bat.ELow;
 	else
 		pStb == 0;
 		qStb == 0;
@@ -350,8 +371,13 @@ cvx_begin
 
 	%% Restricciones de cargas no interrumpibles
 	if lenCh > 0
+		if fixed
+			variable stCh(n,1, Config.Etapas);
+			variable onCh(n,1, Config.Etapas);
+		else
 		variable stCh(n,1, Config.Etapas) binary;
 		variable onCh(n,1, Config.Etapas) binary;
+		end
 		expression onNext(n,1,Config.Etapas)
 
 		pCClNI == Data.ClNI.pC.*onCh;
@@ -548,6 +574,15 @@ cvx_begin
 		qPv == 0;
 	end
 
+	if fixed
+		Ncp == round(Data.Fixed.Cap);
+		Ntr == round(Data.Fixed.Tap); 
+		stCh == round(Data.Fixed.stCh);
+		onCh == round(Data.Fixed.onCh);
+		y == round(Data.Fixed.y);
+	end
+
+
 	fopt_expr = sum(tfopt_expr);
 	minimize fopt_expr
 
@@ -587,6 +622,11 @@ Var.ClRes.pCApp = pCApp;
 Var.ClRes.qCApp = qCApp;
 Var.ClRes.pC = pCClRes;
 Var.ClRes.qC = qCClRes;
+
+if fixed
+	Var.Dual.dPn = dPn;
+	Var.Dual.dQn = dQn;
+end
 
 % Aire Acondicionado
 if lenAC > 0
