@@ -136,7 +136,7 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 
 	DataNxN.Gen.Pv.cr	 = 	replicateMat3_3(	DataNxN.Gen.Pv.cr	,Config.Etapas);
 	DataNxN.Gen.Pv.cv	 = 	replicateMat3_3(	DataNxN.Gen.Pv.cv	,Config.Etapas);
-	DataNxN.Gen.Pv.pPvg	 = 	replicateMat3_1(	DataNxN.Gen.Pv.pPvg(Et)	,Buses);
+	DataNxN.Gen.Pv.pPvg	 = 	replicateMat3_2(	DataNxN.Gen.Pv.pPvg(:,Et)	,1);
 	DataNxN.Gen.Pv.sTop	 = 	replicateMat3_3(	DataNxN.Gen.Pv.sTop	,Config.Etapas);
 	DataNxN.Gen.Pv.xiTop	 = 	replicateMat3_3(	DataNxN.Gen.Pv.xiTop	,Config.Etapas);
 
