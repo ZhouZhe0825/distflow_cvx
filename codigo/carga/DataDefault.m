@@ -90,6 +90,7 @@ function [Data] = DataDefault(n,et,app)
 	Data.Red.Branch.yLow = zeros(n,n);
 	Data.Red.Branch.yTop = zeros(n,n);
 	Data.Red.Branch.Itap = zeros(n,n);
+	Data.Red.Branch.Itreg = zeros(n,n);
 	Data.Red.Branch.NtrIni = zeros(n,n);
 	Data.Red.Branch.NtrLow = zeros(n,n);
 	Data.Red.Branch.NtrTop = zeros(n,n);

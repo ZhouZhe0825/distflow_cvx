@@ -1,8 +1,4 @@
 function runSimulation(Data, DflowD, Config)
-	cantTaps = length(DflowD.Trafos);
-	cantCaps = length(DflowD.Caps);
-	cantCargs = length(DflowD.Cargas);
-
 	date_post = datestr(now,'yyyymmdd_HHMMSS');
 
 	outputDir = ['resultados\',Config.outFilename,'\',date_post];
@@ -112,15 +108,15 @@ function runSimulation(Data, DflowD, Config)
 
 	if ~isfield(Config,'Distr')
 		if Config.runNxN
-			printSalidasDistflowNxN(Var_nxn, DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_nxn'], [], [], [], [], []);
+			printSalidasDistflowNxN(Var_nxn, DataNxN, Config, [outputDirOutputs, '\output_nxn'], [], [], [], [], []);
 		end
 		if Config.runM
-			printSalidasDistflowM(Var_m, DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_m'], [], [], [], [], []);
+			printSalidasDistflowM(Var_m, DataNxN, Config, [outputDirOutputs, '\output_m'], [], [], [], [], []);
 		end
 	else
-		printSalidasDistflowM(Var_F,         DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_m'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
-		printSalidasDistflowM(Var_centr,     DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_centr'],       [],    [],   [],       [],     []);
-		printSalidasDistflowM(Var_dist_conE, DataNxN, Config, cantTaps, cantCaps, cantCargs, [outputDirOutputs, '\output_dist_conE'],   [],    [],   [],       [],     []);
+		printSalidasDistflowM(Var_F,         DataNxN, Config, [outputDirOutputs, '\output_m'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
+		printSalidasDistflowM(Var_centr,     DataNxN, Config, [outputDirOutputs, '\output_centr'],       [],    [],   [],       [],     []);
+		printSalidasDistflowM(Var_dist_conE, DataNxN, Config, [outputDirOutputs, '\output_dist_conE'],   [],    [],   [],       [],     []);
 	end
 	
 end

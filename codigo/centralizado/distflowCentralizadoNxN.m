@@ -216,8 +216,7 @@ cvx_begin
 	norms(lNorm,2,4) <= Data.Red.Branch.T.*(l + repmat(Data.Red.Bus.uTop.^2, [1 n 1]).*z);
 
 	% Restriccion de la tension
-	nn >= (1 + Ntr.*Data.Red.Branch.Tap).^2;
-	nn <= (tnnTop + tnnLow).*(1 + Ntr.*Data.Red.Branch.Tap) - (tnnTop.*tnnLow);
+	nn == 1 + 2*Data.Red.Branch.Tap.*Ntr;
 
 	nv >= nn.*repmat(Data.Red.Bus.uLow.^2, [1 n 1]) + (tnnLow.^2).*repmat(v, [1 n 1]) - (tnnLow.^2).*repmat(Data.Red.Bus.uLow.^2, [1 n 1]);
 	nv >= nn.*repmat(Data.Red.Bus.uTop.^2, [1 n 1]) + (tnnTop.^2).*repmat(v, [1 n 1]) - (tnnTop.^2).*repmat(Data.Red.Bus.uTop.^2, [1 n 1]);
@@ -599,6 +598,7 @@ Var.Red.Bus.cDv = cDv;
 Var.Red.Branch.nn = nn;
 Var.Red.Branch.nv = nv;
 Var.Red.Branch.Ntr = Ntr;
+Var.Red.Branch.Rtr = Ntr*0;
 
 Var.Red.Bus.pC = pC;
 Var.Red.Bus.qC = qC;

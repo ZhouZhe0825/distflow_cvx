@@ -1,4 +1,4 @@
-function printSalidasDistflowM(Var, Data, Config, cantTaps, cantCaps, cantCarg, outFilename, optEv, muEv, lambdaEv, DifPEv, DifQEv)
+function printSalidasDistflowM(Var, Data, Config, outFilename, optEv, muEv, lambdaEv, DifPEv, DifQEv)
 
     TotalT = matOverTime(Data.Red.Branch.T);
     
@@ -6,5 +6,5 @@ function printSalidasDistflowM(Var, Data, Config, cantTaps, cantCaps, cantCarg, 
 
     [Var] = VarM2NxN(Var,D);
 
-	printSalidasDistflowNxN(Var, Data, Config, cantTaps, cantCaps, cantCarg, outFilename, optEv, muEv, lambdaEv, DifPEv, DifQEv);
+	printSalidasDistflowNxN(Var, Data, Config, outFilename, optEv, muEv, lambdaEv, DifPEv, DifQEv);
 end

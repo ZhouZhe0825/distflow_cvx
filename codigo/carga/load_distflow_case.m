@@ -59,7 +59,11 @@ for estT = 1:size(Trafos,1)
 	Data.Red.Branch.NtrLow(Trafos(estT).nodI, Trafos(estT).nodJ) = min(Trafos(estT).N);
 	Data.Red.Branch.NtrTop(Trafos(estT).nodI, Trafos(estT).nodJ) = max(Trafos(estT).N);
 	Data.Red.Branch.NtrIni(Trafos(estT).nodI, Trafos(estT).nodJ) = Trafos(estT).ini;
-	Data.Red.Branch.Itap(Trafos(estT).nodI, Trafos(estT).nodJ) = 1;
+    if Trafos(estT).reg
+        Data.Red.Branch.Itreg(Trafos(estT).nodI, Trafos(estT).nodJ) = 1;
+    else
+        Data.Red.Branch.Itap(Trafos(estT).nodI, Trafos(estT).nodJ) = 1;
+    end
 	Data.Red.Branch.Tap(Trafos(estT).nodI, Trafos(estT).nodJ) = Trafos(estT).TP;
 end
 

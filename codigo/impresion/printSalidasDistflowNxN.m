@@ -1,4 +1,4 @@
-function printSalidasDistflowNxN(Var, Data, Config, cantTaps, cantCaps, cantCarg, outFilename, optEv, muEv, lambdaEv, DifPEv, DifQEv)
+function printSalidasDistflowNxN(Var, Data, Config, outFilename, optEv, muEv, lambdaEv, DifPEv, DifQEv)
 
 %     n = size(Data.Red.Branch.T,1);
 %     nodos = (1:n)';
@@ -11,7 +11,7 @@ function printSalidasDistflowNxN(Var, Data, Config, cantTaps, cantCaps, cantCarg
 %     [rowT, colT, ~] = find(TotalT == 1);
 
 
-	Header = createHeader(Var, Data, Config, cantTaps, cantCaps, cantCarg);
+	Header = createHeader(Var, Data, Config);
 
 	printVarNx1xT(sqrt(Var.Red.Bus.v), Header.Bus, Header.Main, outFilename, 'U');
 	printVarNx1xT(TreeMatTimToVectTim(Var.Red.Branch.l,Config.Etapas,TotalT), Header.Branch, Header.Main, outFilename, 'l');

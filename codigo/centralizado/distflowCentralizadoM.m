@@ -9,22 +9,30 @@ InBr = VertJ';
 n = size(VertI,2);
 m = size(VertI,1);
 
+
+BigMtr = 1e6;
+BigMw = 1e6;
+
 fixed = isfield(Data, 'Fixed');
 
 G = find(Data.Gen.Tras.I == 1);
 NnoG = setdiff((1:n),G);
 
 Data.Red.Branch.Tup = triu(Data.Red.Branch.T);
-[rowTup, colTup, ~] = find(Data.Red.Branch.Tup == 1);
-Tind = find(Data.Red.Branch.T == 1);
-Tupmind = sub2ind(size(Data.Red.Branch.T), rowTup, colTup);
-Tdownmind = sub2ind(size(Data.Red.Branch.T), colTup, rowTup);
-Tupm = zeros(size(Tupmind));
-Tdownm = zeros(size(Tdownmind));
-for i=1:length(Tupmind)
-	Tupm(i) = find(Tind == Tupmind(i));
-	Tdownm(i) = find(Tind == Tdownmind(i));
-end
+
+[Tupm, Tdownm] = getSubTindM(Data.Red.Branch.T, triu(Data.Red.Branch.T));
+
+TrafoTras = Data.Red.Branch.Itap;
+TrafoTras(NnoG,:) = 0;
+TrTras = getSubTindM(Data.Red.Branch.T, TrafoTras);
+
+[TrTrasZ,~] = getSubTindM(Data.Red.Branch.T, TrafoTras');
+
+[TrNTras,~] = getSubTindM(Data.Red.Branch.T, Data.Red.Branch.Itap - TrafoTras - TrafoTras');
+
+[TrReg,~] = getSubTindM(Data.Red.Branch.T, Data.Red.Branch.Itreg);
+
+[NoTr,~] = getSubTindM(Data.Red.Branch.T, Data.Red.Branch.T - Data.Red.Branch.Itap - Data.Red.Branch.Itreg);
 
 tnnLow = (1 + Data.Red.Branch.NtrLow.*Data.Red.Branch.Tap);
 tnnTop = (1 + Data.Red.Branch.NtrTop.*Data.Red.Branch.Tap);
@@ -119,7 +127,8 @@ cvx_begin
 		variable Ntr(m, Config.Etapas);
 	else
 		variable Ntr(m, Config.Etapas) integer;
-	end
+    end
+    variable Rtr(m,Config.Etapas);
 
 	variable pC(n, Config.Etapas); % Consumo de potencia activa en el nodo i
 	variable qC(n, Config.Etapas); % Consumo de potencia reactiva en el nodo i
@@ -236,19 +245,101 @@ cvx_begin
 	norms(lNorm,2,3) <= l + (VertI*Data.Red.Bus.uTop.^2).*z;
 
 	% Restriccion de la tension
-	nn >= (1 + Ntr.*Data.Red.Branch.Tap).^2;
-	nn <= (tnnTop + tnnLow).*(1 + Ntr.*Data.Red.Branch.Tap) - (tnnTop.*tnnLow);
 
-	nv >= nn.*(VertI*(Data.Red.Bus.uLow.^2)) + (tnnLow.^2).*(VertI*v) - (tnnLow.^2).*(VertI*Data.Red.Bus.uLow.^2);
-	nv >= nn.*(VertI*(Data.Red.Bus.uTop.^2)) + (tnnTop.^2).*(VertI*v) - (tnnTop.^2).*(VertI*Data.Red.Bus.uTop.^2);
+% % % % % %   Para trafos en trasmision    
+% % % % %     nn(TrTras,:) >= (1 + Data.Red.Branch.Tap(TrTras,:).*Ntr(TrTras,:)).^2;
+% % % % %     nn(TrTras,:) <= 1 + 2*Data.Red.Branch.Tap(TrTras,:).*Ntr(TrTras,:) + ...
+% % % % %         (Data.Red.Branch.Tap(TrTras,:).^2).*Data.Red.Branch.NtrTop(TrTras,:).*Ntr(TrTras,:) + BigMtr*(1-z(TrTras,:));
+% % % % %     nn(TrTras,:) <= 1 + 2*Data.Red.Branch.Tap(TrTras,:).*Ntr(TrTras,:) + ...
+% % % % %         (Data.Red.Branch.Tap(TrTras,:).^2).*Data.Red.Branch.NtrLow(TrTras,:).*Ntr(TrTras,:) + BigMtr*z(TrTras,:);
+% % % % % 
+% % % % %     nv(TrTras,:) == nn(TrTras,:).*(VertI(TrTras,:)*Data.Red.Bus.uLow.^2);
+% % % % %     
+% % % % %     Ntr(TrTras,:) >= -BigMtr.*(1-z(TrTras,:));
+% % % % %     Ntr(TrTras,:) <= BigMtr.*z(TrTras,:);
+% % % % %     Ntr(TrTrasZ,:) == 0;
+% % % % % 
+% % % % % 
+% % % % % 
+% % % % % 	nn(TrNTras,:) == 1 + 2*Data.Red.Branch.Tap(TrNTras,:).*Ntr(TrNTras,:);
+% % % % % 
+% % % % % 	nv(TrNTras,:) >= nn(TrNTras,:).*(VertI(TrNTras,:)*(Data.Red.Bus.uLow.^2)) ...
+% % % % %         + (tnnLow(TrNTras,:).^2).*(VertI(TrNTras,:)*v) - (tnnLow(TrNTras,:).^2).*(VertI(TrNTras,:)*Data.Red.Bus.uLow.^2);
+% % % % % 	nv(TrNTras,:) >= nn(TrNTras,:).*(VertI(TrNTras,:)*(Data.Red.Bus.uTop.^2)) ...
+% % % % %         + (tnnTop(TrNTras,:).^2).*(VertI(TrNTras,:)*v) - (tnnTop(TrNTras,:).^2).*(VertI(TrNTras,:)*Data.Red.Bus.uTop.^2);
+% % % % % 
+% % % % %     nv(TrNTras,:) <= nn(TrNTras,:).*(VertI(TrNTras,:)*(Data.Red.Bus.uLow.^2)) ...
+% % % % %         + (tnnTop(TrNTras,:).^2).*(VertI(TrNTras,:)*v) - (tnnTop(TrNTras,:).^2).*(VertI(TrNTras,:)*Data.Red.Bus.uLow.^2);
+% % % % % 	nv(TrNTras,:) <= nn(TrNTras,:).*(VertI(TrNTras,:)*(Data.Red.Bus.uTop.^2)) ...
+% % % % %         + (tnnLow(TrNTras,:).^2).*(VertI(TrNTras,:)*v) - (tnnLow(TrNTras,:).^2).*(VertI(TrNTras,:)*Data.Red.Bus.uTop.^2);
+% % % % %     
+% % % % % 	Ntr(TrNTras,:) >= Data.Red.Branch.NtrLow(TrNTras,:);
+% % % % % 	Ntr(TrNTras,:) <= Data.Red.Branch.NtrTop(TrNTras,:);
 
-	nv <= nn.*(VertI*(Data.Red.Bus.uLow.^2)) + (tnnTop.^2).*(VertI*v) - (tnnTop.^2).*(VertI*Data.Red.Bus.uLow.^2);
-	nv <= nn.*(VertI*(Data.Red.Bus.uTop.^2)) + (tnnLow.^2).*(VertI*v) - (tnnLow.^2).*(VertI*Data.Red.Bus.uTop.^2);
+    nv(NoTr,:) == VertI(NoTr,:)*v	
 
-	Ntr >= Data.Red.Branch.NtrLow;
-	Ntr <= Data.Red.Branch.NtrTop;
+    if ~isempty(TrTras)
+        Tap = Data.Red.Branch.Tap(TrTras,:);
+        NT = Data.Red.Branch.NtrTop(TrTras,:);
+        NL = Data.Red.Branch.NtrLow(TrTras,:);
 
-	vExpr = nv - VertJ*v - 2 * (Data.Red.Branch.r.*P + Data.Red.Branch.x.*Q) + ((Data.Red.Branch.r).^2 + (Data.Red.Branch.x).^2) .* l;
+        nn(TrTras,:) >= (1 + Tap.*Ntr(TrTras,:)).^2;
+        nn(TrTras,:) <= 1 + 2*Tap.*Ntr(TrTras,:) + (Tap.^2).*NT.*Ntr(TrTras,:) + BigMtr*(1-z(TrTras,:));
+        nn(TrTras,:) <= 1 + 2*Tap.*Ntr(TrTras,:) + (Tap.^2).*NL.*Ntr(TrTras,:) + BigMtr*z(TrTras,:);
+
+        nv(TrTras,:) == nn(TrTras,:).*(VertI(TrTras,:)*Data.Red.Bus.uLow.^2);
+
+        Ntr(TrTras,:) >= -BigMtr.*(1-z(TrTras,:));
+        Ntr(TrTras,:) <= BigMtr.*z(TrTras,:);
+    end
+
+    if ~isempty(TrTrasZ)
+        nv(TrTrasZ,:) == (VertI(TrTrasZ,:)*v);
+
+        Ntr(TrTrasZ,:) == 0;
+    end
+
+    if ~isempty(TrNTras)
+        VIT = VertI(TrNTras,:);
+        Tap = Data.Red.Branch.Tap(TrNTras,:);
+        NT = Data.Red.Branch.NtrTop(TrNTras,:);
+        NL = Data.Red.Branch.NtrLow(TrNTras,:);
+        tnLo = tnnLow(TrNTras,:);
+        tnTo = tnnTop(TrNTras,:);
+        
+
+        nn(TrNTras,:) == 1 + 2*Tap.*Ntr(TrNTras,:);
+
+        nv(TrNTras,:) >= nn(TrNTras,:).*(VIT*(Data.Red.Bus.uLow.^2)) + (tnLo.^2).*(VIT*v) - (tnLo.^2).*(VIT*Data.Red.Bus.uLow.^2);
+        nv(TrNTras,:) >= nn(TrNTras,:).*(VIT*(Data.Red.Bus.uTop.^2)) + (tnTo.^2).*(VIT*v) - (tnTo.^2).*(VIT*Data.Red.Bus.uTop.^2);
+        nv(TrNTras,:) <= nn(TrNTras,:).*(VIT*(Data.Red.Bus.uLow.^2)) + (tnTo.^2).*(VIT*v) - (tnTo.^2).*(VIT*Data.Red.Bus.uLow.^2);
+        nv(TrNTras,:) <= nn(TrNTras,:).*(VIT*(Data.Red.Bus.uTop.^2)) + (tnLo.^2).*(VIT*v) - (tnLo.^2).*(VIT*Data.Red.Bus.uTop.^2);
+
+        Ntr(TrNTras,:) >= NL;
+        Ntr(TrNTras,:) <= NT;
+    end
+
+    if ~isempty(TrReg)
+        VIT = VertI(TrReg,:);
+        Tap = Data.Red.Branch.Tap(TrReg,:);
+        NT = Data.Red.Branch.NtrTop(TrReg,:);
+        NL = Data.Red.Branch.NtrLow(TrReg,:);
+        tnLo = tnnLow(TrReg,:);
+        tnTo = tnnTop(TrReg,:);
+
+        nn(TrReg,:) == 1 + 2*Tap.*Rtr(TrReg,:);
+
+        nv(TrReg,:) >= nn(TrReg,:).*(VIT*(Data.Red.Bus.uLow.^2)) + (tnLo.^2).*(VIT*v) - (tnLo.^2).*(VIT*Data.Red.Bus.uLow.^2);
+        nv(TrReg,:) >= nn(TrReg,:).*(VIT*(Data.Red.Bus.uTop.^2)) + (tnTo.^2).*(VIT*v) - (tnTo.^2).*(VIT*Data.Red.Bus.uTop.^2);
+        nv(TrReg,:) <= nn(TrReg,:).*(VIT*(Data.Red.Bus.uLow.^2)) + (tnTo.^2).*(VIT*v) - (tnTo.^2).*(VIT*Data.Red.Bus.uLow.^2);
+        nv(TrReg,:) <= nn(TrReg,:).*(VIT*(Data.Red.Bus.uTop.^2)) + (tnLo.^2).*(VIT*v) - (tnLo.^2).*(VIT*Data.Red.Bus.uTop.^2);
+
+        Rtr(TrReg,:) >= NL;
+        Rtr(TrReg,:) <= NT;
+    end
+    
+    
+    vExpr = nv - VertJ*v - 2 * (Data.Red.Branch.r.*P + Data.Red.Branch.x.*Q) + ((Data.Red.Branch.r).^2 + (Data.Red.Branch.x).^2) .* l;
 
 	0 >= vExpr - (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
 	0 <= vExpr + (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
@@ -264,7 +355,7 @@ cvx_begin
 	OutBr(G,:)*z >= 1; % al menos una barra conectada
 
 	w(G,:) == 0;
-	0 >= VertI*w - VertJ*w + 1 - 100000*(1-z); %% TODO TnoG
+	0 >= VertI*w - VertJ*w + 1 - BigMw*(1-z); %% TODO TnoG
 	w >= 0;
 	w <= n-1;
 
@@ -620,6 +711,7 @@ Var.Red.Bus.cDv	 = 	cDv	;
 Var.Red.Branch.nn	 = 	nn	;
 Var.Red.Branch.nv	 = 	nv	;
 Var.Red.Branch.Ntr	 = 	Ntr	;
+Var.Red.Branch.Rtr	 = 	Rtr	;
 
 Var.Red.Bus.pC	 = 	pC	;
 Var.Red.Bus.qC	 = 	qC	;

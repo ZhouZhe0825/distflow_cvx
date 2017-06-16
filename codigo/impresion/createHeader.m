@@ -1,11 +1,18 @@
-function [Header] = createHeader(Var, Data, Config, cantTaps, cantCaps, cantCarg)
+function [Header] = createHeader(Var, Data, Config)
 
 	horas = loadHoras();
 
     [rowTap, colTap, ~] = find(triu(Data.Red.Branch.Itap) == 1);
-	indCaps = find(Data.Red.Bus.Icap == 1);
+    cantTaps = length(rowTap);
+
+    indCaps = find(Data.Red.Bus.Icap == 1);
+    cantCaps = length(indCaps);
+
+    [rowTReg, colTReg, ~] = find(triu(Data.Red.Branch.Itreg) == 1);
+    cantReg = length(rowTReg);
 
 	nodCh = find(Data.ClNI.I == 1);
+    cantCarg = length(nodCh);
 	indHeadEt = (2:1+Config.Etapas);
 
 	n = size(Data.Red.Branch.T,1);
@@ -17,16 +24,23 @@ function [Header] = createHeader(Var, Data, Config, cantTaps, cantCaps, cantCarg
 
     if cantTaps > 0
         for i = 1:cantTaps
-            Header.Main{1+i,1} = ['Ntr_i' num2str(rowTap(i)) '_j_' num2str(colTap(i))];
+            Header.Main{1+i,1} = ['Ntr_' num2str(rowTap(i)) '-' num2str(colTap(i))];
             Header.Main(1+i,indHeadEt) = num2cell(squeeze(round(Var.Red.Branch.Ntr(rowTap(i),colTap(i),:)))');
+        end
+    end
+
+    if cantReg > 0
+        for i = 1:cantReg
+            Header.Main{1+cantTaps+i,1} = ['Reg_' num2str(rowTReg(i)) '-' num2str(colTReg(i))];
+            Header.Main(1+cantTaps+i,indHeadEt) = num2cell(squeeze(Var.Red.Branch.Rtr(rowTReg(i),colTReg(i),:))');
         end
     end
 
     if cantCaps > 0
         for i = 1:cantCaps
-            Header.Main{1+cantTaps+i,1} = ['Ncp_n_' num2str(indCaps(i))];
+            Header.Main{1+cantTaps+cantReg+i,1} = ['Ncp_n_' num2str(indCaps(i))];
         end
-        Header.Main((2+cantTaps:1+cantTaps+cantCaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Ncp(indCaps,:,:)))');
+        Header.Main((2+cantReg+cantTaps:1+cantTaps+cantReg+cantCaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Ncp(indCaps,:,:)))');
     end
 
     if cantCarg > 0
