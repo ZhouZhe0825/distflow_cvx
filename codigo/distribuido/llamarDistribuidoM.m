@@ -71,26 +71,27 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	DistrInfo.Bus = [1:nodos];
 	DistrInfo.Gama = Config.Distr.gama_ini;
 
-    TrasNodes = find(Data.Gen.Tras.I == 1);
-	DfigNodes = find(Data.Gen.DFIG.I == 1);
-	PvNodes = find(Data.Gen.Pv.I == 1);
-	AlmNodes = find(Data.St.Bat.I == 1);
-	ClResNodes = find(Data.Red.Bus.Icons == 1);
-	ClNINodes = find(Data.ClNI.I == 1);
+%     TrasNodes = find(Data.Gen.Tras.I == 1);
+% 	DfigNodes = find(Data.Gen.DFIG.I == 1);
+% 	PvNodes = find(Data.Gen.Pv.I == 1);
+% 	AlmNodes = find(Data.St.Bat.I == 1);
+% % 	ClResNodes = find(Data.Red.Bus.Icons == 1);
+% 	ClResNodes = (1:nodos);
+% 	ClNINodes = find(Data.ClNI.I == 1);
+% 
+% 	ConsGenNodes = [TrasNodes];
+% 	ConsGenNodes = union(ConsGenNodes, DfigNodes);
+% 	ConsGenNodes = union(ConsGenNodes, PvNodes);
+% 	ConsGenNodes = union(ConsGenNodes, AlmNodes);
+% 	ConsGenNodes = union(ConsGenNodes, ClResNodes);
+% 	ConsGenNodes = union(ConsGenNodes, ClNINodes);
+% 
+% 	OpSisNodes = setdiff((1:size(Data.Red.Branch.T,1)), ConsGenNodes);
+% % 	DataM.Red.Bus.indCG0 = OpSisNodes;
 
-	ConsGenNodes = [TrasNodes];
-	ConsGenNodes = union(ConsGenNodes, DfigNodes);
-	ConsGenNodes = union(ConsGenNodes, PvNodes);
-	ConsGenNodes = union(ConsGenNodes, AlmNodes);
-	ConsGenNodes = union(ConsGenNodes, ClResNodes);
-	ConsGenNodes = union(ConsGenNodes, ClNINodes);
-
-	OpSisNodes = setdiff((1:size(Data.Red.Branch.T,1)), ConsGenNodes);
-	DataM.Red.Bus.indCG0 = OpSisNodes;
 
 
-
-	[DistrInfo] = actualizarDistrInfo(Var_ini, DataM, TrasNodes, DfigNodes, ClNINodes, PvNodes, AlmNodes, DistrInfo);
+	[DistrInfo] = actualizarDistrInfo(Var_ini, DataM, DistrInfo);
 
 	% DistrInfo general
 
@@ -104,16 +105,16 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 
 	Var_dist_conE = Var_ini;
 
-	Ev.opt_Tras	 = zeros(Config.Distr.TopIT*2+1+1,3);
-	Ev.opt_Dfig	 = zeros(Config.Distr.TopIT*2+1+1,3);
-	Ev.opt_Pv	 = zeros(Config.Distr.TopIT*2+1+1,3);
-	Ev.opt_ClNI	 = zeros(Config.Distr.TopIT*2+1+1,3);
-	Ev.opt_ClRes	 = zeros(Config.Distr.TopIT*2+1+1,3);
-	Ev.opt_Alm	 = zeros(Config.Distr.TopIT*2+1+1,3);
-	Ev.opt_OpSis	 = zeros(Config.Distr.TopIT*2+1+1,3);
-	Ev.opt	 = zeros(Config.Distr.TopIT*2+1,3);
-	Ev.errP	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
-	Ev.errQ	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
+	Ev.opt_Tras	 = zeros(Config.Distr.TopIT*2+1+1,4);
+	Ev.opt_Dfig	 = zeros(Config.Distr.TopIT*2+1+1,4);
+	Ev.opt_Pv	 = zeros(Config.Distr.TopIT*2+1+1,4);
+	Ev.opt_ClNI	 = zeros(Config.Distr.TopIT*2+1+1,4);
+	Ev.opt_ClRes	 = zeros(Config.Distr.TopIT*2+1+1,4);
+	Ev.opt_Alm	 = zeros(Config.Distr.TopIT*2+1+1,4);
+	Ev.opt_OpSis	 = zeros(Config.Distr.TopIT*2+1+1,4);
+	Ev.opt	 = zeros(Config.Distr.TopIT*2+1,4);
+	Ev.difP	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
+	Ev.difQ	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.mu	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * 0;
 	Ev.lambda	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * 0;
 	Ev.pN	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
@@ -123,8 +124,10 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	Ev.pC	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.qC	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.v	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
+    Ev.Ncp   = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.l	 = ones(arcos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.h_l	 = ones(arcos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
+    Ev.Ntr   = ones(arcos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.errMu	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.errLambda	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 
@@ -174,95 +177,102 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
     opt_F = opt_dist_conE;
     
     delete(wbSol);
+	Ev.opt_Tras	 = 	Ev.opt_Tras((1:it2+it-1),:);
+	Ev.opt_Dfig	 = 	Ev.opt_Dfig((1:it2+it-1),:);
+	Ev.opt_Pv	 = 	Ev.opt_Pv((1:it2+it-1),:);
+	Ev.opt_ClNI	 = 	Ev.opt_ClNI((1:it2+it-1),:);
+	Ev.opt_ClRes	 = 	Ev.opt_ClRes((1:it2+it-1),:);
+	Ev.opt_Alm	 = 	Ev.opt_Alm((1:it2+it-1),:);
+	Ev.opt_OpSis	 = 	Ev.opt_OpSis((1:it2+it-1),:);
 	Ev.opt = Ev.opt((1:it2+it-1),:);
 	Ev.difP = Ev.difP(:,:,(1:it2+it-1));
 	Ev.difQ = Ev.difQ(:,:,(1:it2+it-1));
-	Ev.v	 = Ev.v(:,:,(1:it2+it-1));
-	Ev.l	 = Ev.l(:,:,(1:it2+it-1));
-	Ev.h_l	 = Ev.h_l(:,:,(1:it2+it-1));
-
 	Ev.mu = Ev.mu(:,:,(1:it2+it-1));
 	Ev.lambda = Ev.lambda(:,:,(1:it2+it-1));
-
+	Ev.pN	 = 	Ev.pN(:,:,(1:it2+it-1));
+	Ev.qN	 = 	Ev.qN(:,:,(1:it2+it-1));
+	Ev.pG	 = 	Ev.pG(:,:,(1:it2+it-1));
+	Ev.qG	 = 	Ev.qG(:,:,(1:it2+it-1));
+	Ev.pC	 = 	Ev.pC(:,:,(1:it2+it-1));
+	Ev.qC	 = 	Ev.qC(:,:,(1:it2+it-1));
+	Ev.v	 = Ev.v(:,:,(1:it2+it-1));
+	Ev.Ncp	 = Ev.Ncp(:,:,(1:it2+it-1));
+	Ev.l	 = Ev.l(:,:,(1:it2+it-1));
+	Ev.h_l	 = Ev.h_l(:,:,(1:it2+it-1));
+	Ev.Ntr	 = Ev.Ntr(:,:,(1:it2+it-1));
+	Ev.errMu	 = 	Ev.errMu(:,:,(1:it2+it-1));
+	Ev.errLambda	 = 	Ev.errLambda(:,:,(1:it2+it-1));
+    
 % 	save(Config.workspace_var_file);
 	toc(tdistr)
 end
 
-function [Var_mod] = randStart(Var)
+function [Var_mod] = randStart(Var,Data)
 	Var_mod = Var;
 
-	amplitudD = .15;
+% 	amplitudD = .5;
+	amplitudD = 0;
 	amplitud = .1;
 %	 
 %	 rnd = 1 + amplitud * (rand - .5);
-	rnd = 1;
+% 	rnd = rand(size(Var.Dual.dPn));
+	rnd = ones(size(Var.Dual.dPn));
 
 
-	if isfield(Var_mod,'Gen')
-		if isfield(Var_mod.Gen, 'Dfig')
-			Var_mod.Gen.Dfig.pWi = ones(size(Var.Gen.Dfig.pWi)) * rnd;
-			Var_mod.Gen.Dfig.qWi = ones(size(Var.Gen.Dfig.qWi)) * rnd;
+	Var_mod.Red.Bus.pG = Var.Red.Bus.pG .* rnd;
+	Var_mod.Red.Bus.qG = Var.Red.Bus.qG .* rnd;
+	Var_mod.Red.Bus.pN = Var.Red.Bus.pN .* rnd;
+	Var_mod.Red.Bus.qN = Var.Red.Bus.qN .* rnd;
+	Var_mod.Red.Bus.pC = Var.Red.Bus.pC .* rnd;
+	Var_mod.Red.Bus.qC = Var.Red.Bus.qC .* rnd;
+	Var_mod.Red.Bus.qCp = Var.Red.Bus.qCp .* rnd;
+% 	Var_mod.Red.Bus.v = Var.Red.Bus.v .* rnd;
 
-			Var_mod.Gen.Dfig.pWi = Var_mod.Gen.Dfig.pWi .* Var.Gen.Dfig.pWi;
-			Var_mod.Gen.Dfig.qWi = Var_mod.Gen.Dfig.qWi .* Var.Gen.Dfig.qWi;
-		end
-		if isfield(Var_mod.Gen, 'Pv')
-			Var_mod.Gen.Pv.pPv = ones(size(Var.Gen.Pv.pPv)) * rnd;
-			Var_mod.Gen.Pv.qPv = ones(size(Var.Gen.Pv.qPv)) * rnd;
+	Var_mod.Red.Bus.PTras = Var.Red.Bus.PTras .* rnd;
+	Var_mod.Red.Bus.QTras = Var.Red.Bus.QTras .* rnd;
 
-			Var_mod.Gen.Pv.pPv = Var_mod.Gen.Pv.pPv .* Var.Gen.Pv.pPv;
-			Var_mod.Gen.Pv.qPv = Var_mod.Gen.Pv.qPv .* Var.Gen.Pv.qPv;
-		end
+	if isfield(Var,'Gen')
+        if isfield(Var.Gen,'Dfig')
+            Var_mod.Gen.Dfig.pWi = Var.Gen.Dfig.pWi .* rnd;
+            Var_mod.Gen.Dfig.qWi = Var.Gen.Dfig.qWi .* rnd;
+        end
 	end
 
-
-	if isfield(Var_mod,'St')
-		if isfield(Var_mod.St, 'Bat')
-			Var_mod.St.Bat.pStb = ones(size(Var.St.Bat.pStb)) * rnd;
-			Var_mod.St.Bat.qStb = ones(size(Var.St.Bat.qStb)) * rnd;
-
-			Var_mod.St.Bat.pStb = Var_mod.St.Bat.pStb .* Var.St.Bat.pStb;
-			Var_mod.St.Bat.qStb = Var_mod.St.Bat.qStb .* Var.St.Bat.qStb;
-		end
+	if isfield(Var,'Gen')
+        if isfield(Var.Gen,'Pv')
+            Var_mod.Gen.Pv.pPv = Var.Gen.Pv.pPv .* rnd;
+            Var_mod.Gen.Pv.qPv = Var.Gen.Pv.qPv .* rnd;
+        end
 	end
 
-	Var_mod.Red.Bus.PTras = ones(size(Var.Red.Bus.PTras)) * rnd;
-	Var_mod.Red.Bus.QTras = ones(size(Var.Red.Bus.QTras)) * rnd;
-	Var_mod.Red.Bus.qCp = ones(size(Var.Red.Bus.qCp)) * rnd;
-	Var_mod.Red.Bus.v = ones(size(Var.Red.Bus.v)) * rnd;
-	Var_mod.Red.Bus.pN = ones(size(Var.Red.Bus.pN)) * rnd;
-	Var_mod.Red.Bus.qN = ones(size(Var.Red.Bus.qN)) * rnd;
+	if isfield(Var,'St')
+        if isfield(Var.St,'Bat')
+            Var_mod.St.Bat.pStb = Var.St.Bat.pStb .* rnd;
+            Var_mod.St.Bat.qStb = Var.St.Bat.qStb .* rnd;
+        end
+	end
+	if isfield(Var,'ClNI')
+		Var_mod.ClNI.pC = Var.ClNI.pC .* rnd;
+		Var_mod.ClNI.qC = Var.ClNI.qC .* rnd;
+		Var_mod.ClNI.on = Var.ClNI.on .* rnd;
+		Var_mod.ClNI.start = Var.ClNI.start .* rnd;
+	end
 
-	Var_mod.ClRes.pC = ones(size(Var.ClRes.pC)) * rnd;
-	Var_mod.ClRes.qC = ones(size(Var.ClRes.qC)) * rnd;
-	Var_mod.ClRes.pCApp = ones(size(Var.ClRes.pCApp)) * rnd;
-	Var_mod.ClRes.qCApp = ones(size(Var.ClRes.qCApp)) * rnd;
+    for app=1:2
+        Var_mod.ClRes.pCApp(:,:,app) = Var.ClRes.pCApp(:,:,app) .* rnd;
+        Var_mod.ClRes.qCApp(:,:,app) = Var.ClRes.qCApp(:,:,app) .* rnd;
+    end
 
-	Var_mod.Red.Branch.P = ones(size(Var.Red.Branch.P)) * rnd;
-	Var_mod.Red.Branch.Q = ones(size(Var.Red.Branch.Q)) * rnd;
-
-
-	Var_mod.Red.Bus.PTras = Var_mod.Red.Bus.PTras .* Var.Red.Bus.PTras;
-	Var_mod.Red.Bus.QTras = Var_mod.Red.Bus.QTras .* Var.Red.Bus.QTras;
-	Var_mod.Red.Bus.qCp = Var_mod.Red.Bus.qCp .* Var.Red.Bus.qCp;
-	Var_mod.Red.Bus.v = Var_mod.Red.Bus.v .* Var.Red.Bus.v;
-	Var_mod.Red.Bus.pN = Var_mod.Red.Bus.pN .* Var.Red.Bus.pN;
-	Var_mod.Red.Bus.qN = Var_mod.Red.Bus.qN .* Var.Red.Bus.qN;
-
-	Var_mod.ClRes.pC = Var_mod.ClRes.pC .* Var.ClRes.pC;
-	Var_mod.ClRes.qC = Var_mod.ClRes.qC .* Var.ClRes.qC;
-	Var_mod.ClRes.pCApp = Var_mod.ClRes.pCApp .* Var.ClRes.pCApp;
-	Var_mod.ClRes.qCApp = Var_mod.ClRes.qCApp .* Var.ClRes.qCApp;
-
-	Var_mod.Red.Branch.P = Var_mod.Red.Branch.P .* Var.Red.Branch.P;
-	Var_mod.Red.Branch.Q = Var_mod.Red.Branch.Q .* Var.Red.Branch.Q;
-
-	Var_mod.Dual.dPn = (1 + amplitudD * (rand(size(Var.Dual.dPn)) - .5)).*Var.Dual.dPn;
-	Var_mod.Dual.dQn = (1 + amplitudD * (rand(size(Var.Dual.dPn)) - .5)).*Var.Dual.dQn;
+% 	Var_mod.Dual.dPn = (1 + amplitudD * (rand(size(Var.Dual.dPn)) - .5)).*Var.Dual.dPn;
+% 	Var_mod.Dual.dQn = (1 + amplitudD * (rand(size(Var.Dual.dPn)) - .5)).*Var.Dual.dQn;
+	Var_mod.Dual.dPn = rnd.*Var.Dual.dPn;
+	Var_mod.Dual.dQn = rnd.*Var.Dual.dQn;
 
 end
 
-function [DistrInfo] = actualizarDistrInfo(Var, Data, TrasNodes, DfigNodes, ClNINodes, PvNodes, AlmNodes, DistrInfo)
+function [DistrInfo] = actualizarDistrInfo(Var, Data, DistrInfo)
+
+    DfigNodes = find(Data.Gen.DFIG.I == 1);
 
 	% DistrInfo Administrador
 	DistrInfo.Adm.pG = Var.Red.Bus.pG;
@@ -272,27 +282,31 @@ function [DistrInfo] = actualizarDistrInfo(Var, Data, TrasNodes, DfigNodes, ClNI
 	DistrInfo.Adm.pC = Var.Red.Bus.pC;
 	DistrInfo.Adm.qC = Var.Red.Bus.qC;
 
-	if ~isempty(DfigNodes)
-		% DistrInfo Dfig
-		DistrInfo.Dfig.v = Var.Red.Bus.v;
-		DistrInfo.Dfig.pWi = Var.Gen.Dfig.pWi;
-		DistrInfo.Dfig.qWi = Var.Gen.Dfig.qWi;
-		DistrInfo.Dfig.ind = Data.Gen.DFIG.I;
-		DistrInfo.Dfig.ind(DfigNodes) = (1:length(DfigNodes))';
+	if isfield(Var,'Gen')
+        if isfield(Var.Gen,'Dfig')
+            % DistrInfo Dfig
+            DistrInfo.Dfig.v = Var.Red.Bus.v;
+            DistrInfo.Dfig.pWi = Var.Gen.Dfig.pWi;
+            DistrInfo.Dfig.qWi = Var.Gen.Dfig.qWi;
+            DistrInfo.Dfig.ind = Data.Gen.DFIG.I;
+            DistrInfo.Dfig.ind(DfigNodes) = (1:length(DfigNodes))';
+        end
+        if isfield(Var.Gen,'Pv')
+    		% DistrInfo PV
+            DistrInfo.PV.pPv = Var.Gen.Pv.pPv;
+            DistrInfo.PV.qPv = Var.Gen.Pv.qPv;
+        end
 	end
 
-	if ~isempty(PvNodes)
-		% DistrInfo PV
-		DistrInfo.PV.pPv = Var.Gen.Pv.pPv;
-		DistrInfo.PV.qPv = Var.Gen.Pv.qPv;
-	end
-
-	if ~isempty(AlmNodes);
-		% DistrInfo Almacenamiento
-		DistrInfo.Alm.pStb = Var.St.Bat.pStb;
-		DistrInfo.Alm.qStb = Var.St.Bat.qStb;
-	end
-	if ~isempty(ClNINodes)
+	if isfield(Var,'St')
+        if isfield(Var.St,'Bat')
+            % DistrInfo Almacenamiento
+            DistrInfo.Alm.pStb = Var.St.Bat.pStb;
+            DistrInfo.Alm.qStb = Var.St.Bat.qStb;
+        end
+    end
+    
+	if isfield(Var,'ClNI')
 		% DistrInfo Clientes No Interrumpibles
 		DistrInfo.ClNI.v = Var.Red.Bus.v;
 		DistrInfo.ClNI.pC = Var.ClNI.pC;
@@ -336,13 +350,6 @@ end
 function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_it, Fixed, DistrInfo, Config, Data, Ev, wbSol)
 	conv = false;
 	it = 1;
-    TrasNodes = find(Data.Gen.Tras.I == 1);
-	DfigNodes = find(Data.Gen.DFIG.I == 1);
-	PvNodes = find(Data.Gen.Pv.I == 1);
-	ClResNodes = find(Data.Red.Bus.Icons == 1);
-	AlmNodes = find(Data.St.Bat.I == 1);
-	OpSisNodes = (1:size(Data.Red.Branch.T,1));
-	ClNINodes = find(Data.ClNI.I == 1);
 
     VertI = VertIMat(Data.Red.Branch.T);
 
@@ -353,7 +360,7 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
 		print_it = it + ini_it;
 
 		tic
-		opt_curr = zeros(1,3);
+		opt_curr = zeros(1,4);
 		% 1- Actualizacion del muT y lambdaT
 		DistrInfo.muT = DistrInfo.mu + DistrInfo.Gama * (DistrInfo.Adm.pC - DistrInfo.Adm.pG - DistrInfo.Adm.pN);
 		DistrInfo.lambdaT = DistrInfo.lambda + DistrInfo.Gama * (DistrInfo.Adm.qC - DistrInfo.Adm.qG - DistrInfo.Adm.qN);
@@ -364,7 +371,7 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
 
 		% 3-Segundo Construccion de lambda y mu con los consumos,
 		% generadores, transmision y capacitores
-		[DistrInfo] = actualizarDistrInfo(Var_curr, Data, TrasNodes, DfigNodes, ClNINodes, PvNodes, AlmNodes, DistrInfo);
+		[DistrInfo] = actualizarDistrInfo(Var_curr, Data, DistrInfo);
 		% gamaEv(print_it) = DistrInfo.Gama;
 
 		Ev.difP(:,:,print_it) = DistrInfo.Adm.pC - DistrInfo.Adm.pG - DistrInfo.Adm.pN;
@@ -380,7 +387,9 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
 		Ev.pC(:,:,print_it) = DistrInfo.Adm.pC;
 		Ev.qC(:,:,print_it) = DistrInfo.Adm.qC;
 		Ev.v(:,:,print_it) = Var_curr.Red.Bus.v;
+		Ev.Ncp(:,:,print_it) = Var_curr.Red.Bus.Ncp;
 		Ev.l(:,:,print_it) = Var_curr.Red.Branch.l;
+		Ev.Ntr(:,:,print_it) = Var_curr.Red.Branch.Ntr;
 
         Ev.h_l(:,:,print_it) = ((Var_curr.Red.Branch.P.^2 + Var_curr.Red.Branch.Q.^2)./(VertI*Var_curr.Red.Bus.v))./Var_curr.Red.Branch.l;
 
@@ -410,9 +419,9 @@ function [Var, opt, opt_Tras, opt_Dfig, opt_Pv, opt_ClNI, opt_ClRes, opt_Alm, op
 	DfigNodes = find(Data.Gen.DFIG.I == 1);
 	PvNodes = find(Data.Gen.Pv.I == 1);
 	AlmNodes = find(Data.St.Bat.I == 1);
-	ClResNodes = find(Data.Red.Bus.Icons == 1);
+% 	ClResNodes = find(Data.Red.Bus.Icons == 1);
+	ClResNodes = (1:size(Data.Red.Branch.T,1));
 	ClNINodes = find(Data.ClNI.I == 1);
-
 	OpSisNodes = (1:size(Data.Red.Branch.T,1));
 
 	totalProb = 2 + length(DfigNodes) + length(PvNodes) + length(ClResNodes) + length(ClNINodes) + length(AlmNodes);

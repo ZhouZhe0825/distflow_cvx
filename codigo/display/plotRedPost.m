@@ -15,7 +15,7 @@ function plotRedPost(Data, Var, t)
 	G = digraph(Data.Red.Branch.T(:,:,t));
 	h = plot(G, 'LineStyle', 'none');
 	layout(h,'layered','Direction','down','Sources',Ntras(1));
-	highlight(h, digraph(Var.Red.Branch.z(:,:,1)), 'LineStyle', '-');
+	highlight(h, digraph(Var.Red.Branch.z(:,:,t)), 'LineStyle', '-');
 % 	highlight(h,Ncons,'NodeColor','g', 'Marker','^','MarkerSize',4);
 % 	highlight(h,Nncons, 'Marker','none');
     for i = 1:length(Data.Red.Branch.T(:,:,t))

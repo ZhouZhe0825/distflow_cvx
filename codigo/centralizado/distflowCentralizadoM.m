@@ -185,10 +185,12 @@ cvx_begin
 
 
 	%% Funcion objetivo
-	NcpDif(:,1) = Data.Red.Bus.NcpIni;
+% 	NcpDif(:,1) = Data.Red.Bus.NcpIni;
+	NcpDif(:,1) = Ncp(:,1) - Data.Red.Bus.NcpIni;
 	NcpDif(:,(2:Config.Etapas)) = Ncp(:,(2:Config.Etapas)) - Ncp(:,(1:Config.Etapas-1));
 
-	NtrDif(:,1) = Data.Red.Branch.NtrIni;
+% 	NtrDif(:,1) = Data.Red.Branch.NtrIni;
+	NtrDif(:,1) = Ntr(:,1) - Data.Red.Branch.NtrIni;
 	NtrDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
 
 	tfopt_expr = ...

@@ -38,7 +38,8 @@ cvx_begin quiet
 	variable qStb(nSt, Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas,1); 
-	expression tfopt_virt(Config.Etapas,1); 
+	expression tfopt_mu(Config.Etapas,1); 
+	expression tfopt_lambda(Config.Etapas,1); 
 	expression tfopt_conv(Config.Etapas,1); 
 	expression fopt_expr; 
 
@@ -69,13 +70,12 @@ cvx_begin quiet
 			((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas).*Data.St.Bat.gama(:,Config.Etapas)).^2) ...
 			+ Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
 
-	tfopt_virt = DistrInfo.muT(St,:) .* pStb + DistrInfo.lambdaT(St,:) .* qStb;
+	tfopt_mu = DistrInfo.lambdaT(St,:) .* qStb;
+	tfopt_lambda = DistrInfo.lambdaT(St,:) .* qStb;
 
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
 			(norms(pStb - DistrInfo.Alm.pStb(St,:),2,2) ...
 			+ norms(qStb - DistrInfo.Alm.qStb(St,:),2,2));
-
-	fopt_expr = sum(tfopt_expr) + sum(tfopt_virt) + sum(tfopt_conv);
 
 	EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
 	EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
@@ -97,7 +97,7 @@ cvx_begin quiet
 	pStb >= Data.St.Bat.pgLow(St,:);
 	EStb(St,:) >= Data.St.Bat.ELow(St,:);
 
-	fopt_expr = sum(tfopt_expr + tfopt_virt + tfopt_conv);
+	fopt_expr = sum(tfopt_expr + tfopt_mu + tfopt_lambda + tfopt_conv);
 	minimize fopt_expr
 
 cvx_end
@@ -125,8 +125,9 @@ Var.Red.Bus.pG = Var.St.Bat.pStb;
 Var.Red.Bus.qG = Var.St.Bat.qStb;
 
 opt(1,1) = sum(tfopt_expr);
-opt(1,2) = sum(tfopt_virt);
-opt(1,3) = sum(tfopt_conv);
+opt(1,2) = sum(tfopt_mu);
+opt(1,3) = sum(tfopt_lambda);
+opt(1,4) = sum(tfopt_conv);
 
 
 status = cvx_status;

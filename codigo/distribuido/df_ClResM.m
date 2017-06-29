@@ -39,7 +39,8 @@ cvx_begin quiet
 	expression vApp(n, Config.Etapas, 2);
 
 	expression tfopt_expr(Config.Etapas,1); 
-	expression tfopt_virt(Config.Etapas,1); 
+	expression tfopt_mu(Config.Etapas,1); 
+	expression tfopt_lambda(Config.Etapas,1); 
 	expression tfopt_conv(Config.Etapas,1); 
 	expression fopt_expr; 
 
@@ -49,7 +50,8 @@ cvx_begin quiet
 		sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1) ...
 		;
 
-	tfopt_virt = sum(sum(DistrInfoM.muT(DistrInfo.Bus,:,:) .* pCApp(DistrInfo.Bus,:,:) + DistrInfoM.lambdaT(DistrInfo.Bus,:,:) .* qCApp(DistrInfo.Bus,:,:),3),1);
+	tfopt_mu = sum(sum(DistrInfoM.muT(DistrInfo.Bus,:,:) .* pCApp(DistrInfo.Bus,:,:),3),1);
+	tfopt_lambda = sum(sum(DistrInfoM.lambdaT(DistrInfo.Bus,:,:) .* qCApp(DistrInfo.Bus,:,:),3),1);
 
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
 		sum(sum(norms(pCApp(DistrInfo.Bus,:,:) - DistrInfo.ClRes.pCApp(DistrInfo.Bus,:,:),2,2) ...
@@ -99,7 +101,7 @@ cvx_begin quiet
 
 	end
 
-	fopt_expr = sum(tfopt_expr + tfopt_virt + tfopt_conv);
+	fopt_expr = sum(tfopt_expr + tfopt_mu + tfopt_lambda + tfopt_conv);
 	minimize fopt_expr
 
 cvx_end
@@ -122,8 +124,9 @@ Var.Red.Bus.pC = Var.ClRes.pC;
 Var.Red.Bus.qC = Var.ClRes.qC;
 
 opt(1,1) = sum(tfopt_expr);
-opt(1,2) = sum(tfopt_virt);
-opt(1,3) = sum(tfopt_conv);
+opt(1,2) = sum(tfopt_mu);
+opt(1,3) = sum(tfopt_lambda);
+opt(1,4) = sum(tfopt_conv);
 
 status = cvx_status;
 cvx_clear

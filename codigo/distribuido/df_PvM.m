@@ -45,7 +45,8 @@ cvx_begin quiet
 	variable qPv(nPv, Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas,1); 
-	expression tfopt_virt(Config.Etapas,1); 
+	expression tfopt_mu(Config.Etapas,1); 
+	expression tfopt_lambda(Config.Etapas,1); 
 	expression tfopt_conv(Config.Etapas,1); 
 	expression fopt_expr; 
 
@@ -64,7 +65,8 @@ cvx_begin quiet
 			(norms(pPv -  DistrInfo.PV.pPv(Pv,:),2,2) ...
 			+ norms(qPv - DistrInfo.PV.qPv(Pv,:),2,2));
 
-	tfopt_virt = DistrInfo.muT(Pv,:) .* pPv + DistrInfo.lambdaT(Pv,:) .* qPv;
+	tfopt_mu = DistrInfo.muT(Pv,:) .* pPv;
+	tfopt_lambda = DistrInfo.lambdaT(Pv,:) .* qPv;
 
 	cqPv >= - Data.Cost.rhomqPv(Pv,:) .* qPv;
 	cqPv >= Data.Cost.rhoMqPv(Pv,:) .* qPv;
@@ -80,7 +82,7 @@ cvx_begin quiet
 	xiPv <= Data.Gen.Pv.xiTop(Pv,:).*abs(sign(Data.Gen.Pv.pPvg(Pv,:)));
 
 
-	fopt_expr = sum(tfopt_expr + tfopt_virt + tfopt_conv);
+	fopt_expr = sum(tfopt_expr + tfopt_mu + tfopt_lambda + tfopt_conv);
 	minimize fopt_expr
 
 cvx_end
@@ -100,8 +102,9 @@ Var.Red.Bus.pG = Var.Gen.Pv.pPv;
 Var.Red.Bus.qG = Var.Gen.Pv.qPv;
 
 opt(1,1) = sum(tfopt_expr);
-opt(1,2) = sum(tfopt_virt);
-opt(1,3) = sum(tfopt_conv);
+opt(1,2) = sum(tfopt_mu);
+opt(1,3) = sum(tfopt_lambda);
+opt(1,4) = sum(tfopt_conv);
 
 status = cvx_status;
 cvx_clear

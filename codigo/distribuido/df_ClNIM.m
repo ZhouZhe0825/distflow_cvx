@@ -37,7 +37,8 @@ cvx_begin quiet
 	variable qCClNI(nClNI, Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas,1); 
-	expression tfopt_virt(Config.Etapas,1); 
+	expression tfopt_mu(Config.Etapas,1); 
+	expression tfopt_lambda(Config.Etapas,1); 
 	expression tfopt_conv(Config.Etapas,1); 
 	expression fopt_expr; 
 
@@ -59,7 +60,8 @@ cvx_begin quiet
 	stClNI(:,1) == onClNI(:,1);
 
 	tfopt_expr = sum(Data.Util.betaE(ClNI,:).*((pCClNI - Data.Util.pzCnPrefE(ClNI,:)).^2),1);
-	tfopt_virt = sum(DistrInfo.muT(ClNI,:) .* pCClNI + DistrInfo.lambdaT(ClNI,:) .* qCClNI,1);
+	tfopt_mu = sum(DistrInfo.muT(ClNI,:) .* pCClNI,1);
+	tfopt_lambda = sum(DistrInfo.lambdaT(ClNI,:) .* qCClNI,1);
 
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
 		sum(norms(pCClNI - DistrInfo.ClNI.pC(ClNI,:),2,2) ...
@@ -67,7 +69,7 @@ cvx_begin quiet
 
 
 
-	fopt_expr = sum(tfopt_expr + tfopt_virt + tfopt_conv);
+	fopt_expr = sum(tfopt_expr + tfopt_mu + tfopt_lambda + tfopt_conv);
 	minimize fopt_expr
 
 cvx_end
@@ -91,8 +93,9 @@ if nClNI > 0
 end
 
 opt(1,1) = sum(tfopt_expr);
-opt(1,2) = sum(tfopt_virt);
-opt(1,3) = sum(tfopt_conv);
+opt(1,2) = sum(tfopt_mu);
+opt(1,3) = sum(tfopt_lambda);
+opt(1,4) = sum(tfopt_conv);
 
 status = cvx_status;
 cvx_clear

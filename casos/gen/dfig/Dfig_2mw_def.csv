@@ -13,9 +13,9 @@ RW_13,0.03
 LW_13,0.3
 RW_45,.017407227
 LW_45,.030492541
-lW_12_Top,3
-lW_13_Top,3
-lW_45_Top,3
+lW_12_Top,4
+lW_13_Top,0.3
+lW_45_Top,4
 sW_3_Top,3
 sW_5_Top,3
 vmm,5
@@ -35,9 +35,9 @@ c5,12.5
 c6,0.08
 c7,0.035
 uLow_2,.7
-uTop_2,1.1025
+uTop_2,1.04
 uLow_3,.7
-uTop_3,1.1025
+uTop_3,1
 PQnorm_2,2
 PQnorm_3,.5
 C_plb,1

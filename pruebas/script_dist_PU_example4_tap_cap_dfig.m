@@ -8,12 +8,7 @@ Eol1.type = 'casos\gen\dfig\Dfig_1mw_def.csv';
 Eol1.fileG = 'casos\gen\dfig\Dfig_1mw_P_n_.csv';
 Eol1.fileC = 'casos\costos\dfig\costosDfig.csv';
 
-Eol2.nod = 6;
-Eol2.type = 'casos\gen\dfig\Dfig_200kw_def.csv';
-Eol2.fileG = 'casos\gen\dfig\Dfig_200kw_P_n_.csv';
-Eol2.fileC = 'casos\costos\dfig\costosDfig.csv';
-
-DflowD.Eolicos = [Eol1;Eol2];
+DflowD.Eolicos = [Eol1];
 
 % Trafos
 DflowD.Trafos(1,1).N = [-8 8];

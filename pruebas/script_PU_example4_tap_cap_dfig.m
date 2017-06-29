@@ -4,15 +4,15 @@ DflowD = cargaDflowDDefault();
 
 % Eolicos
 Eol1.nod = 5;
-Eol1.type = 'casos\gen\dfig\Dfig_500kw_def.csv';
-Eol1.fileG = 'casos\gen\dfig\Dfig_500kw_P_n_.csv';
+Eol1.type = 'casos\gen\dfig\Dfig_1mw_def.csv';
+Eol1.fileG = 'casos\gen\dfig\Dfig_1mw_P_n_.csv';
 Eol1.fileC = 'casos\costos\dfig\costosDfig.csv';
 
 DflowD.Eolicos = [Eol1];
 
 % Trafos
-DflowD.Trafos(1,1).N = [-2 2];
-DflowD.Trafos(1,1).TP = .005;
+DflowD.Trafos(1,1).N = [-8 8];
+DflowD.Trafos(1,1).TP = .025;
 DflowD.Trafos(1,1).nodI = 1;
 DflowD.Trafos(1,1).nodJ = 2;
 DflowD.Trafos(1,1).ini = 0;
@@ -20,7 +20,7 @@ DflowD.Trafos(1,1).reg = 0;
 DflowD.Trafos(1,1).cambio = 1;
 
 DflowD.Trafos(2,1).N = [-1 1];
-DflowD.Trafos(2,1).TP = .15;
+DflowD.Trafos(2,1).TP = .1;
 DflowD.Trafos(2,1).nodI = 4;
 DflowD.Trafos(2,1).nodJ = 5;
 DflowD.Trafos(2,1).ini = 0;

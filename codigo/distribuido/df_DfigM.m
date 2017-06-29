@@ -48,7 +48,8 @@ cvx_begin quiet
 	variable qWi(lenWN,Config.Etapas);
 
 	expression tfopt_expr(1,Config.Etapas); 
-	expression tfopt_virt(1,Config.Etapas); 
+	expression tfopt_mu(Config.Etapas,1); 
+	expression tfopt_lambda(Config.Etapas,1); 
 	expression tfopt_conv(1,Config.Etapas); 
 	expression fopt_expr; 
 
@@ -108,9 +109,8 @@ cvx_begin quiet
 				sum(norms(pWi - DistrInfo.Dfig.pWi(indWn,:),2,2) ...
 				+ norms(qWi - DistrInfo.Dfig.qWi(indWn,:),2,2),1);
 
-	tfopt_virt = sum(DistrInfo.muT(indWn,:) .* pWi + DistrInfo.lambdaT(indWn,:) .* qWi,1);
-
-	fopt_expr = sum(tfopt_expr) + sum(tfopt_virt) + sum(tfopt_conv);
+	tfopt_mu = sum(DistrInfo.muT(indWn,:) .* pWi,1);
+	tfopt_lambda = sum(DistrInfo.lambdaT(indWn,:) .* qWi,1);
 
 	cqWi >= - Data.Cost.rhomqWi(indWn) .* qWi;
 	cqWi >= Data.Cost.rhoMqWi(indWn) .* qWi;
@@ -191,7 +191,7 @@ cvx_begin quiet
 	qWigdfigR == n_Wnd(indWn,:).*(qWigdfigE);
 
 
-	fopt_expr = sum(tfopt_expr + tfopt_virt + tfopt_conv);
+	fopt_expr = sum(tfopt_expr + tfopt_mu + tfopt_lambda + tfopt_conv);
 	minimize fopt_expr
 
 cvx_end
@@ -269,8 +269,9 @@ Var.Red.Bus.pG = Var.Gen.Dfig.pWi;
 Var.Red.Bus.qG = Var.Gen.Dfig.qWi;
 
 opt(1,1) = sum(tfopt_expr);
-opt(1,2) = sum(tfopt_virt);
-opt(1,3) = sum(tfopt_conv);
+opt(1,2) = sum(tfopt_mu);
+opt(1,3) = sum(tfopt_lambda);
+opt(1,4) = sum(tfopt_conv);
 
 status = cvx_status;
 cvx_clear
