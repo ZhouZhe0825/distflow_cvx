@@ -19,6 +19,6 @@ function [Data] = loadCargaCuartHoraria(Data, filename)
         Data.Red.Bus.qCLow(:,:) = qCLow;
         ipC = find(sign(sum(abs(Data.Red.Bus.pCLow),2)) == 1);
         iqC = find(sign(sum(abs(Data.Red.Bus.qCLow),2)) == 1);
-        Data.Red.Bus.Icons(intersect(ipC, iqC)) = 1;
+        Data.Red.Bus.Icons(union(ipC, iqC)) = 1;
     end
 end

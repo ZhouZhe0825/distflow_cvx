@@ -160,7 +160,7 @@ cvx_begin quiet
 	% % % % % Ntr >= Data.Red.Branch.NtrLow;
 	% % % % % Ntr <= Data.Red.Branch.NtrTop;
 
-    nv(NoTr,:) == VertI(NoTr,:)*v	
+    nv(NoTr,:) == VertI(NoTr,:)*v
 
     if ~isempty(TrTras)
         Tap = Data.Red.Branch.Tap(TrTras,:);
@@ -175,6 +175,9 @@ cvx_begin quiet
 
         Ntr(TrTras,:) >= -BigMtr.*(1-z(TrTras,:));
         Ntr(TrTras,:) <= BigMtr.*z(TrTras,:);
+        
+        Ntr(TrTras,:) <= NT;
+        Ntr(TrTras,:) >= NL;
     end
 
     if ~isempty(TrTrasZ)

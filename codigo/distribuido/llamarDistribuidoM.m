@@ -62,7 +62,7 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 		Var_ini.Dual.dPn = Var_ini_.Dual.dPn;
 		Var_ini.Dual.dQn = Var_ini_.Dual.dQn;
 
-		[Var_ini] = randStart(Var_ini);
+% % % 		[Var_ini] = randStart(Var_ini);
 % 		save(Config.workspace_var_file);
 	end
 	tdistr = tic;

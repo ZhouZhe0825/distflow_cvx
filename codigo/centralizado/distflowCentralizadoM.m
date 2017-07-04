@@ -293,6 +293,9 @@ cvx_begin
 
         Ntr(TrTras,:) >= -BigMtr.*(1-z(TrTras,:));
         Ntr(TrTras,:) <= BigMtr.*z(TrTras,:);
+        
+        Ntr(TrTras,:) <= NT;
+        Ntr(TrTras,:) >= NL;
     end
 
     if ~isempty(TrTrasZ)
