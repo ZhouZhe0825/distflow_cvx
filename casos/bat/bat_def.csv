@@ -1,12 +1,14 @@
 cv,0.001
 cr,0.001
 epsilon,0.1
-eta,1
+etaC,0.9
+etaD,0.8
 pgTop,0.5
 pgLow,-0.5
 sTop,0.095
 ETop,2
 ELow,0
+EPref,1
 beta,0.2
 wU,1
 wOm,1

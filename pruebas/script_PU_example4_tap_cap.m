@@ -3,8 +3,8 @@
 DflowD = cargaDflowDDefault();
 
 % Trafos
-DflowD.Trafos(1,1).N = [-2 2];
-DflowD.Trafos(1,1).TP = .005;
+DflowD.Trafos(1,1).N = [-8 8];
+DflowD.Trafos(1,1).TP = .025;
 DflowD.Trafos(1,1).nodI = 1;
 DflowD.Trafos(1,1).nodJ = 2;
 DflowD.Trafos(1,1).ini = 0;
@@ -20,12 +20,11 @@ DflowD.Trafos(2,1).reg = 1;
 DflowD.Trafos(2,1).cambio = .1;
 
 % Caps
-Cap1.N = [0 3];
-Cap1.TP = .005;
-Cap1.nod = 9;
-Cap1.ini = 0;
-Cap1.cambio = 1;
-DflowD.Caps = [Cap1];
+DflowD.Cap(1,1).N = [0 3];
+DflowD.Cap(1,1).TP = .005;
+DflowD.Cap(1,1).nod = 9;
+DflowD.Cap(1,1).ini = 0;
+DflowD.Cap(1,1).cambio = 1;
 
 %% Nombres de archivos
 % 

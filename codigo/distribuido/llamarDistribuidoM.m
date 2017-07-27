@@ -130,6 +130,7 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
     Ev.Ntr   = ones(arcos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.errMu	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
 	Ev.errLambda	 = ones(nodos, Config.Etapas, Config.Distr.TopIT*2+1) * Inf;
+    Ev.Var = [];
 
 
 	Data_c = DataM;
@@ -390,6 +391,7 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
 		Ev.Ncp(:,:,print_it) = Var_curr.Red.Bus.Ncp;
 		Ev.l(:,:,print_it) = Var_curr.Red.Branch.l;
 		Ev.Ntr(:,:,print_it) = Var_curr.Red.Branch.Ntr;
+        Ev.Var = [Ev.Var Var_curr];
 
         Ev.h_l(:,:,print_it) = ((Var_curr.Red.Branch.P.^2 + Var_curr.Red.Branch.Q.^2)./(VertI*Var_curr.Red.Bus.v))./Var_curr.Red.Branch.l;
 

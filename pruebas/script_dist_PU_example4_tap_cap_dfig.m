@@ -3,12 +3,11 @@
 DflowD = cargaDflowDDefault();
 
 % Eolicos
-Eol1.nod = 5;
-Eol1.type = 'casos\gen\dfig\Dfig_1mw_def.csv';
-Eol1.fileG = 'casos\gen\dfig\Dfig_1mw_P_n_.csv';
-Eol1.fileC = 'casos\costos\dfig\costosDfig.csv';
+DflowD.Eolicos(1,1).nod = 5;
+DflowD.Eolicos(1,1).type = 'casos\gen\dfig\Dfig_1mw_def.csv';
+DflowD.Eolicos(1,1).fileG = 'casos\gen\dfig\Dfig_1mw_P_n_.csv';
+DflowD.Eolicos(1,1).fileC = 'casos\costos\dfig\costosDfig.csv';
 
-DflowD.Eolicos = [Eol1];
 
 % Trafos
 DflowD.Trafos(1,1).N = [-8 8];
@@ -28,12 +27,11 @@ DflowD.Trafos(2,1).reg = 1;
 DflowD.Trafos(2,1).cambio = .1;
 
 % Caps
-Cap1.N = [0 3];
-Cap1.TP = .005;
-Cap1.nod = 9;
-Cap1.ini = 0;
-Cap1.cambio = 1;
-DflowD.Caps = [Cap1];
+DflowD.Cap(1,1).N = [0 3];
+DflowD.Cap(1,1).TP = .005;
+DflowD.Cap(1,1).nod = 9;
+DflowD.Cap(1,1).ini = 0;
+DflowD.Cap(1,1).cambio = 1;
 
 %% Nombres de archivos
 % 

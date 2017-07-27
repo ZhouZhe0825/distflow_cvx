@@ -48,6 +48,8 @@ cvx_begin quiet
 	%% Restricciones de almacenamiento de bateria
 	variable sStb(nSt, Config.Etapas);
 	variable pStgb(nSt, Config.Etapas);
+	variable pStgbC(nSt, Config.Etapas);
+	variable pStgbD(nSt, Config.Etapas);
 	variable xiStb(nSt, Config.Etapas);
 	variable EStb(n, Config.Etapas);
 	variable DlEStb(n, Config.Etapas);
@@ -66,9 +68,9 @@ cvx_begin quiet
 	end
 
 	tfopt_expr = sum(cStb,1) + ...
-			sum(Data.St.Bat.beta(:,Config.Etapas).* ...
-			((Data.St.Bat.ETop(:,Config.Etapas) - EStb(:,Config.Etapas).*Data.St.Bat.gama(:,Config.Etapas)).^2) ...
-			+ Data.St.Bat.wU(:,Config.Etapas),1)./Config.Etapas;
+			sum(Data.St.Bat.beta.* ...
+			((Data.St.Bat.EPref - EStb).^2) ...
+			+ Data.St.Bat.wU,1);
 
 	tfopt_mu = DistrInfo.lambdaT(St,:) .* qStb;
 	tfopt_lambda = DistrInfo.lambdaT(St,:) .* qStb;
@@ -80,8 +82,12 @@ cvx_begin quiet
 	EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
 	EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
 
+	pStgb == pStgbC - pStgbD;
+	pStgbC >= 0;
+	pStgbD >= 0;
+
 	pStb == pStgb - (Data.St.Bat.cv(St,:).*sStb + Data.St.Bat.cr(St,:).*xiStb);
-	EStb(St,:) == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - Data.St.Bat.eta(St,:).*pStgb*Data.dt;
+	EStb(St,:) == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - pStgbD.*Data.St.Bat.etaD(St,:)*Data.dt + Data.St.Bat.etaC(St,:).*pStgbC*Data.dt;
 
 	StbNorm(:,:,1) = pStgb;
 	StbNorm(:,:,2) = qStb;

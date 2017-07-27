@@ -3,32 +3,29 @@
 DflowD = cargaDflowDDefault();
 
 % Baterias
-Bat1.nod = 5;
-Bat1.type = 'casos\bat\bat_def.csv';
-Bat1.EIni = .5;
+DflowD.Baterias(1,1).nod = 5;
+DflowD.Baterias(1,1).type = 'casos\bat\bat_def.csv';
+DflowD.Baterias(1,1).EIni = .5;
 
-Bat2.nod = 8;
-Bat2.type = 'casos\bat\bat_def.csv';
-Bat2.EIni = .5;
-
-DflowD.Baterias = [Bat1;Bat2];
+DflowD.Baterias(2,1).nod = 8;
+DflowD.Baterias(2,1).type = 'casos\bat\bat_def.csv';
+DflowD.Baterias(2,1).EIni = .5;
 
 % Trafos
-Trafo1.N = [-2 2];
-Trafo1.TP = .005;
-Trafo1.nodI = 1;
-Trafo1.nodJ = 2;
-Trafo1.ini = 0;
-Trafo1.cambio = 1;
-DflowD.Trafos = [Trafo1];
+DflowD.Trafos(1,1).N = [-8 8];
+DflowD.Trafos(1,1).TP = .025;
+DflowD.Trafos(1,1).nodI = 1;
+DflowD.Trafos(1,1).nodJ = 2;
+DflowD.Trafos(1,1).ini = 0;
+DflowD.Trafos(1,1).reg = 0;
+DflowD.Trafos(1,1).cambio = 1;
 
 % Caps
-Cap1.N = [0 3];
-Cap1.TP = .005;
-Cap1.nod = 9;
-Cap1.ini = 0;
-Cap1.cambio = 1;
-DflowD.Caps = [Cap1];
+DflowD.Cap(1,1).N = [0 3];
+DflowD.Cap(1,1).TP = .005;
+DflowD.Cap(1,1).nod = 9;
+DflowD.Cap(1,1).ini = 0;
+DflowD.Cap(1,1).cambio = 1;
 
 %% Nombres de archivos
 % 

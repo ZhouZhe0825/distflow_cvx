@@ -319,6 +319,8 @@ cvx_begin
 	if lenSt > 0
 		variable sStb(n, 1, Config.Etapas);
 		variable pStgb(n, 1, Config.Etapas);
+		variable pStgbC(n, 1, Config.Etapas);
+		variable pStgbD(n, 1, Config.Etapas);
 		variable xiStb(n, 1, Config.Etapas);
 		variable EStb(n, 1, Config.Etapas);
 		variable DlEStb(n, 1, Config.Etapas);
@@ -338,14 +340,18 @@ cvx_begin
 			end
 
 		tfopt_expr = tfopt_expr + sum(cStb,1) + ...
-			sum(Data.St.Bat.beta(:,1,Config.Etapas).* ...
-				((Data.St.Bat.ETop(:,1,Config.Etapas) - EStb(:,1,Config.Etapas).*Data.St.Bat.gama(:,1,Config.Etapas)).^2) + Data.St.Bat.wU(:,1,Config.Etapas),1)./Config.Etapas;
+			sum(Data.St.Bat.beta.* ...
+				((Data.St.Bat.EPref - EStb).^2) + Data.St.Bat.wU,1);
 
 		EStbAnt(:,1,1) = Data.St.Bat.EIni(:,1,1);
 		EStbAnt(:,1,(2:Config.Etapas)) = EStb(:,1,(1:Config.Etapas-1));
 
+		pStgb == pStgbC - pStgbD;
+		pStgbC >= 0;
+		pStgbD >= 0;
+
 		pStb == pStgb - (Data.St.Bat.cv.*sStb + Data.St.Bat.cr.*xiStb);
-		EStb == (1-Data.St.Bat.epsilon).*EStbAnt - Data.St.Bat.eta.*pStgb*Data.dt;
+		EStb == (1-Data.St.Bat.epsilon).*EStbAnt - pStgbD.*Data.St.Bat.etaD*Data.dt + Data.St.Bat.etaC.*pStgbC*Data.dt;
 
 		StbNorm(:,:,:,1) = pStgb;
 		StbNorm(:,:,:,2) = qStb;

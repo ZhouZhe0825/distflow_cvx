@@ -3,40 +3,37 @@
 DflowD = cargaDflowDDefault();
 
 % Trafos
-Trafo1.N = [-2 2];
-Trafo1.TP = .005;
-Trafo1.nodI = 1;
-Trafo1.nodJ = 2;
-Trafo1.ini = 0;
-Trafo1.cambio = 1;
-DflowD.Trafos = [Trafo1];
+DflowD.Trafos(1,1).N = [-8 8];
+DflowD.Trafos(1,1).TP = .025;
+DflowD.Trafos(1,1).nodI = 1;
+DflowD.Trafos(1,1).nodJ = 2;
+DflowD.Trafos(1,1).ini = 0;
+DflowD.Trafos(1,1).reg = 0;
+DflowD.Trafos(1,1).cambio = 1;
 
 % Caps
-Cap1.N = [0 3];
-Cap1.TP = .005;
-Cap1.nod = 9;
-Cap1.ini = 0;
-Cap1.cambio = 1;
-DflowD.Caps = [Cap1];
+DflowD.Cap(1,1).N = [0 3];
+DflowD.Cap(1,1).TP = .005;
+DflowD.Cap(1,1).nod = 9;
+DflowD.Cap(1,1).ini = 0;
+DflowD.Cap(1,1).cambio = 1;
 
 % Cargas
-Carga1.pC = 0.5;
-Carga1.qC = Carga1.pC *.015;
-Carga1.dur = 3;
-Carga1.nMultipTop = 1.1;
-Carga1.nMultipLow = .75;
-Carga1.fileU = 'casos\util\betaE.csv';
-Carga1.nod = 5;
+DflowD.Cargas(1,1).pC = 0.5;
+DflowD.Cargas(1,1).qC = DflowD.Cargas(1,1).pC *.015;
+DflowD.Cargas(1,1).dur = 3;
+DflowD.Cargas(1,1).nMultipTop = 1.1;
+DflowD.Cargas(1,1).nMultipLow = .75;
+DflowD.Cargas(1,1).fileU = 'casos\util\betaE.csv';
+DflowD.Cargas(1,1).nod = 5;
 
-Carga2.pC = 0.25;
-Carga2.qC = Carga2.pC *.015;
-Carga2.dur = 2;
-Carga2.nMultipTop = 1.1;
-Carga2.nMultipLow = .75;
-Carga2.fileU = 'casos\util\betaE.csv';
-Carga2.nod = 4;
-
-DflowD.Cargas = [Carga1;Carga2];
+DflowD.Cargas(2,1).pC = 0.25;
+DflowD.Cargas(2,1).qC = DflowD.Cargas(2,1).pC *.015;
+DflowD.Cargas(2,1).dur = 2;
+DflowD.Cargas(2,1).nMultipTop = 1.1;
+DflowD.Cargas(2,1).nMultipLow = .75;
+DflowD.Cargas(2,1).fileU = 'casos\util\betaE.csv';
+DflowD.Cargas(2,1).nod = 4;
 
 %% Nombres de archivos
 % 

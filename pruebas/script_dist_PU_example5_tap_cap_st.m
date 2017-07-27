@@ -2,29 +2,32 @@
 
 DflowD = cargaDflowDDefault();
 
-% Baterias
-Bat1.nod = 5;
-Bat1.type = 'casos\bat\bat_def.csv';
-Bat1.EIni = .5;
+% Solar
+DflowD.Solares(1,1).nod = 4;
+DflowD.Solares(1,1).type = 'casos\gen\pv\pv_def.csv';
+DflowD.Solares(1,1).fileG = 'casos\gen\pv\pvgen.csv';
+DflowD.Solares(1,1).fileC = 'casos\costos\pv\costosPv.csv';
 
-DflowD.Baterias = [Bat1];
+DflowD.Solares(2,1).nod = 7;
+DflowD.Solares(2,1).type = 'casos\gen\pv\pv_def.csv';
+DflowD.Solares(2,1).fileG = 'casos\gen\pv\pvgen.csv';
+DflowD.Solares(2,1).fileC = 'casos\costos\pv\costosPv.csv';
 
 % Trafos
-Trafo1.N = [-2 2];
-Trafo1.TP = .005;
-Trafo1.nodI = 1;
-Trafo1.nodJ = 2;
-Trafo1.ini = 0;
-Trafo1.cambio = 1;
-DflowD.Trafos = [Trafo1];
+DflowD.Trafos(1,1).N = [-8 8];
+DflowD.Trafos(1,1).TP = .025;
+DflowD.Trafos(1,1).nodI = 1;
+DflowD.Trafos(1,1).nodJ = 2;
+DflowD.Trafos(1,1).ini = 0;
+DflowD.Trafos(1,1).reg = 0;
+DflowD.Trafos(1,1).cambio = 1;
 
 % Caps
-Cap1.N = [0 3];
-Cap1.TP = .005;
-Cap1.nod = 9;
-Cap1.ini = 0;
-Cap1.cambio = 1;
-DflowD.Caps = [Cap1];
+DflowD.Cap(1,1).N = [0 3];
+DflowD.Cap(1,1).TP = .005;
+DflowD.Cap(1,1).nod = 9;
+DflowD.Cap(1,1).ini = 0;
+DflowD.Cap(1,1).cambio = 1;
 
 %% Nombres de archivos
 % 

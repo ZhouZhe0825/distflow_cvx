@@ -77,9 +77,9 @@ cvx_begin quiet
 	pCn >= Data.Util.pzCnLow;
 	pCn <= Data.Util.pzCnTop;
 
-	pCClRes >= sum(pCApp,3);
+	pCClRes == sum(pCApp,3);
 
-	qCClRes >= sum(qCApp,3);
+	qCClRes == sum(qCApp,3);
 
 	%% Restricciones de Aire Acondicionado
 	if nAC > 0 
