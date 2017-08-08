@@ -45,7 +45,7 @@ function plotRedPost(Data, Var, t)
     
 % 	Nbat = find(Data.St.Bat.I == 1);
 
-	G = graph(TotalT);
+	G = digraph(TotalT);
     EndNodes = G.Edges.EndNodes;
     for i = 1:size(EndNodes,1)
         G.Edges.Weight(i) = lRelz(EndNodes(i,1),EndNodes(i,2),t);
@@ -53,7 +53,7 @@ function plotRedPost(Data, Var, t)
     LWidths = 3*G.Edges.Weight+eps;
 	h = plot(G, 'LineStyle', 'none','LineWidth',LWidths);
     layout(h,'layered','Direction','down','Sources',Ntras(1));
-	highlight(h, graph(Var.Red.Branch.y(:,:,t)), 'LineStyle', '-');
+	highlight(h, digraph(Var.Red.Branch.z(:,:,t)), 'LineStyle', '-');
 
 
 	highlight(h,Ncons,'NodeColor','g', 'Marker','^');
