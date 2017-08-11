@@ -48,7 +48,8 @@ function printSalidasDistflowNxN(Var, Data, Config, outFilename, optEv, muEv, la
 	printVarNx1xT(Var.Red.Bus.QTras, Header.Bus, Header.Main, outFilename, 'Qtras');
 
 	printClNI(Header.Main, Var, Data, outFilename);
-	printPv(Header.Main, Var, Data, outFilename);
+	printBasic(Header.Main, Var, Data, outFilename);
+    printPv(Header.Main, Var, Data, outFilename);
 	printBat(Header.Main, Var, Data, outFilename);
 	printDfig(Header.Main, Var, Data, outFilename);
 

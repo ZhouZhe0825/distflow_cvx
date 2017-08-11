@@ -1,4 +1,4 @@
-function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTension, fileCostosTras, Solares, Eolicos)
+function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, GenBas, fileCostosTension, fileCostosTras, Solares, Eolicos)
 
 [Data.Cost.m, Data.Cost.delta, Data.Cost.cdv] = costosTension(Data,fileCostosTension);
 
@@ -8,12 +8,10 @@ function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, fileCostosTen
 
 [Data.Cost.rhopWi, Data.Cost.rhomqWi, Data.Cost.rhoMqWi] = costosDfig(Data,Eolicos);
 
-Data.Cost.cCap = Data.Red.Bus.Icap;
 for i = 1:length(Caps)
 	Data.Cost.cCap(Caps(i).nod) = Caps(i).cambio;
 end    
 
-Data.Cost.cTap = Data.Red.Branch.Itap*0;
 for i = 1:length(Trafos)
 	Data.Cost.cTap(Trafos(i).nodI,Trafos(i).nodJ) = Trafos(i).cambio;
 end    
@@ -21,3 +19,5 @@ end
 Data.Cost.cTap = Data.Cost.cTap + Data.Cost.cTap';
 
 Data.Cost.cY = Data.Red.Branch.T .* Switches.cY;
+
+[Data.Cost.cBas] = costosGBasico(Data,GenBas);

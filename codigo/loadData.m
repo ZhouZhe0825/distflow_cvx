@@ -27,9 +27,12 @@ function [Data] = loadData(DflowD)
 
         % Baterias
         [Data] = cargaBatDefault(Data, DflowD.Baterias);
-
+        
+        % Generador Basico
+        [Data] = cargaGBasicoDefault(Data, DflowD.GenBas);
+        
         % Costos
-        [Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.fileCostosTension, DflowD.fileCostosTras, DflowD.Solares, DflowD.Eolicos);
+        [Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.GenBas, DflowD.fileCostosTension, DflowD.fileCostosTras, DflowD.Solares, DflowD.Eolicos);
     end
 
 end

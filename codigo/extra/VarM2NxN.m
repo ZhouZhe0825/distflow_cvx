@@ -131,4 +131,11 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 		end
 	end
 
+	% Fotovoltaico
+	if isfield(VarM, 'Gen')
+		if isfield(VarM.Gen, 'Basic')
+			VarNxN.Gen.Basic.pGBas	 = permute(full(	VarM.Gen.Basic.pGBas	), [1 3 2]);
+			VarNxN.Gen.Basic.qGBas	 = permute(full(	VarM.Gen.Basic.qGBas	), [1 3 2]);
+		end
+	end
 end

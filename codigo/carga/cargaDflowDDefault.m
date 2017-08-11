@@ -24,6 +24,7 @@ function DflowD = cargaDflowDDefault()
 	DflowD.Caps = [];
 	DflowD.Cargas = [];
 	DflowD.Eolicos = [];
+    DflowD.GenBas = [];
 	DflowD.fileCostosTension = '';
 	DflowD.fileCostosTras = '';
 	DflowD.fileCurvaCarga = '';

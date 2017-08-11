@@ -16,6 +16,15 @@ function runSimulation(Data, DflowD, Config)
 		eol.fileG = [outputDirInputs, '\', newFileG];
 		eol.fileC = [outputDirInputs, '\', newFileC];
 	end
+	for i = 1:length(DflowD.GenBas)
+		gbas = DflowD.GenBas(i);
+		newFileG = ['gbas',num2str(i),'fileG.csv'];
+		newFileC = ['gbas',num2str(i),'fileC.csv'];
+		copyrename(gbas.fileG,newFileG,outputDirInputs);
+		copyrename(gbas.fileC,newFileC,outputDirInputs);
+		gbas.fileG = [outputDirInputs, '\', newFileG];
+		gbas.fileC = [outputDirInputs, '\', newFileC];
+	end
 	for i = 1:length(DflowD.Solares)
 		sol = DflowD.Solares(i);
 		newFileG = ['sol',num2str(i),'fileG.csv'];
