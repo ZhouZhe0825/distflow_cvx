@@ -179,6 +179,7 @@ cvx_begin
 	expression vApp(n, Config.Etapas, 2);
 	expression NcpDif(n,Config.Etapas);
 	expression NtrDif(m,Config.Etapas);
+	expression yDif(m,Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas,1); 
 	expression fopt_expr; 
@@ -193,13 +194,16 @@ cvx_begin
 	NtrDif(:,1) = Ntr(:,1) - Data.Red.Branch.NtrIni;
 	NtrDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
 
+	yDif(:,1) = y(:,1);
+	yDif(:,(2:Config.Etapas)) = y(:,(2:Config.Etapas)) - y(:,(1:Config.Etapas-1));
+
 	tfopt_expr = ...
 		sum(Data.Cost.piPTras.*pGTras,1) ...
 		+ sum(Data.Cost.cdv.*cDv,1) ...
 		+ sum(cqGTras,1) ...
 		+ sum(Data.Cost.cCap.*(NcpDif.^2),1) ...
 		+ sum(Data.Cost.cTap.*(NtrDif.^2),1) ...
-		+ sum(Data.Cost.cY.*y,1) ...
+		+ sum(Data.Cost.cY.*(yDif.^2(,1) ...
 		+ sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1) ...
 		;
 
@@ -715,6 +719,7 @@ Var.Red.Branch.Q	 = 	Q	;
 Var.Red.Branch.l	 = 	l	;
 Var.Red.Branch.z	 = 	round(z)	;
 Var.Red.Branch.y	 = 	y	;
+Var.Red.Branch.yDif	 = 	yDif	;
 Var.Red.Bus.w	 = 	w	;
 
 Var.Red.Bus.v	 = 	v	;
@@ -722,9 +727,11 @@ Var.Red.Bus.cDv	 = 	cDv	;
 Var.Red.Branch.nn	 = 	nn	;
 Var.Red.Branch.nv	 = 	nv	;
 Var.Red.Branch.Ntr	 = 	Ntr	;
+Var.Red.Branch.NtrDif	 = 	NtrDif	;
 Var.Red.Branch.Rtr	 = 	Rtr	;
 
 Var.Red.Bus.pC	 = 	pC	;
+Var.Red.Bus.pCn	 = 	pCn	;
 Var.Red.Bus.qC	 = 	qC	;
 
 Var.Red.Bus.pN	 = 	pN	;
@@ -735,9 +742,11 @@ Var.Red.Bus.qG	 = 	qG	;
 
 Var.Red.Bus.qCp	 = 	qCp	;
 Var.Red.Bus.Ncp	 = 	Ncp	;
+Var.Red.Bus.NcpDif	 = 	NcpDif	;
 
 Var.Red.Bus.PTras	 = 	pGTras	;
 Var.Red.Bus.QTras	 = 	qGTras	;
+Var.Red.Bus.cQTras	 = 	cqGTras	;
 
 Var.ClRes.pCApp	 = 	pCApp	;
 Var.ClRes.qCApp	 = 	qCApp	;
@@ -754,12 +763,17 @@ if nSt > 0
 	Var.St.Bat.pStb = pStb;
 	Var.St.Bat.pStgb = pStb*0;
 	Var.St.Bat.pStgb(St,:) = pStgb;
+	Var.St.Bat.pStgbC = pStb*0;
+	Var.St.Bat.pStgbC(St,:) = pStgbC;
+	Var.St.Bat.pStgbD = pStbD*0;
+	Var.St.Bat.pStgbD(St,:) = pStgbD;
 	Var.St.Bat.qStb = qStb;
 	Var.St.Bat.sStb = pStb*0;
 	Var.St.Bat.sStb(St,:) = sStb;
 	Var.St.Bat.xiStb = pStb*0;
 	Var.St.Bat.xiStb(St,:) = xiStb;
 	Var.St.Bat.EStb = EStb;
+	Var.St.Bat.cStb = cStb;
 end
 
 % Cargas No interrumpibles
