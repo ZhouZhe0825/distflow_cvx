@@ -1,6 +1,6 @@
 function [Header] = createHeader(Var, Data, Config)
 
-	horas = loadHoras();
+	horas = loadHoras(Config);
 
     [rowTap, colTap, ~] = find(triu(Data.Red.Branch.Itap) == 1);
     cantTaps = length(rowTap);

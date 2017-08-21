@@ -7,6 +7,8 @@ function printBat(Header, Var, Data, outFilename)
 			for i = 1:length(nodBat)
 				nod = nodBat(i);
 				pStb = Var.St.Bat.pStb(nod, 1, :);
+				pStgbC = Var.St.Bat.pStgbC(nod, 1, :);
+				pStgbD = Var.St.Bat.pStgbD(nod, 1, :);
 				qStb = Var.St.Bat.qStb(nod, 1, :);
 				EStb = Var.St.Bat.EStb(nod, 1, :);
 				pStgb = Var.St.Bat.pStgb(nod, 1, :);
@@ -17,19 +19,21 @@ function printBat(Header, Var, Data, outFilename)
 				h_xiStb = (pStgb.^2 + qStb.^2)./xiStb;
 				cr_xiStb = Data.St.Bat.cr(nod,1,:).*xiStb;
 
-				rowHeader = cell(10,1);
+				rowHeader = cell(12,1);
 				rowHeader{1} = 'pStb';
-				rowHeader{2} = 'qStb';
-				rowHeader{3} = 'EStb';
-				rowHeader{4} = 'pStgb';
-				rowHeader{5} = 'sStb';
-				rowHeader{6} = 'Holgura sStb';
-				rowHeader{7} = 'cv sStb';
-				rowHeader{8} = 'xiStb';
-				rowHeader{9} = 'Holgura xiStb';
-				rowHeader{10} = 'cr xiStb';
+				rowHeader{2} = 'pStgbC';
+				rowHeader{3} = 'pStgbD';
+				rowHeader{4} = 'qStb';
+				rowHeader{5} = 'EStb';
+				rowHeader{6} = 'pStgb';
+				rowHeader{7} = 'sStb';
+				rowHeader{8} = 'Holgura sStb';
+				rowHeader{9} = 'cv sStb';
+				rowHeader{10} = 'xiStb';
+				rowHeader{11} = 'Holgura xiStb';
+				rowHeader{12} = 'cr xiStb';
 
-				Bat = [pStb; qStb; EStb; pStgb; sStb; h_sStb; cv_sStb; xiStb; h_xiStb; cr_xiStb];
+				Bat = [pStb; pStgbC; pStgbD; qStb; EStb; pStgb; sStb; h_sStb; cv_sStb; xiStb; h_xiStb; cr_xiStb];
 				sheetName = ['Bat_' num2str(nod)];
 				printVarNx1xT(Bat, rowHeader, Header, outFilename, sheetName);
 			end

@@ -10,6 +10,7 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 	VarNxN.Red.Branch.l	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.l	);
 	VarNxN.Red.Branch.z	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.z	);
 	VarNxN.Red.Branch.y	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.y	);
+	VarNxN.Red.Branch.yDif	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.yDif	);
 	VarNxN.Red.Bus.w	 = permute(full(	VarM.Red.Bus.w	), [1 3 2]);
 
 	VarNxN.Red.Bus.v	 = permute(full(	VarM.Red.Bus.v	), [1 3 2]);
@@ -18,9 +19,11 @@ function [VarNxN] = VarM2NxN(VarM, Data)
     VarNxN.Red.Branch.nn	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.nn	);
 	VarNxN.Red.Branch.nv	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.nv	);
 	VarNxN.Red.Branch.Ntr	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.Ntr	);
+	VarNxN.Red.Branch.NtrDif	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.NtrDif	);
 	VarNxN.Red.Branch.Rtr	 = MxT2NxNxT(VertI,VertJ,	VarM.Red.Branch.Rtr	);
 
 	VarNxN.Red.Bus.pC	 = permute(full(	VarM.Red.Bus.pC	), [1 3 2]);
+	VarNxN.Red.Bus.pCn	 = permute(full(	VarM.Red.Bus.pCn	), [1 3 2]);
 	VarNxN.Red.Bus.qC	 = permute(full(	VarM.Red.Bus.qC	), [1 3 2]);
 
 	VarNxN.Red.Bus.pN	 = permute(full(	VarM.Red.Bus.pN	), [1 3 2]);
@@ -31,9 +34,11 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 
 	VarNxN.Red.Bus.qCp	 = permute(full(	VarM.Red.Bus.qCp	), [1 3 2]);
 	VarNxN.Red.Bus.Ncp	 = permute(full(	VarM.Red.Bus.Ncp	), [1 3 2]);
+	VarNxN.Red.Bus.NcpDif	 = permute(full(	VarM.Red.Bus.NcpDif	), [1 3 2]);
 
 	VarNxN.Red.Bus.PTras	 = permute(full(	VarM.Red.Bus.PTras	), [1 3 2]);
 	VarNxN.Red.Bus.QTras	 = permute(full(	VarM.Red.Bus.QTras	), [1 3 2]);
+	VarNxN.Red.Bus.cQTras	 = permute(full(	VarM.Red.Bus.cQTras	), [1 3 2]);
 
 	VarNxN.ClRes.pCApp	 = permute(full(	VarM.ClRes.pCApp	), [1 4 2 3]);
 	VarNxN.ClRes.qCApp	 = permute(full(	VarM.ClRes.qCApp	), [1 4 2 3]);
@@ -58,10 +63,13 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 
 			VarNxN.St.Bat.pStb	 = permute(full(	VarM.St.Bat.pStb	), [1 3 2]);
 			VarNxN.St.Bat.pStgb	 = permute(full(	VarM.St.Bat.pStgb	), [1 3 2]);
+			VarNxN.St.Bat.pStgbC	 = permute(full(	VarM.St.Bat.pStgbC	), [1 3 2]);
+			VarNxN.St.Bat.pStgbD	 = permute(full(	VarM.St.Bat.pStgbD	), [1 3 2]);
 			VarNxN.St.Bat.qStb	 = permute(full(	VarM.St.Bat.qStb	), [1 3 2]);
 			VarNxN.St.Bat.sStb	 = permute(full(	VarM.St.Bat.sStb	), [1 3 2]);
 			VarNxN.St.Bat.xiStb	 = permute(full(	VarM.St.Bat.xiStb	), [1 3 2]);
 			VarNxN.St.Bat.EStb	 = permute(full(	VarM.St.Bat.EStb	), [1 3 2]);
+			VarNxN.St.Bat.cStb	 = permute(full(	VarM.St.Bat.cStb	), [1 3 2]);
 		end
 	end
 
