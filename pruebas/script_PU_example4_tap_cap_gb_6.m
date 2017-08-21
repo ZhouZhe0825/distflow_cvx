@@ -31,7 +31,7 @@ DflowD.Trafos(1,1).nodI = 1;
 DflowD.Trafos(1,1).nodJ = 2;
 DflowD.Trafos(1,1).ini = 0;
 DflowD.Trafos(1,1).reg = 0;
-DflowD.Trafos(1,1).cambio = .25;
+DflowD.Trafos(1,1).cambio = 1;
 
 % Caps
 
@@ -50,12 +50,12 @@ DflowD.Baterias(1,1).EIni = .1;
 
 %% Nombres de archivos
 % 
-DflowD.inFilename = 'casos\PU_example\PU_example4.xls';
+DflowD.inFilename = 'casos\PU_example\PU_example4_uTL_aj.xls';
 DflowD.fileCurvaCarga = 'casos\PU_example\cargas\carga_PU_example_variable.csv';
 DflowD.fileUtilBetaT = 'casos\util\betaT.csv';
 DflowD.fileTemp = 'casos\temp\tempInvierno.csv';
-DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
-DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision_incr.csv';
+DflowD.fileCostosTension = 'casos\costos\tension\costosTension_distr.csv';
+DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision_incr5.csv';
 
 %% Configuracion de simulacion
 iniEtapa = 1;
