@@ -2,7 +2,7 @@ cv,0.001
 cr,0.03
 epsilon,0.000001
 etaC,.85
-etaD,1.1
+etaD,.9
 pgTop,0.05
 pgLow,-0.05
 sTop,0.07
