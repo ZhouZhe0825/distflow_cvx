@@ -90,6 +90,7 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 
 			VarNxN.Gen.Dfig.pWi	 = permute(full(	VarM.Gen.Dfig.pWi	), [1 3 2]);
 			VarNxN.Gen.Dfig.qWi	 = permute(full(	VarM.Gen.Dfig.qWi	), [1 3 2]);
+			VarNxN.Gen.Dfig.cqWi	 = permute(full(	VarM.Gen.Dfig.cqWi	), [1 3 2]);
 
 			VarNxN.Gen.Dfig.Branch.PIE	 = permute(full(	VarM.Gen.Dfig.Branch.PIE	), [1 3 2]);
 			VarNxN.Gen.Dfig.Branch.PIF	 = permute(full(	VarM.Gen.Dfig.Branch.PIF	), [1 3 2]);
@@ -134,6 +135,7 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 		if isfield(VarM.Gen, 'Pv')
 			VarNxN.Gen.Pv.pPv	 = permute(full(	VarM.Gen.Pv.pPv	), [1 3 2]);
 			VarNxN.Gen.Pv.qPv	 = permute(full(	VarM.Gen.Pv.qPv	), [1 3 2]);
+			VarNxN.Gen.Pv.cqPv	 = permute(full(	VarM.Gen.Pv.cqPv	), [1 3 2]);
 			VarNxN.Gen.Pv.s	 = permute(full(	VarM.Gen.Pv.s	), [1 3 2]);
 			VarNxN.Gen.Pv.xi	 = permute(full(	VarM.Gen.Pv.xi	), [1 3 2]);
 		end
@@ -144,6 +146,7 @@ function [VarNxN] = VarM2NxN(VarM, Data)
 		if isfield(VarM.Gen, 'Basic')
 			VarNxN.Gen.Basic.pGBas	 = permute(full(	VarM.Gen.Basic.pGBas	), [1 3 2]);
 			VarNxN.Gen.Basic.qGBas	 = permute(full(	VarM.Gen.Basic.qGBas	), [1 3 2]);
+			VarNxN.Gen.Basic.cqGBas	 = permute(full(	VarM.Gen.Basic.cqGBas	), [1 3 2]);
 		end
 	end
 end

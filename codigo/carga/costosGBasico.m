@@ -7,7 +7,7 @@ function [c] = costosGBasico(Data,GenBas)
         [vars] = loadCsvDataSeries(GenBas(i).fileC,n);
         lenVar = length(vars);
         c_aux = [];
-        if lenVar == 3
+        if lenVar == 1
             for j = 1:lenVar
                 if strcmp(vars(j).name, 'c') && vars(j).undefBus
                     c_aux = vars(j).data;

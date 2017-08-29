@@ -825,6 +825,7 @@ if lenWN > 0
 
 	Var.Gen.Dfig.pWi = pWi;
 	Var.Gen.Dfig.qWi = qWi;
+    Var.Gen.Dfig.cqWi = cqWi;
 
 	Var.Gen.Dfig.Branch.PIE = pWi*0;
 	Var.Gen.Dfig.Branch.PIE(indWn,:) = PdfigIE;
@@ -893,6 +894,7 @@ end
 if nPv > 0
 	Var.Gen.Pv.pPv = pPv;
 	Var.Gen.Pv.qPv = qPv;
+	Var.Gen.Pv.cqPv = qPv;
 	Var.Gen.Pv.s = pPv*0;
 	Var.Gen.Pv.s(Pv,:) = sPv;
 	Var.Gen.Pv.xi = pPv*0;
@@ -903,7 +905,8 @@ end
 if nGBas > 0
 	Var.Gen.Basic.pGBas = pGBas;
 	Var.Gen.Basic.qGBas = qGBas;
-	Var.Gen.Basic.cqGBas = cqGBas;
+	Var.Gen.Basic.cqGBas = pGBas*0;
+	Var.Gen.Basic.cqGBas(GBas,:) = cqGBas;
 end
 
 status = cvx_status;

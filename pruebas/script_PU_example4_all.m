@@ -2,21 +2,63 @@
 
 DflowD = cargaDflowDDefault();
 
+% Solar
+DflowD.Solares(1,1).nod = 4;
+DflowD.Solares(1,1).type = 'casos\gen\pv\pv_def.csv';
+DflowD.Solares(1,1).fileG = 'casos\gen\pv\pvgen.csv';
+DflowD.Solares(1,1).fileC = 'casos\costos\pv\costosPv.csv';
+
+% Baterias
+DflowD.Baterias(1,1).nod = 5;
+DflowD.Baterias(1,1).type = 'casos\bat\bat_def.csv';
+DflowD.Baterias(1,1).EIni = .5;
+
+% Eolicos
+DflowD.Eolicos(1,1).nod = 5;
+DflowD.Eolicos(1,1).type = 'casos\gen\dfig\Dfig_1mw_def.csv';
+DflowD.Eolicos(1,1).fileG = 'casos\gen\dfig\Dfig_1mw_P_n_.csv';
+DflowD.Eolicos(1,1).fileC = 'casos\costos\dfig\costosDfig_1.csv';
+
+% Generador Basico
+DflowD.GenBas(1,1).nod = 7;
+DflowD.GenBas(1,1).fileG = 'casos\gen\basic\genbas.csv';
+DflowD.GenBas(1,1).fileC = 'casos\costos\basic\costosBasic.csv';
+
+% Switches
+DflowD.Switches.i = [5 7];
+DflowD.Switches.j = [6 8];
+DflowD.Switches.cY = 1;
+DflowD.Switches.all = false;
+
 % Trafos
-DflowD.Trafos(1,1).N = [-8 8];
+DflowD.Trafos(1,1).N = [2 8];
 DflowD.Trafos(1,1).TP = .025;
 DflowD.Trafos(1,1).nodI = 1;
 DflowD.Trafos(1,1).nodJ = 2;
-DflowD.Trafos(1,1).ini = 0;
+DflowD.Trafos(1,1).ini = 2;
 DflowD.Trafos(1,1).reg = 0;
 DflowD.Trafos(1,1).cambio = 1;
+
+DflowD.Trafos(2,1).N = [-1 1];
+DflowD.Trafos(2,1).TP = .1;
+DflowD.Trafos(2,1).nodI = 4;
+DflowD.Trafos(2,1).nodJ = 5;
+DflowD.Trafos(2,1).ini = 1;
+DflowD.Trafos(2,1).reg = 1;
+DflowD.Trafos(2,1).cambio = .1;
 
 % Caps
 DflowD.Caps(1,1).N = [0 3];
 DflowD.Caps(1,1).TP = .005;
 DflowD.Caps(1,1).nod = 9;
-DflowD.Caps(1,1).ini = 0;
+DflowD.Caps(1,1).ini = 3;
 DflowD.Caps(1,1).cambio = 1;
+
+% Aires acondicionados
+DflowD.ACs(1,1).fileT = 'casos\PU_example\ac\ac.csv';
+DflowD.ACs(1,1).tempIni = 21;
+DflowD.ACs(1,1).epsilon = .16;
+DflowD.ACs(1,1).eta = 1666.67;
 
 % Cargas
 DflowD.Cargas(1,1).pC = 0.5;
@@ -48,19 +90,20 @@ DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
 iniEtapa = 1;
 CantHorasEtapa = 1;
 
+Config = [];
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
-Config.outFilename = 'PU_example4_tap_cap_ch';
-Config.runNxN = true;
+Config.outFilename = 'PU_example4_all';
+Config.runNxN = false;
 Config.runM = true;
 
 % Centralizado
 Config.Centr = [];
 % Mosek
-% Config.Centr{1, 1} = 'MSK_DPAR_MIO_TOL_REL_RELAX_INT';
-% Config.Centr{1, 2} = 0.01;
-% Config.Centr{2, 1} = 'MSK_DPAR_OPTIMIZER_MAX_TIME';
-% Config.Centr{2, 2} = 600;
+Config.Centr{1, 1} = 'MSK_DPAR_MIO_TOL_REL_RELAX_INT';
+Config.Centr{1, 2} = 0.01;
+Config.Centr{2, 1} = 'MSK_DPAR_OPTIMIZER_MAX_TIME';
+Config.Centr{2, 2} = 10;
 % Gurobi
 % Config.Centr{1, 1} = 'MIPGap';
 % Config.Centr{1, 2} = 0.01;1

@@ -118,10 +118,10 @@ function [DataM] = reshapeDataM(Data, Config)
 	DataM.Gen.Tras.qgLow = DataM.Gen.Tras.qgLow * one;
 	DataM.Gen.Tras.qgTop = DataM.Gen.Tras.qgTop * one;
 
-	DataM.Gen.Basic.pgLow = repmat(DataM.Gen.Basic.pgLow(:,(1:lenEt)), [size(VertI,2) 1]);
-	DataM.Gen.Basic.pgTop = repmat(DataM.Gen.Basic.pgTop(:,(1:lenEt)), [size(VertI,2) 1]);
-	DataM.Gen.Basic.qgLow = repmat(DataM.Gen.Basic.qgLow(:,(1:lenEt)), [size(VertI,2) 1]);
-	DataM.Gen.Basic.qgTop = repmat(DataM.Gen.Basic.qgTop(:,(1:lenEt)), [size(VertI,2) 1]);
+	DataM.Gen.Basic.pgLow = DataM.Gen.Basic.pgLow(:,(1:lenEt));
+	DataM.Gen.Basic.pgTop = DataM.Gen.Basic.pgTop(:,(1:lenEt));
+	DataM.Gen.Basic.qgLow = DataM.Gen.Basic.qgLow(:,(1:lenEt));
+	DataM.Gen.Basic.qgTop = DataM.Gen.Basic.qgTop(:,(1:lenEt));
 	
 	DataM.St.AC.beta = DataM.St.AC.beta(:,(1:lenEt));
 	DataM.St.AC.epsilon = DataM.St.AC.epsilon(:,(1:lenEt));

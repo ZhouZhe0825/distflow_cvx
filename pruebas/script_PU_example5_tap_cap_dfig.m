@@ -39,12 +39,12 @@ DflowD.Trafos(3,1).reg = 1;
 DflowD.Trafos(3,1).cambio = .1;
 
 % Caps
-Cap1.N = [0 3];
-Cap1.TP = .005;
-Cap1.nod = 9;
-Cap1.ini = 0;
-Cap1.cambio = 1;
-DflowD.Caps = [Cap1];
+DflowD.Caps(1,1).N = [0 3];
+DflowD.Caps(1,1).TP = .005;
+DflowD.Caps(1,1).nod = 9;
+DflowD.Caps(1,1).ini = 0;
+DflowD.Caps(1,1).cambio = 1;
+
 
 %% Nombres de archivos
 % 
