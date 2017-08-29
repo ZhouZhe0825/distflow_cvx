@@ -12,17 +12,19 @@ DflowD.Trafos(1,1).reg = 0;
 DflowD.Trafos(1,1).cambio = 1;
 
 % Caps
-DflowD.Cap(1,1).N = [0 3];
-DflowD.Cap(1,1).TP = .005;
-DflowD.Cap(1,1).nod = 9;
-DflowD.Cap(1,1).ini = 0;
-DflowD.Cap(1,1).cambio = 1;
+DflowD.Caps(1,1).N = [0 3];
+DflowD.Caps(1,1).TP = .005;
+DflowD.Caps(1,1).nod = 9;
+DflowD.Caps(1,1).ini = 0;
+DflowD.Caps(1,1).cambio = 1;
+
 
 %% Nombres de archivos
 % 
 DflowD.inFilename = 'casos\PU_example\PU_example5.xls';
 DflowD.fileCurvaCarga = 'casos\PU_example\cargas\carga_PU_example.csv';
 DflowD.fileUtilBetaT = 'casos\util\betaT.csv';
+DflowD.utilOptFuncCuad = true;
 DflowD.fileTemp = 'casos\temp\tempInvierno.csv';
 DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
 DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
@@ -34,7 +36,7 @@ CantHorasEtapa = 1;
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
 Config.outFilename = 'PU_example5_tap_cap';
-Config.runNxN = true;
+Config.runNxN = false;
 Config.runM = true;
 
 % Centralizado

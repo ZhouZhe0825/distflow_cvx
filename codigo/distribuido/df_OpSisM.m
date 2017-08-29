@@ -93,6 +93,7 @@ cvx_begin quiet
 	expression vApp(n, Config.Etapas, 2);
 	expression NcpDif(n,Config.Etapas);
 	expression NtrDif(m,Config.Etapas);
+	expression yDif(m,Config.Etapas);
 
 	expression tfopt_expr(Config.Etapas,1); 
 	expression tfopt_mu(Config.Etapas,1); 
@@ -103,12 +104,13 @@ cvx_begin quiet
 
 	%% Funcion objetivo
 	NcpDif(:,1) = Ncp(:,1) - Data.Red.Bus.NcpIni;
-% 	NcpDif(:,1) = Data.Red.Bus.NcpIni;
 	NcpDif(:,(2:Config.Etapas)) = Ncp(:,(2:Config.Etapas)) - Ncp(:,(1:Config.Etapas-1));
 
 	NtrDif(:,1) = Ntr(:,1) - Data.Red.Branch.NtrIni;
-% 	NtrDif(:,1) = Data.Red.Branch.NtrIni;
 	NtrDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
+
+	yDif(:,1) = y(:,1);
+	yDif(:,(2:Config.Etapas)) = y(:,(2:Config.Etapas)) - y(:,(1:Config.Etapas-1));
 
 	tfopt_expr = ...
 		sum(Data.Cost.cdv.*cDv,1) ...
@@ -267,6 +269,7 @@ Var.Red.Branch.Q	 = 	Q	;
 Var.Red.Branch.l	 = 	l	;
 Var.Red.Branch.z	 = 	z	;
 Var.Red.Branch.y	 = 	y	;
+Var.Red.Branch.yDif	 = 	yDif	;
 Var.Red.Bus.w	 = 	w	;
 
 Var.Red.Bus.v	 = 	v	;
@@ -274,6 +277,7 @@ Var.Red.Bus.cDv	 = 	cDv	;
 Var.Red.Branch.nn	 = 	nn	;
 Var.Red.Branch.nv	 = 	nv	;
 Var.Red.Branch.Ntr	 = 	Ntr	;
+Var.Red.Branch.NtrDif	 = 	NtrDif	;
 Var.Red.Branch.Rtr	 = 	Rtr	;
 
 Var.Red.Bus.pN	 = 	pN	;
@@ -281,6 +285,7 @@ Var.Red.Bus.qN	 = 	qN	;
 
 Var.Red.Bus.qCp	 = 	qCp	;
 Var.Red.Bus.Ncp	 = 	Ncp	;
+Var.Red.Bus.NcpDif	 = 	NcpDif	;
 
 Var.Red.Bus.qG = Var.Red.Bus.qCp;
 

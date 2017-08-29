@@ -16,6 +16,15 @@ function runSimulation(Data, DflowD, Config)
 		eol.fileG = [outputDirInputs, '\', newFileG];
 		eol.fileC = [outputDirInputs, '\', newFileC];
 	end
+	for i = 1:length(DflowD.GenBas)
+		gbas = DflowD.GenBas(i);
+		newFileG = ['gbas',num2str(i),'fileG.csv'];
+		newFileC = ['gbas',num2str(i),'fileC.csv'];
+		copyrename(gbas.fileG,newFileG,outputDirInputs);
+		copyrename(gbas.fileC,newFileC,outputDirInputs);
+		gbas.fileG = [outputDirInputs, '\', newFileG];
+		gbas.fileC = [outputDirInputs, '\', newFileC];
+	end
 	for i = 1:length(DflowD.Solares)
 		sol = DflowD.Solares(i);
 		newFileG = ['sol',num2str(i),'fileG.csv'];
@@ -111,12 +120,17 @@ function runSimulation(Data, DflowD, Config)
 			printSalidasDistflowNxN(Var_nxn, DataNxN, Config, [outputDirOutputs, '\output_nxn'], [], [], [], [], []);
 		end
 		if Config.runM
-			printSalidasDistflowM(Var_m, DataNxN, Config, [outputDirOutputs, '\output_m'], [], [], [], [], []);
+			printSalidasDistflowM(Var_m, DataNxN, Config, [outputDirOutputs, '\output_m1'], [], [], [], [], []);
+			printSalidasDistflowM_(Var_m, DataM, Config, [outputDirOutputs, '\output_m2'], [], [], [], [], []);
 		end
 	else
-		printSalidasDistflowM(Var_F,         DataNxN, Config, [outputDirOutputs, '\output_m'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
-		printSalidasDistflowM(Var_centr,     DataNxN, Config, [outputDirOutputs, '\output_centr'],       [],    [],   [],       [],     []);
-		printSalidasDistflowM(Var_dist_conE, DataNxN, Config, [outputDirOutputs, '\output_dist_conE'],   [],    [],   [],       [],     []);
+		printSalidasDistflowM(Var_F,         DataNxN, Config, [outputDirOutputs, '\output_m1'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
+		printSalidasDistflowM(Var_centr,     DataNxN, Config, [outputDirOutputs, '\output_centr1'],       [],    [],   [],       [],     []);
+		printSalidasDistflowM(Var_dist_conE, DataNxN, Config, [outputDirOutputs, '\output_dist_conE1'],   [],    [],   [],       [],     []);
+
+        printSalidasDistflowM_(Var_F,         DataM, Config, [outputDirOutputs, '\output_m2'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
+		printSalidasDistflowM_(Var_centr,     DataM, Config, [outputDirOutputs, '\output_centr2'],       [],    [],   [],       [],     []);
+		printSalidasDistflowM_(Var_dist_conE, DataM, Config, [outputDirOutputs, '\output_dist_conE2'],   [],    [],   [],       [],     []);
 	end
 	
 end

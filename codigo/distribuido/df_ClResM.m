@@ -122,6 +122,7 @@ end
 
 Var.Red.Bus.pC = Var.ClRes.pC;
 Var.Red.Bus.qC = Var.ClRes.qC;
+Var.Red.Bus.pCn	 = 	pCn	;
 
 opt(1,1) = sum(tfopt_expr);
 opt(1,2) = sum(tfopt_mu);

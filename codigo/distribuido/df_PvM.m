@@ -93,6 +93,9 @@ Var.Gen.Pv.pPv = zeros(n, Config.Etapas);
 Var.Gen.Pv.pPv(Pv,:) = pPv;
 Var.Gen.Pv.qPv = zeros(n, Config.Etapas);
 Var.Gen.Pv.qPv(Pv,:) = qPv;
+Var.Gen.Pv.cqPv = zeros(n, Config.Etapas);
+Var.Gen.Pv.cqPv(Pv,:) = cqPv;
+
 Var.Gen.Pv.s = zeros(n, Config.Etapas);
 Var.Gen.Pv.s(Pv,:) = sPv;
 Var.Gen.Pv.xi = zeros(n, Config.Etapas);

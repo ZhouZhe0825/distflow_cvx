@@ -129,6 +129,7 @@ Var.St.Bat.xiStb = zeros(n, Config.Etapas);
 Var.St.Bat.xiStb(St,:) = xiStb;
 Var.St.Bat.EStb = zeros(n, Config.Etapas);
 Var.St.Bat.EStb(St,:) = EStb(St,:);
+Var.St.Bat.cStb = cStb;
 
 
 Var.Red.Bus.pG = Var.St.Bat.pStb;

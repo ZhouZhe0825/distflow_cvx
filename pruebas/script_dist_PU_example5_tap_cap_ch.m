@@ -40,6 +40,7 @@ DflowD.Cargas(2,1).nod = 9;
 DflowD.inFilename = 'casos\PU_example\PU_example5.xls';
 DflowD.fileCurvaCarga = 'casos\PU_example\cargas\carga_PU_example.csv';
 DflowD.fileUtilBetaT = 'casos\util\betaT.csv';
+DflowD.utilOptFuncCuad = true;
 DflowD.fileTemp = 'casos\temp\tempInvierno.csv';
 DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
 DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';

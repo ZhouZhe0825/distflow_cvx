@@ -37,7 +37,7 @@ function extraOutput(Var, Data, Config, Header, outFilename)
     indl = intersect(intersect(find(lzr > 1e-8),find(lRelz < .9)),find(lRelz > 1e-5));
     lRelz_prob = lRelz*0;
     lRelz_prob(indl) = lRelz(indl);
-    
+   
     printVarNx1xT(h_p, Header.Bus, Header.Main, outFilename, 'pC - pG div pN');
     printVarNx1xT(h_q, Header.Bus, Header.Main, outFilename, 'qC - qG div qN');
 

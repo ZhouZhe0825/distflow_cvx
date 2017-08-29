@@ -69,8 +69,11 @@ toc
 % pasaje a NxNxT
 Var.Red.Bus.PTras = zeros(n, Config.Etapas);
 Var.Red.Bus.QTras = zeros(n, Config.Etapas);
+Var.Red.Bus.cQTras = zeros(n, Config.Etapas);
 Var.Red.Bus.PTras(G,:)	 = 	pGTras	;
 Var.Red.Bus.QTras(G,:)	 = 	qGTras	;
+Var.Red.Bus.cQTras(G,:)  =  cqGTras ;
+
 
 Var.Red.Bus.pG = Var.Red.Bus.PTras;
 Var.Red.Bus.qG = Var.Red.Bus.QTras;

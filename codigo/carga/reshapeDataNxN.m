@@ -42,6 +42,7 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 	
 	DataNxN.Cost.cdv	 = 	replicateMat3_2(	DataNxN.Cost.cdv(:,Et)	,1);
 	DataNxN.Cost.cCap	 = 	replicateMat3_3(	DataNxN.Cost.cCap	,Config.Etapas);
+	DataNxN.Cost.cBas	 = 	replicateMat3_2(	DataNxN.Cost.cBas(:,Et)	,1);
 	DataNxN.Cost.cTap	 = 	replicateMat3_3(	DataNxN.Cost.cTap	,Config.Etapas);
 	DataNxN.Cost.cY	 = 	replicateMat3_3(	DataNxN.Cost.cY	,Config.Etapas);
 	DataNxN.Cost.delta	 = 	replicateMat3_2(	DataNxN.Cost.delta(:,Et)	,1);
@@ -145,6 +146,10 @@ function [DataNxN] = reshapeDataNxN(Data, Config)
 	DataNxN.Gen.Tras.qgLow = replicateMat3_3(	DataNxN.Gen.Tras.qgLow	,Config.Etapas);
 	DataNxN.Gen.Tras.qgTop = replicateMat3_3(	DataNxN.Gen.Tras.qgTop	,Config.Etapas);
 
+	DataNxN.Gen.Basic.pgLow = replicateMat3_2(     DataNxN.Gen.Basic.pgLow(:,Et),    1);
+	DataNxN.Gen.Basic.pgTop = replicateMat3_2(     DataNxN.Gen.Basic.pgTop(:,Et),    1);
+	DataNxN.Gen.Basic.qgLow = replicateMat3_2(     DataNxN.Gen.Basic.qgLow(:,Et),    1);
+	DataNxN.Gen.Basic.qgTop = replicateMat3_2(     DataNxN.Gen.Basic.qgTop(:,Et),    1);
 
 	% DataNxN.St.AC.a	 = 	replicateMat4_4(	DataNxN.St.AC.a	,Config.Etapas);
 	DataNxN.St.AC.beta	 = 	replicateMat3_2(	DataNxN.St.AC.beta(:,Et)	,1);

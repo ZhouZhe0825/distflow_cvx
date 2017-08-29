@@ -8,6 +8,7 @@ DflowD = cargaDflowDDefault();
 DflowD.inFilename = 'casos\PU_example\PU_example4.xls';
 DflowD.fileCurvaCarga = 'casos\PU_example\cargas\carga_PU_example.csv';
 DflowD.fileUtilBetaT = 'casos\util\betaT.csv';
+DflowD.utilOptFuncCuad = true;
 DflowD.fileTemp = 'casos\temp\tempInvierno.csv';
 DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
 DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
@@ -16,10 +17,11 @@ DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
 iniEtapa = 1;
 CantHorasEtapa = .25;
 
+Config = [];
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
 Config.outFilename = 'PU_example4';
-Config.runNxN = true;
+Config.runNxN = false;
 Config.runM = true;
 
 % Centralizado

@@ -20,16 +20,19 @@ function [Data] = loadData(DflowD)
         [Data] = cargaPvDefault(Data, DflowD.Solares);
 
         % Utilidad
-        [Data] = cargaUtilDefault(Data, DflowD.fileUtilBetaT, DflowD.Cargas, DflowD.App);
+        [Data] = cargaUtilDefault(Data, DflowD.fileUtilBetaT, DflowD.utilOptFuncCuad, DflowD.Cargas, DflowD.App);
 
         % Aire Acondicionado
         [Data] = cargaACDefault(Data, DflowD.fileTemp, DflowD.ACs);
 
         % Baterias
         [Data] = cargaBatDefault(Data, DflowD.Baterias);
-
+        
+        % Generador Basico
+        [Data] = cargaGBasicoDefault(Data, DflowD.GenBas);
+        
         % Costos
-        [Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.fileCostosTension, DflowD.fileCostosTras, DflowD.Solares, DflowD.Eolicos);
+        [Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.GenBas, DflowD.fileCostosTension, DflowD.fileCostosTras, DflowD.Solares, DflowD.Eolicos);
     end
 
 end

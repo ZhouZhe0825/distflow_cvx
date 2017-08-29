@@ -1,8 +1,10 @@
-function [Data] = cargaUtilDefault(Data, fileUtilBetaT, Cargas, App)
+function [Data] = cargaUtilDefault(Data, fileUtilBetaT, utilOptFuncCuad, Cargas, App)
 
 [Data.Util.betaE] = utilBetasE(Data,Cargas);
 
 [Data.Util.betaT] = utilBetasT(Data,fileUtilBetaT);
+
+Data.Util.betaTcuad = utilOptFuncCuad;
 
 Data.Util.pzCnPref = repmat(full(Data.Red.Bus.pCLow), [1,1,length(App)]);
  

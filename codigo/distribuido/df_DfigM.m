@@ -201,8 +201,10 @@ toc
 % pasaje a NxNxT
 Var.Gen.Dfig.pWi = zeros(n,Config.Etapas);
 Var.Gen.Dfig.qWi = zeros(n,Config.Etapas);
+Var.Gen.Dfig.cqWi = zeros(n,Config.Etapas);
 Var.Gen.Dfig.pWi(indWn,:) = pWi;
 Var.Gen.Dfig.qWi(indWn,:) = qWi;
+Var.Gen.Dfig.cqWi(indWn,:) = cqWi;
 
 Var.Gen.Dfig.Branch.PIE = zeros(n,Config.Etapas);
 Var.Gen.Dfig.Branch.PIE(indWn,:) = PdfigIE;

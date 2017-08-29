@@ -9,7 +9,6 @@ InBr = VertJ';
 n = size(VertI,2);
 m = size(VertI,1);
 
-
 BigMtr = 1e6;
 BigMw = 1e6;
 
@@ -95,6 +94,11 @@ Pv = find(Data.Gen.Pv.I == 1);
 nPv = length(Pv);
 NotPv = find(Data.Gen.Pv.I == 0);
 
+% Generador Basico
+GBas = find(Data.Gen.Basic.I == 1);
+nGBas = length(GBas);
+NotGBas = find(Data.Gen.Basic.I == 0);
+
 
 %% Modelo programacion matematica
 
@@ -173,6 +177,9 @@ cvx_begin
 	variable pPv(n, Config.Etapas);
 	variable qPv(n, Config.Etapas);
 
+	variable pGBas(n,Config.Etapas);
+	variable qGBas(n,Config.Etapas);
+
  	expression lQoL(m, Config.Etapas, 3);
  	expression lNorm(m, Config.Etapas, 3);
 	expression vExpr(n, Config.Etapas);
@@ -197,17 +204,25 @@ cvx_begin
 	yDif(:,1) = y(:,1);
 	yDif(:,(2:Config.Etapas)) = y(:,(2:Config.Etapas)) - y(:,(1:Config.Etapas-1));
 
-	tfopt_expr = ...
+    tfopt_expr = ...
 		sum(Data.Cost.piPTras.*pGTras,1) ...
 		+ sum(Data.Cost.cdv.*cDv,1) ...
 		+ sum(cqGTras,1) ...
 		+ sum(Data.Cost.cCap.*(NcpDif.^2),1) ...
 		+ sum(Data.Cost.cTap.*(NtrDif.^2),1) ...
 		+ sum(Data.Cost.cY.*(yDif.^2),1) ...
-		+ sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1) ...
 		;
 
-	cqGTras >= - Data.Cost.piQmtras .* qGTras;
+    if Data.Util.betaTcuad
+        tfopt_expr = tfopt_expr ...
+            + sum(Data.Util.betaT(:,:,1).*((pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1);
+    else
+        tfopt_expr = tfopt_expr ...
+            + sum(Data.Util.betaT(:,:,1).*(Data.Util.pzCnPref(:,:,1)-(pCn(:,:,1))),1);
+    end
+ 
+    
+    cqGTras >= - Data.Cost.piQmtras .* qGTras;
 	cqGTras >= Data.Cost.piQMtras .* qGTras;
 
 
@@ -219,8 +234,8 @@ cvx_begin
 	pC == pCClRes + pCClNI;
 	qC == qCClRes + qCClNI;
 
-	pG == pGTras + pStb + pWi + pPv;
-	qG == qGTras + qCp + qStb + qWi + qPv;
+	pG == pGTras + pStb + pWi + pPv + pGBas;
+	qG == qGTras + qCp + qStb + qWi + qPv + qGBas;
 
 	if fixed
 		pN - pC + pG == 0 : dPn;
@@ -403,6 +418,7 @@ cvx_begin
 
 	pCn >= Data.Util.pzCnLow;
 	pCn <= Data.Util.pzCnTop;
+	pCn <= Data.Util.pzCnPref;
 
 	pCClRes == sum(pCApp,3);
 
@@ -458,13 +474,13 @@ cvx_begin
 		EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
 		EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
 
-		pStgb == pStgbC - pStgbD;
+		pStgb == pStgbD - pStgbC;
 		pStgbC >= 0;
 		pStgbD >= 0;
 
-		pStb(St,:) == pStgb - (Data.St.Bat.cv(St,:).*sStb + Data.St.Bat.cr(St,:).*xiStb);
-		EStb(St,:) == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - pStgbD.*Data.St.Bat.etaD(St,:)*Data.dt + Data.St.Bat.etaC(St,:).*pStgbC*Data.dt;
-
+        pStb(St,:) == pStgb - (Data.St.Bat.cv(St,:).*sStb + Data.St.Bat.cr(St,:).*xiStb);
+		EStb(St,:) == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - pStgbD./Data.St.Bat.etaD(St,:)*Data.dt + Data.St.Bat.etaC(St,:).*pStgbC*Data.dt;
+        
 		StbNorm(:,:,1) = pStgb;
 		StbNorm(:,:,2) = qStb(St,:);
 		sStb >= norms(StbNorm,2,3);
@@ -478,7 +494,7 @@ cvx_begin
 
 		pStb(St,:) >= Data.St.Bat.pgLow(St,:);
 		EStb(St,:) >= Data.St.Bat.ELow(St,:);
-
+        
 		pStb(NotSt,:) == 0;
 		qStb(NotSt,:) == 0;
 		EStb(NotSt,:) == 0;
@@ -704,8 +720,28 @@ cvx_begin
 		Ncp == round(Data.Fixed.Ncp);
 		Ntr == round(Data.Fixed.Ntr); 
 		y == round(Data.Fixed.y);
-	end
+    end
 
+    if nGBas > 0
+		variable cqGBas(nGBas, Config.Etapas);
+		pGBas(GBas,:) <= Data.Gen.Basic.pgTop(GBas,:);
+		pGBas(GBas,:) >= Data.Gen.Basic.pgLow(GBas,:);
+		qGBas(GBas,:) <= Data.Gen.Basic.qgTop(GBas,:);
+		qGBas(GBas,:) >= Data.Gen.Basic.qgLow(GBas,:);
+        
+        pGBas(NotGBas,:) == 0;
+        qGBas(NotGBas,:) == 0;
+
+        tfopt_expr = tfopt_expr ...
+			+ sum(Data.Cost.cBas(GBas,:) .* pGBas(GBas,:)) ...
+			+ sum(cqGBas) ...
+		;
+		cqGBas >= - Data.Cost.cBas(GBas,:) .* qGBas(GBas,:);
+		cqGBas >= Data.Cost.cBas(GBas,:) .* qGBas(GBas,:);
+    else
+		pGBas == 0;
+		qGBas == 0;
+    end
 
 	fopt_expr = sum(tfopt_expr);
 	minimize fopt_expr
@@ -746,7 +782,7 @@ Var.Red.Bus.NcpDif	 = 	NcpDif	;
 
 Var.Red.Bus.PTras	 = 	pGTras	;
 Var.Red.Bus.QTras	 = 	qGTras	;
-Var.Red.Bus.cQTras	 = 	cqGTras	;
+Var.Red.Bus.cQTras   =  cqGTras ;
 
 Var.ClRes.pCApp	 = 	pCApp	;
 Var.ClRes.qCApp	 = 	qCApp	;
@@ -765,7 +801,7 @@ if nSt > 0
 	Var.St.Bat.pStgb(St,:) = pStgb;
 	Var.St.Bat.pStgbC = pStb*0;
 	Var.St.Bat.pStgbC(St,:) = pStgbC;
-	Var.St.Bat.pStgbD = pStgbD*0;
+	Var.St.Bat.pStgbD = pStb*0;
 	Var.St.Bat.pStgbD(St,:) = pStgbD;
 	Var.St.Bat.qStb = qStb;
 	Var.St.Bat.sStb = pStb*0;
@@ -773,7 +809,7 @@ if nSt > 0
 	Var.St.Bat.xiStb = pStb*0;
 	Var.St.Bat.xiStb(St,:) = xiStb;
 	Var.St.Bat.EStb = EStb;
-	Var.St.Bat.cStb = cStb;
+    Var.St.Bat.cStb = cStb;
 end
 
 % Cargas No interrumpibles
@@ -797,6 +833,7 @@ if lenWN > 0
 
 	Var.Gen.Dfig.pWi = pWi;
 	Var.Gen.Dfig.qWi = qWi;
+    Var.Gen.Dfig.cqWi = cqWi;
 
 	Var.Gen.Dfig.Branch.PIE = pWi*0;
 	Var.Gen.Dfig.Branch.PIE(indWn,:) = PdfigIE;
@@ -865,10 +902,19 @@ end
 if nPv > 0
 	Var.Gen.Pv.pPv = pPv;
 	Var.Gen.Pv.qPv = qPv;
+	Var.Gen.Pv.cqPv = cqPv;
 	Var.Gen.Pv.s = pPv*0;
 	Var.Gen.Pv.s(Pv,:) = sPv;
 	Var.Gen.Pv.xi = pPv*0;
 	Var.Gen.Pv.xi(Pv,:) = xiPv;
+end
+
+% Generador Basico
+if nGBas > 0
+	Var.Gen.Basic.pGBas = pGBas;
+	Var.Gen.Basic.qGBas = qGBas;
+	Var.Gen.Basic.cqGBas = pGBas*0;
+	Var.Gen.Basic.cqGBas(GBas,:) = cqGBas;
 end
 
 status = cvx_status;

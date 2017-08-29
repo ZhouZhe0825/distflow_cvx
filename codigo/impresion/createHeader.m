@@ -1,6 +1,6 @@
 function [Header] = createHeader(Var, Data, Config)
 
-	horas = loadHoras();
+	horas = loadHoras(Config);
 
     [rowTap, colTap, ~] = find(triu(Data.Red.Branch.Itap) == 1);
     cantTaps = length(rowTap);
@@ -18,7 +18,7 @@ function [Header] = createHeader(Var, Data, Config)
 	n = size(Data.Red.Branch.T,1);
 	nodos = (1:n)';
     
-	Header.Main = cell(1+cantTaps+cantCaps+cantCarg,Config.Etapas+1);
+	Header.Main = cell(1+cantTaps+cantCaps+cantReg+cantCarg,Config.Etapas+1);
 
 	Header.Main(1,indHeadEt) = horas(Config.iniEtapa:Config.iniEtapa+Config.Etapas-1);
 
@@ -40,14 +40,14 @@ function [Header] = createHeader(Var, Data, Config)
         for i = 1:cantCaps
             Header.Main{1+cantTaps+cantReg+i,1} = ['Ncp_n_' num2str(indCaps(i))];
         end
-        Header.Main((2+cantReg+cantTaps:1+cantTaps+cantReg+cantCaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Ncp(indCaps,:,:)))');
+        Header.Main((2+cantTaps+cantReg:1+cantTaps+cantReg+cantCaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Ncp(indCaps,:,:)))');
     end
 
     if cantCarg > 0
         for i = 1:cantCarg
-            Header.Main{1+cantTaps+cantCaps+i,1} = ['Chg_' num2str(Data.ClNI.pC(nodCh(i))) '_d_' num2str(Data.ClNI.d(nodCh(i))) '_n_' num2str(nodCh(i))];
+            Header.Main{1+cantTaps+cantReg+cantCaps+i,1} = ['Chg_' num2str(Data.ClNI.pC(nodCh(i))) '_d_' num2str(Data.ClNI.d(nodCh(i))) '_n_' num2str(nodCh(i))];
         end
-        Header.Main((2+cantTaps+cantCaps:1+cantTaps+cantCaps+cantCarg),indHeadEt) = num2cell(squeeze(round(Var.ClNI.on(nodCh,:))));
+        Header.Main((2+cantTaps+cantReg+cantCaps:1+cantTaps+cantReg+cantCaps+cantCarg),indHeadEt) = num2cell(squeeze(round(Var.ClNI.on(nodCh,:))));
     end
 
 	TotalT = matOverTime(Data.Red.Branch.T);
