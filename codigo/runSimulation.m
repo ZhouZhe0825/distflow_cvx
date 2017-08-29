@@ -120,7 +120,7 @@ function runSimulation(Data, DflowD, Config)
 			printSalidasDistflowNxN(Var_nxn, DataNxN, Config, [outputDirOutputs, '\output_nxn'], [], [], [], [], []);
 		end
 		if Config.runM
-% 			printSalidasDistflowM(Var_m, DataNxN, Config, [outputDirOutputs, '\output_m1'], [], [], [], [], []);
+			printSalidasDistflowM(Var_m, DataNxN, Config, [outputDirOutputs, '\output_m1'], [], [], [], [], []);
 			printSalidasDistflowM_(Var_m, DataM, Config, [outputDirOutputs, '\output_m2'], [], [], [], [], []);
 		end
 	else
