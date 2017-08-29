@@ -121,12 +121,12 @@ function runSimulation(Data, DflowD, Config)
 		end
 		if Config.runM
 			printSalidasDistflowM(Var_m, DataNxN, Config, [outputDirOutputs, '\output_m1'], [], [], [], [], []);
-			printSalidasDistflowM_(Var_m, DataM, Config, [outputDirOutputs, '\output_m2'], [], [], [], [], []);
+% 			printSalidasDistflowM_(Var_m, DataM, Config, [outputDirOutputs, '\output_m2'], [], [], [], [], []);
 		end
 	else
-		printSalidasDistflowM(Var_F,         DataNxN, Config, [outputDirOutputs, '\output_m1'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
-		printSalidasDistflowM(Var_centr,     DataNxN, Config, [outputDirOutputs, '\output_centr1'],       [],    [],   [],       [],     []);
-		printSalidasDistflowM(Var_dist_conE, DataNxN, Config, [outputDirOutputs, '\output_dist_conE1'],   [],    [],   [],       [],     []);
+% 		printSalidasDistflowM(Var_F,         DataNxN, Config, [outputDirOutputs, '\output_m1'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
+% 		printSalidasDistflowM(Var_centr,     DataNxN, Config, [outputDirOutputs, '\output_centr1'],       [],    [],   [],       [],     []);
+% 		printSalidasDistflowM(Var_dist_conE, DataNxN, Config, [outputDirOutputs, '\output_dist_conE1'],   [],    [],   [],       [],     []);
 
         printSalidasDistflowM_(Var_F,         DataM, Config, [outputDirOutputs, '\output_m2'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
 		printSalidasDistflowM_(Var_centr,     DataM, Config, [outputDirOutputs, '\output_centr2'],       [],    [],   [],       [],     []);
