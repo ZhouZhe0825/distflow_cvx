@@ -46,8 +46,8 @@ function [DataM] = reshapeDataM(Data, Config)
 	DataM.Red.Bus.NcpLow = DataM.Red.Bus.NcpLow * one;
 	DataM.Red.Bus.NcpTop = DataM.Red.Bus.NcpTop * one;
 	DataM.Red.Bus.Cap = DataM.Red.Bus.Cap * one;
-	DataM.Red.Bus.pCLow = full(DataM.Red.Bus.pCLow(:,(1:lenEt)));
-	DataM.Red.Bus.qCLow = full(DataM.Red.Bus.qCLow(:,(1:lenEt)));
+	DataM.Red.Bus.pCLow = full(DataM.Red.Bus.pCLow(:,Et));
+	DataM.Red.Bus.qCLow = full(DataM.Red.Bus.qCLow(:,Et));
 	DataM.Red.Bus.uLow = DataM.Red.Bus.uLow * one;
 	DataM.Red.Bus.uTop = DataM.Red.Bus.uTop * one;
 	
@@ -57,78 +57,78 @@ function [DataM] = reshapeDataM(Data, Config)
 	
 	
 	
-	DataM.Cost.cdv = DataM.Cost.cdv(:,(1:lenEt));
+	DataM.Cost.cdv = DataM.Cost.cdv(:,Et);
 	DataM.Cost.cCap = DataM.Cost.cCap * one;
-	DataM.Cost.cBas = DataM.Cost.cBas(:,(1:lenEt));
+	DataM.Cost.cBas = DataM.Cost.cBas(:,Et);
 	DataM.Cost.cTap = repmat(full(DataM.Cost.cTap), [1 1 lenEt]);
 	DataM.Cost.cTap = NxNxT2MxT(VertI,VertJ,DataM.Cost.cTap);
 	DataM.Cost.cY = repmat(full(DataM.Cost.cY), [1 1 lenEt]);
 	DataM.Cost.cY = NxNxT2MxT(VertI,VertJ,DataM.Cost.cY);
-    DataM.Cost.delta = DataM.Cost.delta(:,(1:lenEt));
-	DataM.Cost.m = DataM.Cost.m(:,(1:lenEt));
-	DataM.Cost.piPTras = DataM.Cost.piPTras(:,(1:lenEt));
-	DataM.Cost.piQmtras = DataM.Cost.piQmtras(:,(1:lenEt));
-	DataM.Cost.piQMtras = DataM.Cost.piQMtras(:,(1:lenEt));
-	DataM.Cost.rhopPv	 = DataM.Cost.rhopPv(:,(1:lenEt));
-	DataM.Cost.rhomqPv	 = DataM.Cost.rhomqPv(:,(1:lenEt));
-	DataM.Cost.rhoMqPv	 = DataM.Cost.rhoMqPv(:,(1:lenEt));
-	DataM.Cost.rhopWi = DataM.Cost.rhopWi(:,(1:lenEt));
-	DataM.Cost.rhomqWi = DataM.Cost.rhomqWi(:,(1:lenEt));
-	DataM.Cost.rhoMqWi = DataM.Cost.rhoMqWi(:,(1:lenEt));
+    DataM.Cost.delta = DataM.Cost.delta(:,Et);
+	DataM.Cost.m = DataM.Cost.m(:,Et);
+	DataM.Cost.piPTras = DataM.Cost.piPTras(:,Et);
+	DataM.Cost.piQmtras = DataM.Cost.piQmtras(:,Et);
+	DataM.Cost.piQMtras = DataM.Cost.piQMtras(:,Et);
+	DataM.Cost.rhopPv	 = DataM.Cost.rhopPv(:,Et);
+	DataM.Cost.rhomqPv	 = DataM.Cost.rhomqPv(:,Et);
+	DataM.Cost.rhoMqPv	 = DataM.Cost.rhoMqPv(:,Et);
+	DataM.Cost.rhopWi = DataM.Cost.rhopWi(:,Et);
+	DataM.Cost.rhomqWi = DataM.Cost.rhomqWi(:,Et);
+	DataM.Cost.rhoMqWi = DataM.Cost.rhoMqWi(:,Et);
 
 
 
 
 	if lenWn > 0
-		DataM.Gen.DFIG.crF = DataM.Gen.DFIG.crF(:,(1:lenEt));
-		DataM.Gen.DFIG.crR = DataM.Gen.DFIG.crR(:,(1:lenEt));
-		DataM.Gen.DFIG.cvF = DataM.Gen.DFIG.cvF(:,(1:lenEt));
-		DataM.Gen.DFIG.cvR = DataM.Gen.DFIG.cvR(:,(1:lenEt));
-		DataM.Gen.DFIG.lTopIE = DataM.Gen.DFIG.lTopIE(:,(1:lenEt));
-		DataM.Gen.DFIG.lTopIF = DataM.Gen.DFIG.lTopIF(:,(1:lenEt));
-		DataM.Gen.DFIG.lTopOR = DataM.Gen.DFIG.lTopOR(:,(1:lenEt));
-		DataM.Gen.DFIG.n_	 = 	DataM.Gen.DFIG.n_(:,(1:lenEt));
-		DataM.Gen.DFIG.P_mec	 = 	DataM.Gen.DFIG.P_mec(:,(1:lenEt));
-		DataM.Gen.DFIG.PQnormIE = DataM.Gen.DFIG.PQnormIE(:,(1:lenEt));
-		DataM.Gen.DFIG.PQnormIF = DataM.Gen.DFIG.PQnormIF(:,(1:lenEt));
-		DataM.Gen.DFIG.rIE = DataM.Gen.DFIG.rIE(:,(1:lenEt));
-		DataM.Gen.DFIG.rIF = DataM.Gen.DFIG.rIF(:,(1:lenEt));
-		DataM.Gen.DFIG.rOR = DataM.Gen.DFIG.rOR(:,(1:lenEt));
-		DataM.Gen.DFIG.sTopF = DataM.Gen.DFIG.sTopF(:,(1:lenEt));
-		DataM.Gen.DFIG.sTopR = DataM.Gen.DFIG.sTopR(:,(1:lenEt));
-		DataM.Gen.DFIG.xIE = DataM.Gen.DFIG.xIE(:,(1:lenEt));
-		DataM.Gen.DFIG.xIF = DataM.Gen.DFIG.xIF(:,(1:lenEt));
-		DataM.Gen.DFIG.xOR = DataM.Gen.DFIG.xOR(:,(1:lenEt));
-		DataM.Gen.DFIG.xiTopF = DataM.Gen.DFIG.xiTopF(:,(1:lenEt));
-		DataM.Gen.DFIG.xiTopR = DataM.Gen.DFIG.xiTopR(:,(1:lenEt));
-		DataM.Gen.DFIG.uLowE = DataM.Gen.DFIG.uLowE(:,(1:lenEt));
-		DataM.Gen.DFIG.uLowF = DataM.Gen.DFIG.uLowF(:,(1:lenEt));
-		DataM.Gen.DFIG.uTopE = DataM.Gen.DFIG.uTopE(:,(1:lenEt));
-		DataM.Gen.DFIG.uTopF = DataM.Gen.DFIG.uTopF(:,(1:lenEt));
+		DataM.Gen.DFIG.crF = DataM.Gen.DFIG.crF(:,Et);
+		DataM.Gen.DFIG.crR = DataM.Gen.DFIG.crR(:,Et);
+		DataM.Gen.DFIG.cvF = DataM.Gen.DFIG.cvF(:,Et);
+		DataM.Gen.DFIG.cvR = DataM.Gen.DFIG.cvR(:,Et);
+		DataM.Gen.DFIG.lTopIE = DataM.Gen.DFIG.lTopIE(:,Et);
+		DataM.Gen.DFIG.lTopIF = DataM.Gen.DFIG.lTopIF(:,Et);
+		DataM.Gen.DFIG.lTopOR = DataM.Gen.DFIG.lTopOR(:,Et);
+		DataM.Gen.DFIG.n_	 = 	DataM.Gen.DFIG.n_(:,Et);
+		DataM.Gen.DFIG.P_mec	 = 	DataM.Gen.DFIG.P_mec(:,Et);
+		DataM.Gen.DFIG.PQnormIE = DataM.Gen.DFIG.PQnormIE(:,Et);
+		DataM.Gen.DFIG.PQnormIF = DataM.Gen.DFIG.PQnormIF(:,Et);
+		DataM.Gen.DFIG.rIE = DataM.Gen.DFIG.rIE(:,Et);
+		DataM.Gen.DFIG.rIF = DataM.Gen.DFIG.rIF(:,Et);
+		DataM.Gen.DFIG.rOR = DataM.Gen.DFIG.rOR(:,Et);
+		DataM.Gen.DFIG.sTopF = DataM.Gen.DFIG.sTopF(:,Et);
+		DataM.Gen.DFIG.sTopR = DataM.Gen.DFIG.sTopR(:,Et);
+		DataM.Gen.DFIG.xIE = DataM.Gen.DFIG.xIE(:,Et);
+		DataM.Gen.DFIG.xIF = DataM.Gen.DFIG.xIF(:,Et);
+		DataM.Gen.DFIG.xOR = DataM.Gen.DFIG.xOR(:,Et);
+		DataM.Gen.DFIG.xiTopF = DataM.Gen.DFIG.xiTopF(:,Et);
+		DataM.Gen.DFIG.xiTopR = DataM.Gen.DFIG.xiTopR(:,Et);
+		DataM.Gen.DFIG.uLowE = DataM.Gen.DFIG.uLowE(:,Et);
+		DataM.Gen.DFIG.uLowF = DataM.Gen.DFIG.uLowF(:,Et);
+		DataM.Gen.DFIG.uTopE = DataM.Gen.DFIG.uTopE(:,Et);
+		DataM.Gen.DFIG.uTopF = DataM.Gen.DFIG.uTopF(:,Et);
 	end
 
 	DataM.Gen.Pv.cr = DataM.Gen.Pv.cr * one;
 	DataM.Gen.Pv.cv = DataM.Gen.Pv.cv * one;
-	DataM.Gen.Pv.pPvg = repmat(DataM.Gen.Pv.pPvg(:,(1:lenEt)), [size(VertI,2) 1]);
+	DataM.Gen.Pv.pPvg = repmat(DataM.Gen.Pv.pPvg(:,Et), [size(VertI,2) 1]);
 	DataM.Gen.Pv.sTop = DataM.Gen.Pv.sTop * one;
 	DataM.Gen.Pv.xiTop = DataM.Gen.Pv.xiTop * one;
 
-	DataM.Gen.Tras.pgLow = DataM.Gen.Tras.pgLow * one;
-	DataM.Gen.Tras.pgTop = DataM.Gen.Tras.pgTop * one;
-	DataM.Gen.Tras.qgLow = DataM.Gen.Tras.qgLow * one;
-	DataM.Gen.Tras.qgTop = DataM.Gen.Tras.qgTop * one;
+	DataM.Gen.Tras.pgLow = DataM.Gen.Tras.pgLow(:,Et);
+	DataM.Gen.Tras.pgTop = DataM.Gen.Tras.pgTop(:,Et);
+	DataM.Gen.Tras.qgLow = DataM.Gen.Tras.qgLow(:,Et);
+	DataM.Gen.Tras.qgTop = DataM.Gen.Tras.qgTop(:,Et);
 
-	DataM.Gen.Basic.pgLow = DataM.Gen.Basic.pgLow(:,(1:lenEt));
-	DataM.Gen.Basic.pgTop = DataM.Gen.Basic.pgTop(:,(1:lenEt));
-	DataM.Gen.Basic.qgLow = DataM.Gen.Basic.qgLow(:,(1:lenEt));
-	DataM.Gen.Basic.qgTop = DataM.Gen.Basic.qgTop(:,(1:lenEt));
+	DataM.Gen.Basic.pgLow = DataM.Gen.Basic.pgLow(:,Et);
+	DataM.Gen.Basic.pgTop = DataM.Gen.Basic.pgTop(:,Et);
+	DataM.Gen.Basic.qgLow = DataM.Gen.Basic.qgLow(:,Et);
+	DataM.Gen.Basic.qgTop = DataM.Gen.Basic.qgTop(:,Et);
 	
-	DataM.St.AC.beta = DataM.St.AC.beta(:,(1:lenEt));
-	DataM.St.AC.epsilon = DataM.St.AC.epsilon(:,(1:lenEt));
-	DataM.St.AC.eta = DataM.St.AC.eta(:,(1:lenEt));
-	DataM.St.AC.tempLow = DataM.St.AC.tempLow(:,(1:lenEt));
-	DataM.St.AC.tempPref = DataM.St.AC.tempPref(:,(1:lenEt));
-	DataM.St.AC.tempTop = DataM.St.AC.tempTop(:,(1:lenEt));
+	DataM.St.AC.beta = DataM.St.AC.beta(:,Et);
+	DataM.St.AC.epsilon = DataM.St.AC.epsilon(:,Et);
+	DataM.St.AC.eta = DataM.St.AC.eta(:,Et);
+	DataM.St.AC.tempLow = DataM.St.AC.tempLow(:,Et);
+	DataM.St.AC.tempPref = DataM.St.AC.tempPref(:,Et);
+	DataM.St.AC.tempTop = DataM.St.AC.tempTop(:,Et);
 
 	DataM.St.Bat.beta = DataM.St.Bat.beta * one;
 	DataM.St.Bat.cr = DataM.St.Bat.cr * one;
@@ -151,15 +151,15 @@ function [DataM] = reshapeDataM(Data, Config)
 	DataM.St.Bat.wOm = DataM.St.Bat.wOm * one;
 	DataM.St.Bat.wU = DataM.St.Bat.wU * one;
 
-	DataM.temp = repmat(DataM.temp(:,(1:lenEt)), [size(VertI,2) 1]);
+	DataM.temp = repmat(DataM.temp(:,Et), [size(VertI,2) 1]);
 
-	DataM.Util.betaE = DataM.Util.betaE(:,(1:lenEt));
-	DataM.Util.betaT = DataM.Util.betaT(:,(1:lenEt));
-	DataM.Util.pzCnLow = DataM.Util.pzCnLow(:,(1:lenEt),:);
+	DataM.Util.betaE = DataM.Util.betaE(:,Et);
+	DataM.Util.betaT = DataM.Util.betaT(:,Et);
+	DataM.Util.pzCnLow = DataM.Util.pzCnLow(:,Et,:);
 	DataM.Util.pzCnLowE = DataM.Util.pzCnLowE * one;
-	DataM.Util.pzCnPref = DataM.Util.pzCnPref(:,(1:lenEt),:);
+	DataM.Util.pzCnPref = DataM.Util.pzCnPref(:,Et,:);
 	DataM.Util.pzCnPrefE = DataM.Util.pzCnPrefE * one;
-	DataM.Util.pzCnTop = DataM.Util.pzCnTop(:,(1:lenEt),:);
+	DataM.Util.pzCnTop = DataM.Util.pzCnTop(:,Et,:);
 	DataM.Util.pzCnTopE = DataM.Util.pzCnTopE * one;
 	DataM.Util.qzCnLowE = DataM.Util.qzCnLowE * one;
 	DataM.Util.qzCnTopE = DataM.Util.qzCnTopE * one;

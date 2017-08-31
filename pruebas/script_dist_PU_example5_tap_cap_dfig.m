@@ -39,12 +39,18 @@ DflowD.Trafos(3,1).reg = 1;
 DflowD.Trafos(3,1).cambio = .1;
 
 % Caps
-Cap1.N = [0 3];
-Cap1.TP = .005;
-Cap1.nod = 9;
-Cap1.ini = 0;
-Cap1.cambio = 1;
-DflowD.Caps = [Cap1];
+DflowD.Caps(1,1).N = [0 3];
+DflowD.Caps(1,1).TP = .005;
+DflowD.Caps(1,1).nod = 9;
+DflowD.Caps(1,1).ini = 0;
+DflowD.Caps(1,1).cambio = 1;
+
+% Trasmision
+DflowD.Tras.nod = 2;
+DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras.uLow = 1;
+DflowD.Tras.uTop = 1;
+DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
 
 %% Nombres de archivos
 % 
@@ -54,15 +60,15 @@ DflowD.fileUtilBetaT = 'casos\util\betaT.csv';
 DflowD.utilOptFuncCuad = true;
 DflowD.fileTemp = 'casos\temp\tempInvierno.csv';
 DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
-DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
 
 %% Configuracion de simulacion
 iniEtapa = 1;
 CantHorasEtapa = 1;
 
+Config = [];
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
-Config.outFilename = 'PU_example4_tap_cap_dfig_dist';
+Config.outFilename = 'PU_example5_tap_cap_dfig_dist';
 Config.runNxN = false;
 Config.runM = true;
 

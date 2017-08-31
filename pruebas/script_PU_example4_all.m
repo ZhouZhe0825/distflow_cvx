@@ -54,6 +54,13 @@ DflowD.Caps(1,1).nod = 9;
 DflowD.Caps(1,1).ini = 3;
 DflowD.Caps(1,1).cambio = 1;
 
+% Trasmision
+DflowD.Tras.nod = 1;
+DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras.uLow = 1;
+DflowD.Tras.uTop = 1;
+DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+
 % Aires acondicionados
 DflowD.ACs(1,1).fileT = 'casos\PU_example\ac\ac.csv';
 DflowD.ACs(1,1).tempIni = 21;
@@ -85,7 +92,6 @@ DflowD.fileUtilBetaT = 'casos\util\betaT.csv';
 DflowD.utilOptFuncCuad = true;
 DflowD.fileTemp = 'casos\temp\tempInvierno.csv';
 DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
-DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
 
 %% Configuracion de simulacion
 iniEtapa = 1;
@@ -104,7 +110,7 @@ Config.Centr = [];
 Config.Centr{1, 1} = 'MSK_DPAR_MIO_TOL_REL_RELAX_INT';
 Config.Centr{1, 2} = 0.01;
 Config.Centr{2, 1} = 'MSK_DPAR_OPTIMIZER_MAX_TIME';
-Config.Centr{2, 2} = 10;
+Config.Centr{2, 2} = 120;
 % Gurobi
 % Config.Centr{1, 1} = 'MIPGap';
 % Config.Centr{1, 2} = 0.01;1

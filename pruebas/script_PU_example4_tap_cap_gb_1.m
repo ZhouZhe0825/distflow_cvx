@@ -37,6 +37,13 @@ DflowD.Caps(1,1).nod = 9;
 DflowD.Caps(1,1).ini = 0;
 DflowD.Caps(1,1).cambio = .1;
 
+% Trasmision
+DflowD.Tras.nod = 1;
+DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras.uLow = 1;
+DflowD.Tras.uTop = 1;
+DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+
 % Cargas
 
 % Switches
@@ -50,14 +57,15 @@ DflowD.Switches.all = false;
 DflowD.inFilename = 'casos\PU_example\PU_example4.xls';
 DflowD.fileCurvaCarga = 'casos\PU_example\cargas\carga_PU_example_variable.csv';
 DflowD.fileUtilBetaT = 'casos\util\betaT.csv';
+DflowD.utilOptFuncCuad = false;
 DflowD.fileTemp = 'casos\temp\tempInvierno.csv';
 DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
-DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision_incr.csv';
 
 %% Configuracion de simulacion
 iniEtapa = 1;
 CantHorasEtapa = 24;
 
+Config = [];
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
 Config.outFilename = 'PU_example4_tap_cap_gb_1';

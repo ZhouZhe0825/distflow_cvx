@@ -13,6 +13,9 @@ function [Data] = loadData(DflowD)
 
         [Data] = loadCargaCuartHoraria(Data, DflowD.fileCurvaCarga);
 
+        % Tras
+        [Data] = cargaTrasDefault(Data, DflowD.Tras);
+
         % Eolicos
         [Data] = cargaEolicosDefault(Data, DflowD.Eolicos);
 
@@ -32,7 +35,7 @@ function [Data] = loadData(DflowD)
         [Data] = cargaGBasicoDefault(Data, DflowD.GenBas);
         
         % Costos
-        [Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.GenBas, DflowD.fileCostosTension, DflowD.fileCostosTras, DflowD.Solares, DflowD.Eolicos);
+        [Data] = cargaCostosDefault(Data, DflowD.Trafos, DflowD.Caps, DflowD.Switches, DflowD.GenBas, DflowD.fileCostosTension, DflowD.Tras, DflowD.Solares, DflowD.Eolicos);
     end
 
 end

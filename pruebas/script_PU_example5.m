@@ -2,16 +2,22 @@
 
 DflowD = cargaDflowDDefault();
 
+% Trasmision
+DflowD.Tras.nod = 2;
+DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras.uLow = 1;
+DflowD.Tras.uTop = 1;
+DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+
 
 %% Nombres de archivos
 % 
-DflowD.inFilename = 'casos\PU_example\PU_example5.xls';
+DflowD.inFilename = 'casos\PU_example\PU_example4.xls';
 DflowD.fileCurvaCarga = 'casos\PU_example\cargas\carga_PU_example.csv';
 DflowD.fileUtilBetaT = 'casos\util\betaT.csv';
 DflowD.utilOptFuncCuad = true;
 DflowD.fileTemp = 'casos\temp\tempInvierno.csv';
 DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
-DflowD.fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
 
 %% Configuracion de simulacion
 iniEtapa = 1;

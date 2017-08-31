@@ -46,6 +46,15 @@ function runSimulation(Data, DflowD, Config)
 		copyrename(ac.fileT,newFileT,outputDirInputs);
 		ac.fileT = [outputDirInputs, '\', newFileT];
 	end
+	for i = 1:length(DflowD.Tras)
+		tra = DflowD.Tras(i);
+		newFileG = ['tra',num2str(i),'fileG.csv'];
+		newFileC = ['tra',num2str(i),'fileC.csv'];
+		copyrename(tra.fileG,newFileG,outputDirInputs);
+		copyrename(tra.fileC,newFileC,outputDirInputs);
+		tra.fileG = [outputDirInputs, '\', newFileG];
+		tra.fileC = [outputDirInputs, '\', newFileC];
+	end
 	copyrename(DflowD.inFilename,'inFilename.xls',outputDirInputs);
 	DflowD.inFilename = [outputDirInputs, '\inFilename.xls'];
 
@@ -60,9 +69,6 @@ function runSimulation(Data, DflowD, Config)
 
 	copyrename(DflowD.fileCostosTension,'fileCostosTension.csv',outputDirInputs);
 	DflowD.fileCostosTension = [outputDirInputs, '\fileCostosTension.csv'];
-
-	copyrename(DflowD.fileCostosTras,'fileCostosTras.csv',outputDirInputs);
-	DflowD.fileCostosTras = [outputDirInputs, '\fileCostosTras.csv'];
 
 	save([outputDirInputs,'\inputs.mat'],...
 		'Data','DflowD','Config');
@@ -94,8 +100,6 @@ function runSimulation(Data, DflowD, Config)
 	if ~isfield(Config,'Distr')
 		if Config.runNxN
 			[Var_nxn, opt_nxn, DataNxN] = llamarCentralizadoNxN(Data, Config);
-		else
-			[DataNxN] = reshapeDataNxN(Data, Config);
 		end
 
 		if Config.runM
@@ -106,11 +110,9 @@ function runSimulation(Data, DflowD, Config)
 
 		diary('off');
 	else
-		[DataNxN] = reshapeDataNxN(Data, Config);
-
 		[Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, status, DataM, Ev] = llamarDistribuidoM(Data, Config, Var_centr, opt_centr, Var_ini);
 
-		save([outputDirOutputs, '\outputs.mat'],'Var_dist_conE', 'Var_centr', 'Var_F', 'Var_ini', 'opt_dist_conE', 'opt_centr', 'opt_F', 'Ev','DataNxN','Config','Var_m','opt_m','DataM');
+		save([outputDirOutputs, '\outputs.mat'],'Var_dist_conE', 'Var_centr', 'Var_F', 'Var_ini', 'opt_dist_conE', 'opt_centr', 'opt_F', 'Ev','Config','Var_m','opt_m','DataM');
 
 		diary('off');
 	end
@@ -120,14 +122,9 @@ function runSimulation(Data, DflowD, Config)
 			printSalidasDistflowNxN(Var_nxn, DataNxN, Config, [outputDirOutputs, '\output_nxn'], [], [], [], [], []);
 		end
 		if Config.runM
-			printSalidasDistflowM(Var_m, DataNxN, Config, [outputDirOutputs, '\output_m1'], [], [], [], [], []);
-% 			printSalidasDistflowM_(Var_m, DataM, Config, [outputDirOutputs, '\output_m2'], [], [], [], [], []);
+			printSalidasDistflowM_(Var_m, DataM, Config, [outputDirOutputs, '\output_m2'], [], [], [], [], []);
 		end
 	else
-% 		printSalidasDistflowM(Var_F,         DataNxN, Config, [outputDirOutputs, '\output_m1'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
-% 		printSalidasDistflowM(Var_centr,     DataNxN, Config, [outputDirOutputs, '\output_centr1'],       [],    [],   [],       [],     []);
-% 		printSalidasDistflowM(Var_dist_conE, DataNxN, Config, [outputDirOutputs, '\output_dist_conE1'],   [],    [],   [],       [],     []);
-
         printSalidasDistflowM_(Var_F,         DataM, Config, [outputDirOutputs, '\output_m2'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
 		printSalidasDistflowM_(Var_centr,     DataM, Config, [outputDirOutputs, '\output_centr2'],       [],    [],   [],       [],     []);
 		printSalidasDistflowM_(Var_dist_conE, DataM, Config, [outputDirOutputs, '\output_dist_conE2'],   [],    [],   [],       [],     []);

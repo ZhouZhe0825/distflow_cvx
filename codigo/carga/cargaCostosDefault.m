@@ -1,8 +1,8 @@
-function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, GenBas, fileCostosTension, fileCostosTras, Solares, Eolicos)
+function [Data] = cargaCostosDefault(Data, Trafos, Caps, Switches, GenBas, fileCostosTension, Tras, Solares, Eolicos)
 
 [Data.Cost.m, Data.Cost.delta, Data.Cost.cdv] = costosTension(Data,fileCostosTension);
 
-[Data.Cost.piPTras, Data.Cost.piQmtras, Data.Cost.piQMtras] = costosTrasmision(Data,fileCostosTras);
+[Data.Cost.piPTras, Data.Cost.piQmtras, Data.Cost.piQMtras] = costosTrasmision(Data,Tras);
 
 [Data.Cost.rhopPv, Data.Cost.rhomqPv, Data.Cost.rhoMqPv] = costosPv(Data,Solares);
 

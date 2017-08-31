@@ -41,13 +41,8 @@ for i=1:length(Switches.i)
 	Data.Red.Branch.Tswitches(Switches.j(i), Switches.i(i))=1;
 end
 
-Data.Red.Bus.uLow(:,:) = sparse(n_bu(:,7));
-Data.Red.Bus.uTop(:,:) = sparse(n_bu(:,6));
-v0 = find(~isnan(n_bu(:,2)));
-Q0Top = 10;
-Q0Low = -10;
-P0Top = 10;
-P0Low = -10;
+Data.Red.Bus.uLow(:,:) = sparse(n_bu(:,5));
+Data.Red.Bus.uTop(:,:) = sparse(n_bu(:,4));
 
 for a = 1:length(App)
     Data.Red.Bus.alpha(:,App(a).I) = App(a).alpha;
@@ -82,15 +77,6 @@ for estC = 1:size(Caps,1)
 	Data.Red.Bus.Icap(Caps(estC).nod) = 1;
 	Data.Red.Bus.Cap(Caps(estC).nod) = Caps(estC).TP;
 end
-
-%% Trasmision
-Data.Gen.Tras.pgLow(v0,:) = P0Low;
-Data.Gen.Tras.qgLow(v0,:) = Q0Low;
-Data.Gen.Tras.pgTop(v0,:) = P0Top;
-Data.Gen.Tras.qgTop(v0,:) = Q0Top;
-Data.Gen.Tras.I = zeros(n, 1);
-Data.Gen.Tras.I(v0) = 1;
-
 
 %% Cargas no interrumpibles
 for estCg = 1:length(Cargas)

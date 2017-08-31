@@ -81,16 +81,9 @@ cvx_begin quiet
 	variable qCp(n, Config.Etapas); % reactive power demand in i
 	variable Ncp(n, Config.Etapas) integer;
 
-	variable pCApp(n, Config.Etapas, 2); % real power demand in i
-	variable qCApp(n, Config.Etapas, 2); % real power demand in i
-	variable pCn(n, Config.Etapas, 2); % real power demand in i
-	variable pCClRes(n, Config.Etapas); % real power demand in i
-	variable qCClRes(n, Config.Etapas); % real power demand in i
-
  	expression lQoL(m, Config.Etapas, 3);
  	expression lNorm(m, Config.Etapas, 3);
 	expression vExpr(n, Config.Etapas);
-	expression vApp(n, Config.Etapas, 2);
 	expression NcpDif(n,Config.Etapas);
 	expression NtrDif(m,Config.Etapas);
 	expression yDif(m,Config.Etapas);
@@ -116,7 +109,7 @@ cvx_begin quiet
 		sum(Data.Cost.cdv.*cDv,1) ...
 		+ sum(Data.Cost.cCap.*(NcpDif.^2),1) ...
 		+ sum(Data.Cost.cTap.*(NtrDif.^2),1) ...
-		+ sum(Data.Cost.cY.*y,1) ...
+		+ sum(Data.Cost.cY.*yDif,1) ...
 		;
 	tfopt_mu = sum(- DistrInfo.muT .* pN,1);
 	tfopt_lambda = sum(- DistrInfo.lambdaT .* qN + DistrInfo.lambdaT .* qCp,1);
