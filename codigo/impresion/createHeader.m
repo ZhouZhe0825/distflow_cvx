@@ -17,6 +17,15 @@ function [Header] = createHeader(Var, Data, Config)
 
 	n = size(Data.Red.Branch.T,1);
 	nodos = (1:n)';
+
+    VertI = VertIMat(Data.Red.Branch.T);
+    VertJ = VertJMat(Data.Red.Branch.T);
+
+    ItapM = NxNxT2MxT(VertI, VertJ, triu(Data.Red.Branch.Itap));
+    indITapM = find(ItapM == 1);
+
+    ItregM = NxNxT2MxT(VertI, VertJ, triu(Data.Red.Branch.Itreg));
+    indIItregM = find(ItregM == 1);    
     
 	Header.Main = cell(1+cantTaps+cantCaps+cantReg+cantCarg,Config.Etapas+1);
 
@@ -25,14 +34,14 @@ function [Header] = createHeader(Var, Data, Config)
     if cantTaps > 0
         for i = 1:cantTaps
             Header.Main{1+i,1} = ['Ntr_' num2str(rowTap(i)) '-' num2str(colTap(i))];
-            Header.Main(1+i,indHeadEt) = num2cell(squeeze(round(Var.Red.Branch.Ntr(rowTap(i),colTap(i),:)))');
+            Header.Main(1+i,indHeadEt) = num2cell(round(Var.Red.Branch.Ntr(indITapM(i),:)));
         end
     end
 
     if cantReg > 0
         for i = 1:cantReg
             Header.Main{1+cantTaps+i,1} = ['Reg_' num2str(rowTReg(i)) '-' num2str(colTReg(i))];
-            Header.Main(1+cantTaps+i,indHeadEt) = num2cell(squeeze(Var.Red.Branch.Rtr(rowTReg(i),colTReg(i),:))');
+            Header.Main(1+cantTaps+i,indHeadEt) = num2cell(Var.Red.Branch.Rtr(indIItregM(i),:));
         end
     end
 
@@ -40,14 +49,14 @@ function [Header] = createHeader(Var, Data, Config)
         for i = 1:cantCaps
             Header.Main{1+cantTaps+cantReg+i,1} = ['Ncp_n_' num2str(indCaps(i))];
         end
-        Header.Main((2+cantTaps+cantReg:1+cantTaps+cantReg+cantCaps),indHeadEt) = num2cell(squeeze(round(Var.Red.Bus.Ncp(indCaps,:,:)))');
+        Header.Main((2+cantTaps+cantReg:1+cantTaps+cantReg+cantCaps),indHeadEt) = num2cell(round(Var.Red.Bus.Ncp(indCaps,:)));
     end
 
     if cantCarg > 0
         for i = 1:cantCarg
             Header.Main{1+cantTaps+cantReg+cantCaps+i,1} = ['Chg_' num2str(Data.ClNI.pC(nodCh(i))) '_d_' num2str(Data.ClNI.d(nodCh(i))) '_n_' num2str(nodCh(i))];
         end
-        Header.Main((2+cantTaps+cantReg+cantCaps:1+cantTaps+cantReg+cantCaps+cantCarg),indHeadEt) = num2cell(squeeze(round(Var.ClNI.on(nodCh,:))));
+        Header.Main((2+cantTaps+cantReg+cantCaps:1+cantTaps+cantReg+cantCaps+cantCarg),indHeadEt) = num2cell(round(Var.ClNI.on(nodCh,:)));
     end
 
 	TotalT = matOverTime(Data.Red.Branch.T);

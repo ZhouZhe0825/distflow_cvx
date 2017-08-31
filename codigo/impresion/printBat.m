@@ -2,20 +2,20 @@ function printBat(Header, Var, Data, outFilename)
 
 	if isfield(Var, 'St')
 		if isfield(Var.St, 'Bat')
-			nodBat = find(matOverTime(Data.St.Bat.I) == 1);
+			nodBat = find(Data.St.Bat.I == 1);
 
 			for i = 1:length(nodBat)
 				nod = nodBat(i);
-				pStb = Var.St.Bat.pStb(nod, 1, :);
-				pStgbC = Var.St.Bat.pStgbC(nod, 1, :);
-				pStgbD = Var.St.Bat.pStgbD(nod, 1, :);
-				qStb = Var.St.Bat.qStb(nod, 1, :);
-				EStb = Var.St.Bat.EStb(nod, 1, :);
-				pStgb = Var.St.Bat.pStgb(nod, 1, :);
-				sStb = Var.St.Bat.sStb(nod, 1, :);
+				pStb = Var.St.Bat.pStb(nod, :);
+				pStgbC = Var.St.Bat.pStgbC(nod, :);
+				pStgbD = Var.St.Bat.pStgbD(nod, :);
+				qStb = Var.St.Bat.qStb(nod, :);
+				EStb = Var.St.Bat.EStb(nod, :);
+				pStgb = Var.St.Bat.pStgb(nod, :);
+				sStb = Var.St.Bat.sStb(nod, :);
 				h_sStb = sqrt(pStgb.^2 + qStb.^2)./sStb;
 				cv_sStb = Data.St.Bat.cv(nod,1,:).*sStb;
-				xiStb = Var.St.Bat.xiStb(nod, 1, :);
+				xiStb = Var.St.Bat.xiStb(nod, :);
 				h_xiStb = (pStgb.^2 + qStb.^2)./xiStb;
 				cr_xiStb = Data.St.Bat.cr(nod,1,:).*xiStb;
 

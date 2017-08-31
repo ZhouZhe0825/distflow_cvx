@@ -61,8 +61,6 @@ fileCostosTras = 'casos\costos\trasmision\costosTrasmision.csv';
 Config.iniEtapa = 1;
 Config.Etapas = 1;
 Config.outFilename = 'PU_example4';
-Config.runNxN = true;
-Config.runM = true;
 
 % Centralizado
 Config.Centr = [];

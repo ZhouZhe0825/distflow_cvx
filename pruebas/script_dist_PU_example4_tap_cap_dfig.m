@@ -57,8 +57,6 @@ Config = [];
 Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
 Config.outFilename = 'PU_example4_tap_cap_dfig_dist';
-Config.runNxN = false;
-Config.runM = true;
 
 Config.Distr.gama_ini = .25;
 Config.Distr.gama_fin = .25;

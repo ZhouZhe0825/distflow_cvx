@@ -83,10 +83,6 @@ function runSimulation(Data, DflowD, Config)
 
 	leyenda = ['------------------------------------ ' Config.outFilename ' ------------------------------------']
 
-    Var_nxn = [];
-    opt_nxn = [];
-    DataNxN = [];
-
 	Var_m = [];
 	opt_m = [];
 	DataM = [];
@@ -98,15 +94,8 @@ function runSimulation(Data, DflowD, Config)
 
 	
 	if ~isfield(Config,'Distr')
-		if Config.runNxN
-			[Var_nxn, opt_nxn, DataNxN] = llamarCentralizadoNxN(Data, Config);
-		end
-
-		if Config.runM
-			[Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
-		end
-
-		save([outputDirOutputs, '\outputs.mat'],'Var_nxn','opt_nxn','DataNxN','Config','Var_m','opt_m','DataM');
+		[Var_m, opt_m, DataM] = llamarCentralizadoM(Data, Config);
+		save([outputDirOutputs, '\outputs.mat'],'Config','Var_m','opt_m','DataM');
 
 		diary('off');
 	else
@@ -118,16 +107,11 @@ function runSimulation(Data, DflowD, Config)
 	end
 
 	if ~isfield(Config,'Distr')
-		if Config.runNxN
-			printSalidasDistflowNxN(Var_nxn, DataNxN, Config, [outputDirOutputs, '\output_nxn'], [], [], [], [], []);
-		end
-		if Config.runM
-			printSalidasDistflowM_(Var_m, DataM, Config, [outputDirOutputs, '\output_m2'], [], [], [], [], []);
-		end
+		printSalidasDistflowM(Var_m, DataM, Config, [outputDirOutputs, '\output_m2'], [], [], [], [], []);
 	else
-        printSalidasDistflowM_(Var_F,         DataM, Config, [outputDirOutputs, '\output_m2'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
-		printSalidasDistflowM_(Var_centr,     DataM, Config, [outputDirOutputs, '\output_centr2'],       [],    [],   [],       [],     []);
-		printSalidasDistflowM_(Var_dist_conE, DataM, Config, [outputDirOutputs, '\output_dist_conE2'],   [],    [],   [],       [],     []);
+        printSalidasDistflowM(Var_F,         DataM, Config, [outputDirOutputs, '\output_m'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difP, Ev.difQ);
+		printSalidasDistflowM(Var_centr,     DataM, Config, [outputDirOutputs, '\output_centr'],       [],    [],   [],       [],     []);
+		printSalidasDistflowM(Var_dist_conE, DataM, Config, [outputDirOutputs, '\output_dist_conE'],   [],    [],   [],       [],     []);
 	end
 	
 end

@@ -2,18 +2,18 @@ function printPv(Header, Var, Data, outFilename)
 
 	if isfield(Var, 'Gen')
 		if isfield(Var.Gen, 'Pv')
-			nodPv = find(matOverTime(Data.Gen.Pv.I) == 1);
+			nodPv = find(Data.Gen.Pv.I == 1);
 
 			for i = 1:length(nodPv)
 				nod = nodPv(i);
-				pPv = Var.Gen.Pv.pPv(nod, 1, :);
-				qPv = Var.Gen.Pv.qPv(nod, 1, :);
-				sPv = Var.Gen.Pv.s(nod, 1, :);
+				pPv = Var.Gen.Pv.pPv(nod, :);
+				qPv = Var.Gen.Pv.qPv(nod, :);
+				sPv = Var.Gen.Pv.s(nod, :);
 				h_sPv = sqrt(pPv.^2 + qPv.^2)./sPv;
-				cv_sPv = Data.Gen.Pv.cv(nod, 1, :).*sPv;
-				xiPv = Var.Gen.Pv.xi(nod, 1, :);
+				cv_sPv = Data.Gen.Pv.cv(nod, :).*sPv;
+				xiPv = Var.Gen.Pv.xi(nod, :);
 				h_xiPv = (pPv.^2 + qPv.^2)./xiPv;
-				cr_xiPv = Data.Gen.Pv.cr(nod, 1, :).*xiPv;
+				cr_xiPv = Data.Gen.Pv.cr(nod, :).*xiPv;
 				Pv = [pPv;qPv;sPv;h_sPv;cv_sPv;xiPv;h_xiPv;cr_xiPv];
 
 
