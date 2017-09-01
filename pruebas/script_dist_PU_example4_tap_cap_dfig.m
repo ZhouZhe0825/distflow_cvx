@@ -7,6 +7,8 @@ DflowD.Eolicos(1,1).nod = 5;
 DflowD.Eolicos(1,1).type = 'casos\gen\dfig\Dfig_1mw_def.csv';
 DflowD.Eolicos(1,1).fileG = 'casos\gen\dfig\Dfig_1mw_P_n_.csv';
 DflowD.Eolicos(1,1).fileC = 'casos\costos\dfig\costosDfig.csv';
+DflowD.Eolicos(1,1).pgIni = 0;
+DflowD.Eolicos(1,1).qgIni = 0;
 
 
 % Trafos

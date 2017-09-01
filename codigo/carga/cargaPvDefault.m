@@ -23,6 +23,8 @@ function [Data] = cargaPvDefault(Data, Solares)
             Data.Gen.Pv.cv(Solares(i).nod,:) = S.cv_ct;
             Data.Gen.Pv.cr(Solares(i).nod,:) = S.cr_ct;
             Data.Gen.Pv.pPvg(Solares(i).nod,:) = pPvg;
+            Data.Gen.Pv.pgIni(Solares(i).nod,:) = Solares(i).pgIni;
+            Data.Gen.Pv.qgIni(Solares(i).nod,:) = Solares(i).qgIni;
 
             
         end

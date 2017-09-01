@@ -3,6 +3,8 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	DataM = Data;
 	[DataM] = reshapeDataM(DataM, Config);
 
+    [DataM.Red.Branch.yIni] = cargarExplotacionInicial(DataM);
+
 	if isempty(Var_centr) && isempty(Var_ini)
 
 		ConfigIni = Config;

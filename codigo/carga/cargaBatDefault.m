@@ -29,6 +29,9 @@ function [Data] = cargaBatDefault(Data, Baterias)
 			Data.St.Bat.xiTop(Baterias(i).nod) = Data.St.Bat.sTop(Baterias(i).nod).^2;
 			Data.St.Bat.kapa(Baterias(i).nod) = S.kapa;
 			Data.St.Bat.gama(Baterias(i).nod) = S.gama;
+            Data.St.Bat.pgIni(Baterias(i).nod,:) = Baterias(i).pgIni;
+            Data.St.Bat.qgIni(Baterias(i).nod,:) = Baterias(i).qgIni;
+            
     end
         
 

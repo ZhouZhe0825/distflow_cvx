@@ -3,6 +3,8 @@ function [Var, opt, DataM] = llamarCentralizadoM(Data, Config)
 
     DataM = Data;
     [DataM] = reshapeDataM(DataM, Config);
+    
+    [DataM.Red.Branch.yIni] = cargarExplotacionInicial(DataM);
 
 	[Var, opt] = distflowCentralizadoM(DataM, Config);
 

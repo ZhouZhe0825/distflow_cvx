@@ -7,22 +7,30 @@ DflowD.Solares(1,1).nod = 4;
 DflowD.Solares(1,1).type = 'casos\gen\pv\pv_def.csv';
 DflowD.Solares(1,1).fileG = 'casos\gen\pv\pvgen.csv';
 DflowD.Solares(1,1).fileC = 'casos\costos\pv\costosPv.csv';
+DflowD.Solares(1,1).pgIni = 0;
+DflowD.Solares(1,1).qgIni = 0;
 
 % Baterias
 DflowD.Baterias(1,1).nod = 5;
 DflowD.Baterias(1,1).type = 'casos\bat\bat_def.csv';
 DflowD.Baterias(1,1).EIni = .5;
+DflowD.Baterias(1,1).pgIni = 0;
+DflowD.Baterias(1,1).qgIni = 0;
 
 % Eolicos
 DflowD.Eolicos(1,1).nod = 5;
 DflowD.Eolicos(1,1).type = 'casos\gen\dfig\Dfig_1mw_def.csv';
 DflowD.Eolicos(1,1).fileG = 'casos\gen\dfig\Dfig_1mw_P_n_.csv';
 DflowD.Eolicos(1,1).fileC = 'casos\costos\dfig\costosDfig_1.csv';
+DflowD.Eolicos(1,1).pgIni = 0;
+DflowD.Eolicos(1,1).qgIni = 0;
 
 % Generador Basico
 DflowD.GenBas(1,1).nod = 7;
 DflowD.GenBas(1,1).fileG = 'casos\gen\basic\genbas.csv';
 DflowD.GenBas(1,1).fileC = 'casos\costos\basic\costosBasic.csv';
+DflowD.GenBas(1,1).pgIni = 0;
+DflowD.GenBas(1,1).qgIni = 0;
 
 % Switches
 DflowD.Switches.i = [5 7];
@@ -55,11 +63,13 @@ DflowD.Caps(1,1).ini = 3;
 DflowD.Caps(1,1).cambio = 1;
 
 % Trasmision
-DflowD.Tras.nod = 1;
-DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
-DflowD.Tras.uLow = 1;
-DflowD.Tras.uTop = 1;
-DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).nod = 1;
+DflowD.Tras(1,1).fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras(1,1).uLow = 1;
+DflowD.Tras(1,1).uTop = 1;
+DflowD.Tras(1,1).fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).pgIni = 0;
+DflowD.Tras(1,1).qgIni = 0;
 
 % Aires acondicionados
 DflowD.ACs(1,1).fileT = 'casos\PU_example\ac\ac.csv';

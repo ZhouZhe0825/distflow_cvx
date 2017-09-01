@@ -23,6 +23,8 @@ DflowD.App(2,1).tgPhi = 0;
 DflowD.GenBas(1,1).nod = 7;
 DflowD.GenBas(1,1).fileG = 'casos\gen\basic\genbas_fix_q005.csv';
 DflowD.GenBas(1,1).fileC = 'casos\costos\basic\costosBasic_fix.csv';
+DflowD.GenBas(1,1).pgIni = 0;
+DflowD.GenBas(1,1).qgIni = 0;
 
 % Trafos
 DflowD.Trafos(1,1).N = [-8 8];
@@ -36,11 +38,13 @@ DflowD.Trafos(1,1).cambio = .25;
 % Caps
 
 % Trasmision
-DflowD.Tras.nod = 1;
-DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
-DflowD.Tras.uLow = 1;
-DflowD.Tras.uTop = 1;
-DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).nod = 1;
+DflowD.Tras(1,1).fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras(1,1).uLow = 1;
+DflowD.Tras(1,1).uTop = 1;
+DflowD.Tras(1,1).fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).pgIni = 0;
+DflowD.Tras(1,1).qgIni = 0;
 
 % Cargas
 

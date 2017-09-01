@@ -25,11 +25,13 @@ DflowD.Ac(1,1).epsilon = .16;
 DflowD.Ac(1,1).eta = 1666.67;
 
 % Trasmision
-DflowD.Tras.nod = 2;
-DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
-DflowD.Tras.uLow = 1;
-DflowD.Tras.uTop = 1;
-DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).nod = 2;
+DflowD.Tras(1,1).fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras(1,1).uLow = 1;
+DflowD.Tras(1,1).uTop = 1;
+DflowD.Tras(1,1).fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).pgIni = 0;
+DflowD.Tras(1,1).qgIni = 0;
 
 %% Nombres de archivos
 % 

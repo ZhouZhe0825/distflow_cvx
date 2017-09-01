@@ -96,6 +96,9 @@ function [Data] = cargaEolicosDefault(Data,Eolicos)
 
             Data.Gen.DFIG.PQnormIE(Eolicos(i).nod,:) = S.PQnorm_2;
             Data.Gen.DFIG.PQnormIF(Eolicos(i).nod,:) = S.PQnorm_3;
+
+            Data.Gen.DFIG.pgIni(Eolicos(i).nod,:) = Eolicos(i).pgIni;
+            Data.Gen.DFIG.qgIni(Eolicos(i).nod,:) = Eolicos(i).qgIni;
         end
     end
 

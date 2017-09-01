@@ -29,6 +29,8 @@ function [Data] = cargaGBasicoDefault(Data, GenBas)
             Data.Gen.Basic.qgLow(GenBas(i).nod,:) = qgLow;
             Data.Gen.Basic.pgTop(GenBas(i).nod,:) = pgTop;
             Data.Gen.Basic.qgTop(GenBas(i).nod,:) = qgTop;
+            Data.Gen.Basic.pgIni(GenBas(i).nod,:) = GenBas(i).pgIni;
+            Data.Gen.Basic.qgIni(GenBas(i).nod,:) = GenBas(i).qgIni;
             Data.Gen.Basic.I(GenBas(i).nod,:) = 1;
         end
 

@@ -7,11 +7,15 @@ DflowD.Eolicos(1,1).nod = 5;
 DflowD.Eolicos(1,1).type = 'casos\gen\dfig\Dfig_1mw_def.csv';
 DflowD.Eolicos(1,1).fileG = 'casos\gen\dfig\Dfig_1mw_P_n_.csv';
 DflowD.Eolicos(1,1).fileC = 'casos\costos\dfig\costosDfig.csv';
+DflowD.Eolicos(1,1).pgIni = 0;
+DflowD.Eolicos(1,1).qgIni = 0;
 
 DflowD.Eolicos(2,1).nod = 6;
 DflowD.Eolicos(2,1).type = 'casos\gen\dfig\Dfig_200kw_def.csv';
 DflowD.Eolicos(2,1).fileG = 'casos\gen\dfig\Dfig_200kw_P_n_.csv';
 DflowD.Eolicos(2,1).fileC = 'casos\costos\dfig\costosDfig.csv';
+DflowD.Eolicos(2,1).pgIni = 0;
+DflowD.Eolicos(2,1).qgIni = 0;
 
 % Trafos
 DflowD.Trafos(1,1).N = [-8 8];
@@ -46,11 +50,14 @@ DflowD.Caps(1,1).ini = 0;
 DflowD.Caps(1,1).cambio = 1;
 
 % Trasmision
-DflowD.Tras.nod = 2;
-DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
-DflowD.Tras.uLow = 1;
-DflowD.Tras.uTop = 1;
-DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).nod = 2;
+DflowD.Tras(1,1).fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras(1,1).uLow = 1;
+DflowD.Tras(1,1).uTop = 1;
+DflowD.Tras(1,1).fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).pgIni = 0;
+DflowD.Tras(1,1).qgIni = 0;
+
 
 %% Nombres de archivos
 % 

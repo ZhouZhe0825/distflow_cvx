@@ -7,11 +7,15 @@ DflowD.Solares(1,1).nod = 4;
 DflowD.Solares(1,1).type = 'casos\gen\pv\pv_def.csv';
 DflowD.Solares(1,1).fileG = 'casos\gen\pv\pvgen.csv';
 DflowD.Solares(1,1).fileC = 'casos\costos\pv\costosPv.csv';
+DflowD.Solares(1,1).pgIni = 0;
+DflowD.Solares(1,1).qgIni = 0;
 
 DflowD.Solares(2,1).nod = 7;
 DflowD.Solares(2,1).type = 'casos\gen\pv\pv_def.csv';
 DflowD.Solares(2,1).fileG = 'casos\gen\pv\pvgen.csv';
 DflowD.Solares(2,1).fileC = 'casos\costos\pv\costosPv.csv';
+DflowD.Solares(2,1).pgIni = 0;
+DflowD.Solares(2,1).qgIni = 0;
 
 % Trafos
 DflowD.Trafos(1,1).N = [-8 8];
@@ -30,11 +34,14 @@ DflowD.Caps(1,1).ini = 0;
 DflowD.Caps(1,1).cambio = 1;
 
 % Trasmision
-DflowD.Tras.nod = 2;
-DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
-DflowD.Tras.uLow = 1;
-DflowD.Tras.uTop = 1;
-DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).nod = 2;
+DflowD.Tras(1,1).fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras(1,1).uLow = 1;
+DflowD.Tras(1,1).uTop = 1;
+DflowD.Tras(1,1).fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).pgIni = 0;
+DflowD.Tras(1,1).qgIni = 0;
+
 
 %% Nombres de archivos
 % 

@@ -6,10 +6,16 @@ DflowD = cargaDflowDDefault();
 DflowD.Baterias(1,1).nod = 5;
 DflowD.Baterias(1,1).type = 'casos\bat\bat_def.csv';
 DflowD.Baterias(1,1).EIni = .5;
+DflowD.Baterias(1,1).pgIni = 0;
+DflowD.Baterias(1,1).qgIni = 0;
 
 DflowD.Baterias(2,1).nod = 8;
 DflowD.Baterias(2,1).type = 'casos\bat\bat_def.csv';
 DflowD.Baterias(2,1).EIni = .5;
+DflowD.Baterias(2,1).pgIni = 0;
+DflowD.Baterias(2,1).qgIni = 0;
+DflowD.Baterias(2,1).pgIni = 0;
+DflowD.Baterias(2,1).qgIni = 0;
 
 % Trafos
 DflowD.Trafos(1,1).N = [-8 8];
@@ -28,11 +34,13 @@ DflowD.Caps(1,1).ini = 0;
 DflowD.Caps(1,1).cambio = 1;
 
 % Trasmision
-DflowD.Tras.nod = 1;
-DflowD.Tras.fileG = 'casos\gen\tras\tras_def.csv';
-DflowD.Tras.uLow = 1;
-DflowD.Tras.uTop = 1;
-DflowD.Tras.fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).nod = 1;
+DflowD.Tras(1,1).fileG = 'casos\gen\tras\tras_def.csv';
+DflowD.Tras(1,1).uLow = 1;
+DflowD.Tras(1,1).uTop = 1;
+DflowD.Tras(1,1).fileC = 'casos\costos\trasmision\costosTrasmision.csv';
+DflowD.Tras(1,1).pgIni = 0;
+DflowD.Tras(1,1).qgIni = 0;
 
 %% Nombres de archivos
 % 

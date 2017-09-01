@@ -31,6 +31,8 @@ function [Data] = cargaTrasDefault(Data, Tras)
             Data.Gen.Tras.qgLow(Tras(i).nod,:) = qgLow;
             Data.Gen.Tras.pgTop(Tras(i).nod,:) = pgTop;
             Data.Gen.Tras.qgTop(Tras(i).nod,:) = qgTop;
+            Data.Gen.Tras.pgIni(Tras(i).nod,:) = Tras(i).pgIni;
+            Data.Gen.Tras.qgIni(Tras(i).nod,:) = Tras(i).qgIni;
             Data.Gen.Tras.I(Tras(i).nod,:) = 1;
         end
 

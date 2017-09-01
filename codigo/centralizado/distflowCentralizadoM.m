@@ -202,7 +202,7 @@ cvx_begin
 	NtrDif(:,(2:Config.Etapas)) = Ntr(:,(2:Config.Etapas)) - Ntr(:,(1:Config.Etapas-1));
 
 % 	yDif(:,1) = y(:,1);
-	yDif(:,1) = 0;
+	yDif(:,1) = y(:,1) - Data.Red.Branch.yIni;
 	yDif(:,(2:Config.Etapas)) = y(:,(2:Config.Etapas)) - y(:,(1:Config.Etapas-1));
 
     tfopt_expr = ...
