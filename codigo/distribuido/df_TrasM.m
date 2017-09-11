@@ -14,12 +14,11 @@ nG = length(G);
 
 
 %% Modelo programacion matematica
-
 tic
 cvx_begin quiet
 
-	for i = 1: size(Config.Centr,1)
-		cvx_solver_settings(Config.Centr{i,1}, Config.Centr{i,2});
+	for i = 1: size(Config.SubP,1)
+		cvx_solver_settings(Config.SubP{i,1}, Config.SubP{i,2});
 	end
 
 	cvx_precision high
@@ -37,16 +36,16 @@ cvx_begin quiet
 
 
 	%% Funcion objetivo
-    tfopt_conv = 1/(2*DistrInfo.Gama) * ...
-            (norms(pGTras - DistrInfo.Tras.P(G,:),2,2) ...
-            + norms(qGTras - DistrInfo.Tras.Q(G,:),2,2));
+	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
+			(norms(pGTras - DistrInfo.Tras.P(G,:),2,1) ...
+			+ norms(qGTras - DistrInfo.Tras.Q(G,:),2,1));
 	tfopt_expr = ...
 		sum(Data.Cost.piPTras(G,:).*pGTras,1) ...
 		+ sum(cqGTras,1) ...
 		;
 
-	tfopt_mu = - DistrInfo.muT(G,:) .* pGTras;
-	tfopt_lambda = - DistrInfo.lambdaT(G,:) .* qGTras;
+	tfopt_mu = sum(- DistrInfo.muT(G,:) .* pGTras,1);
+	tfopt_lambda = sum(- DistrInfo.lambdaT(G,:) .* qGTras,1);
 
 	cqGTras >= - Data.Cost.piQmtras(G,:) .* qGTras;
 	cqGTras >= Data.Cost.piQMtras(G,:) .* qGTras;

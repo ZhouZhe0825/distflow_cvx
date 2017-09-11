@@ -18,7 +18,7 @@ if nSt > 0
 		for et = 1: Config.Etapas-1
 			Maux = [Data.St.Bat.m1(St(i),et) -Data.St.Bat.m2(St(i),et)/2; ...
 				-Data.St.Bat.m2(St(i),et)/2 Data.St.Bat.m1(St(i),et)];
-            M((et:et+1),(et:et+1),i) = M((et:et+1),(et:et+1),i) + Maux;
+			M((et:et+1),(et:et+1),i) = M((et:et+1),(et:et+1),i) + Maux;
 		end
 	end
 end
@@ -72,12 +72,12 @@ cvx_begin quiet
 			((Data.St.Bat.EPref - EStb).^2) ...
 			+ Data.St.Bat.wU,1);
 
-	tfopt_mu = DistrInfo.lambdaT(St,:) .* qStb;
-	tfopt_lambda = DistrInfo.lambdaT(St,:) .* qStb;
+	tfopt_mu = sum(DistrInfo.muT(St,:) .* pStb,1);
+	tfopt_lambda = sum(DistrInfo.lambdaT(St,:) .* qStb,1);
 
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
-			(norms(pStb - DistrInfo.Alm.pStb(St,:),2,2) ...
-			+ norms(qStb - DistrInfo.Alm.qStb(St,:),2,2));
+			(norms(pStb - DistrInfo.Alm.pStb(St,:),2,1) ...
+			+ norms(qStb - DistrInfo.Alm.qStb(St,:),2,1));
 
 	EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
 	EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
@@ -108,6 +108,12 @@ cvx_begin quiet
 
 cvx_end
 toc
+% catch Err
+%	 status = 'Error';
+%	 Var = [];
+%	 ME = MException('df_AlmM','');
+%	 throw(ME);
+% end
 
 %% Construccion de la estructura de solucion
 % pasaje a NxNxT

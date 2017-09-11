@@ -21,7 +21,6 @@ vLClNI = Data.Red.Bus.uLow(ClNI,:).^2;
 vTClNI = Data.Red.Bus.uTop(ClNI,:).^2;
 
 %% Modelo programacion matematica
-
 tic
 cvx_begin quiet
 
@@ -48,7 +47,7 @@ cvx_begin quiet
 
 	expression onNext(nClNI,Config.Etapas)
 
-    pCClNI == Data.ClNI.pC(ClNI,:).*onClNI;
+	pCClNI == Data.ClNI.pC(ClNI,:).*onClNI;
 	qCClNI == Data.ClNI.qC(ClNI,:).*onClNI;
 
 	onNext(:,(1:Config.Etapas-1)) = onClNI(:,(2:Config.Etapas));
@@ -64,8 +63,8 @@ cvx_begin quiet
 	tfopt_lambda = sum(DistrInfo.lambdaT(ClNI,:) .* qCClNI,1);
 
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
-		sum(norms(pCClNI - DistrInfo.ClNI.pC(ClNI,:),2,2) ...
-		+ norms(qCClNI - DistrInfo.ClNI.qC(ClNI,:),2,2),1);
+		(norms(pCClNI - DistrInfo.ClNI.pC(ClNI,:),2,1) ...
+		+ norms(qCClNI - DistrInfo.ClNI.qC(ClNI,:),2,1));
 
 
 
@@ -80,9 +79,9 @@ toc
 % Cargas No interrumpibles
 if nClNI > 0
 	Var.ClNI.pC = zeros(n,Config.Etapas);
-    Var.ClNI.pC(ClNI,:) = pCClNI;
+	Var.ClNI.pC(ClNI,:) = pCClNI;
 	Var.ClNI.qC = Var.ClNI.pC * 0;
-    Var.ClNI.qC(ClNI,:) = qCClNI;
+	Var.ClNI.qC(ClNI,:) = qCClNI;
 	Var.ClNI.on = Var.ClNI.pC * 0;
 	Var.ClNI.on(ClNI,:) = onClNI;
 	Var.ClNI.start = Var.ClNI.pC * 0;

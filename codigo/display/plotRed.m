@@ -10,21 +10,21 @@ function plotRed(Data)
 	Ntras = find(Data.Gen.Tras.I == 1);
 	Nbat = find(Data.St.Bat.I == 1);
 
-    
+	
 
 
 	G = graph(Data.Red.Branch.T);
 	h = plot(G);
-	labelnode(h,Ntras,{'Tras'});
 	layout(h,'layered','Direction','down','Sources',Ntras(1));
 	highlight(h, graph(Data.Red.Branch.Tswitches), 'EdgeColor', 'r', 'LineStyle', '--', 'Linewidth',1.5);
 	highlight(h,Ncons,'NodeColor','g', 'Marker','^','MarkerSize',4);
-    for i = 1:length(Data.Red.Branch.T(:,:))
-        labelnode(h,i,{num2str(i)});
-    end
+	for i = 1:length(Data.Red.Branch.T(:,:))
+		labelnode(h,i,{num2str(i)});
+	end
 	highlight(h,Nncons, 'Marker','none');
 	highlight(h, graph(Data.Red.Branch.Tswitches), 'EdgeColor', 'r', 'LineStyle', '--', 'Linewidth',1.5);
-    labeledge(h,NtapI,NtapJ,repmat({'Tap'},[length(NtapI) 1]))    
+	labeledge(h,NtapI,NtapJ,repmat({'Tap'},[length(NtapI) 1]))	
+	labelnode(h,Ntras,{'Tras'});
 	labelnode(h,Ncap,{'Cap'});
 	labelnode(h,Ncarg,{'Carga'});
 	labelnode(h,Ndfig,{'Dfig'});

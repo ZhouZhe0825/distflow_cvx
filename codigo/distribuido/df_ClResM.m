@@ -19,7 +19,6 @@ AC = find(Data.St.AC.I == 1);
 nAC = length(AC);
 
 %% Modelo programacion matematica
-
 tic
 cvx_begin quiet
 
@@ -54,8 +53,8 @@ cvx_begin quiet
 	tfopt_lambda = sum(sum(DistrInfoM.lambdaT(DistrInfo.Bus,:,:) .* qCApp(DistrInfo.Bus,:,:),3),1);
 
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
-		sum(sum(norms(pCApp(DistrInfo.Bus,:,:) - DistrInfo.ClRes.pCApp(DistrInfo.Bus,:,:),2,2) ...
-		+ norms(qCApp(DistrInfo.Bus,:,:) - DistrInfo.ClRes.qCApp(DistrInfo.Bus,:,:),2,2),3),1);
+		sum(norms(pCApp(DistrInfo.Bus,:,:) - DistrInfo.ClRes.pCApp(DistrInfo.Bus,:,:),2,1) ...
+		+ norms(qCApp(DistrInfo.Bus,:,:) - DistrInfo.ClRes.qCApp(DistrInfo.Bus,:,:),2,1),3);
 
 	%% Restricciones de clientes residenciales
 	uLowApp = zeros(size(Data.Red.Bus.uLow,1),size(Data.Red.Bus.uLow,2), 2);
@@ -65,7 +64,7 @@ cvx_begin quiet
 		vApp(:,:,app) = DistrInfo.ClRes.v;
 		uLowApp(:,:,app) = Data.Red.Bus.uLow(:,:);
 		uTopApp(:,:,app) = Data.Red.Bus.uTop(:,:);
-        qCApp(:,:,app) == pCApp(:,:,app).*Data.Util.tgPhi(app)
+		qCApp(:,:,app) == pCApp(:,:,app).*Data.Util.tgPhi(app)
 	end
 
 	pCApp >= Data.Red.Bus.alpha.*(Data.Util.pzCnLow.*vApp + pCn.*uLowApp.^2 - Data.Util.pzCnLow.*uLowApp.^2) + (1-Data.Red.Bus.alpha).* pCn; 

@@ -30,12 +30,11 @@ nPv = length(Pv);
 NotPv = find(sign(sum(abs(Data.Gen.Pv.I),2)) == 0);
 
 %% Modelo programacion matematica
-
 tic
 cvx_begin quiet
 
-	for i = 1: size(Config.Centr,1)
-		cvx_solver_settings(Config.Centr{i,1}, Config.Centr{i,2});
+	for i = 1: size(Config.SubP,1)
+		cvx_solver_settings(Config.SubP{i,1}, Config.SubP{i,2});
 	end
 
 	cvx_precision high
@@ -58,12 +57,12 @@ cvx_begin quiet
 	variable cqPv(nPv, Config.Etapas);
 	expression SPvNorm(nPv, Config.Etapas,2);
 
-	tfopt_expr = sum(Data.Cost.rhopPv(Pv,:) .* pPv) ...
-		+ sum(cqPv) ...
+	tfopt_expr = sum(Data.Cost.rhopPv(Pv,:) .* pPv,1) ...
+		+ sum(cqPv,1) ...
 	;
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
-			(norms(pPv -  DistrInfo.PV.pPv(Pv,:),2,2) ...
-			+ norms(qPv - DistrInfo.PV.qPv(Pv,:),2,2));
+			(norms(pPv -  DistrInfo.PV.pPv(Pv,:),2,1) ...
+			+ norms(qPv - DistrInfo.PV.qPv(Pv,:),2,1));
 
 	tfopt_mu = DistrInfo.muT(Pv,:) .* pPv;
 	tfopt_lambda = DistrInfo.lambdaT(Pv,:) .* qPv;

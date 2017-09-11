@@ -1,12 +1,17 @@
 function [Var, opt, DataM] = llamarCentralizadoM(Data, Config)
 
 
-    DataM = Data;
-    [DataM] = reshapeDataM(DataM, Config);
-    
-    [DataM.Red.Branch.yIni] = cargarExplotacionInicial(DataM);
+	DataM = Data;
+	[DataM] = reshapeDataM(DataM, Config);
+	
+	[DataM.Red.Branch.yIni] = cargarExplotacionInicial(DataM);
 
-	[Var, opt] = distflowCentralizadoM(DataM, Config);
+	try
+		[Var, opt, status] = distflowCentralizadoM(DataM, Config);
+	catch Err
+		Var = [];
+		opt = [];
+	end
 
 % 	DataM_f = DataM;
 % 

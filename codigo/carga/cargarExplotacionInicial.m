@@ -21,14 +21,18 @@ function [yIni] = cargarExplotacionInicial(DataM)
 	DataIni.Red.Bus.uTop = DataM.Red.Bus.uTop(:,1);
 	DataIni.Red.Bus.pCLow = DataM.Red.Bus.pCLow(:,1);
 	DataIni.Red.Bus.qCLow = DataM.Red.Bus.qCLow(:,1);
-
-    leyenda = '------------------------ Calculo de explotacion ------------------------'
-    
+	DataIni.Gen.Tras.pgLow = DataM.Gen.Tras.pgLow(:,1);
+	DataIni.Gen.Tras.pgTop = DataM.Gen.Tras.pgTop(:,1);
+	DataIni.Gen.Tras.qgLow = DataM.Gen.Tras.qgLow(:,1);
+	DataIni.Gen.Tras.qgTop = DataM.Gen.Tras.qgTop(:,1);
+	
+	leyenda = '------------------------ Calculo de explotacion ------------------------'
+	
 	[Var, status] = df_InicialM(DataIni);
 
-    leyenda = status
+	leyenda = status
 
-    yIni = Var.Red.Branch.y;
+	yIni = Var.Red.Branch.y;
 
 
 
