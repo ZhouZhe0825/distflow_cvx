@@ -64,8 +64,8 @@ cvx_begin quiet
 			(norms(pPv -  DistrInfo.PV.pPv(Pv,:),2,1) ...
 			+ norms(qPv - DistrInfo.PV.qPv(Pv,:),2,1));
 
-	tfopt_mu = DistrInfo.muT(Pv,:) .* pPv;
-	tfopt_lambda = DistrInfo.lambdaT(Pv,:) .* qPv;
+	tfopt_mu = (- DistrInfo.muT(Pv,:) .* pPv);
+	tfopt_lambda = (- DistrInfo.lambdaT(Pv,:) .* qPv);
 
 	cqPv >= - Data.Cost.rhomqPv(Pv,:) .* qPv;
 	cqPv >= Data.Cost.rhoMqPv(Pv,:) .* qPv;

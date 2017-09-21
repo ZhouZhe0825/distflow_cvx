@@ -108,8 +108,8 @@ cvx_begin quiet
 				(norms(pWi - DistrInfo.Dfig.pWi(indWn,:),2,1) ...
 				+ norms(qWi - DistrInfo.Dfig.qWi(indWn,:),2,2));
 
-	tfopt_mu = sum(DistrInfo.muT(indWn,:) .* pWi,1);
-	tfopt_lambda = sum(DistrInfo.lambdaT(indWn,:) .* qWi,1);
+	tfopt_mu = sum(- DistrInfo.muT(indWn,:) .* pWi,1);
+	tfopt_lambda = sum(- DistrInfo.lambdaT(indWn,:) .* qWi,1);
 
 	cqWi >= - Data.Cost.rhomqWi(indWn) .* qWi;
 	cqWi >= Data.Cost.rhoMqWi(indWn) .* qWi;

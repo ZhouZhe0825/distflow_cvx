@@ -72,8 +72,8 @@ cvx_begin quiet
 			((Data.St.Bat.EPref - EStb).^2) ...
 			+ Data.St.Bat.wU,1);
 
-	tfopt_mu = sum(DistrInfo.muT(St,:) .* pStb,1);
-	tfopt_lambda = sum(DistrInfo.lambdaT(St,:) .* qStb,1);
+	tfopt_mu = sum(- DistrInfo.muT(St,:) .* pStb,1);
+	tfopt_lambda = sum(- DistrInfo.lambdaT(St,:) .* qStb,1);
 
 	tfopt_conv = 1/(2*DistrInfo.Gama) * ...
 			(norms(pStb - DistrInfo.Alm.pStb(St,:),2,1) ...
@@ -82,7 +82,7 @@ cvx_begin quiet
 	EStbAnt(:,1) = Data.St.Bat.EIni(St,1);
 	EStbAnt(:,(2:Config.Etapas)) = EStb(St,(1:Config.Etapas-1));
 
-	pStgb == pStgbC - pStgbD;
+	pStgb == pStgbD - pStgbC;
 	pStgbC >= 0;
 	pStgbD >= 0;
 

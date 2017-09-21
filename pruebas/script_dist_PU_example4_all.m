@@ -11,8 +11,8 @@ DflowD.Solares(1,1).pgIni = 0;
 DflowD.Solares(1,1).qgIni = 0;
 
 % Baterias
-DflowD.Baterias(1,1).nod = 5;
-DflowD.Baterias(1,1).type = 'casos\bat\bat_def.csv';
+DflowD.Baterias(1,1).nod = 7;
+DflowD.Baterias(1,1).type = 'casos\bat\bat_eta2.csv';
 DflowD.Baterias(1,1).EIni = .5;
 DflowD.Baterias(1,1).pgIni = 0;
 DflowD.Baterias(1,1).qgIni = 0;
@@ -26,11 +26,11 @@ DflowD.Eolicos(1,1).pgIni = 0;
 DflowD.Eolicos(1,1).qgIni = 0;
 
 % Generador Basico
-DflowD.GenBas(1,1).nod = 7;
-DflowD.GenBas(1,1).fileG = 'casos\gen\basic\genbas.csv';
-DflowD.GenBas(1,1).fileC = 'casos\costos\basic\costosBasic.csv';
-DflowD.GenBas(1,1).pgIni = 0;
-DflowD.GenBas(1,1).qgIni = 0;
+% DflowD.GenBas(1,1).nod = 7;
+% DflowD.GenBas(1,1).fileG = 'casos\gen\basic\genbas.csv';
+% DflowD.GenBas(1,1).fileC = 'casos\costos\basic\costosBasic.csv';
+% DflowD.GenBas(1,1).pgIni = 0;
+% DflowD.GenBas(1,1).qgIni = 0;
 
 % Switches
 DflowD.Switches.i = [5 7];
@@ -80,7 +80,7 @@ DflowD.ACs(1,1).eta = 1666.67;
 % Cargas
 DflowD.Cargas(1,1).pC = 0.5;
 DflowD.Cargas(1,1).qC = DflowD.Cargas(1,1).pC *.015;
-DflowD.Cargas(1,1).dur = 3;
+DflowD.Cargas(1,1).dur = 3*4;
 DflowD.Cargas(1,1).nMultipTop = 1.1;
 DflowD.Cargas(1,1).nMultipLow = .75;
 DflowD.Cargas(1,1).fileU = 'casos\util\betaE.csv';
@@ -88,7 +88,7 @@ DflowD.Cargas(1,1).nod = 5;
 
 DflowD.Cargas(2,1).pC = 0.25;
 DflowD.Cargas(2,1).qC = DflowD.Cargas(2,1).pC *.015;
-DflowD.Cargas(2,1).dur = 2;
+DflowD.Cargas(2,1).dur = 4*4;
 DflowD.Cargas(2,1).nMultipTop = 1.1;
 DflowD.Cargas(2,1).nMultipLow = .75;
 DflowD.Cargas(2,1).fileU = 'casos\util\betaE.csv';
@@ -105,7 +105,7 @@ DflowD.fileCostosTension = 'casos\costos\tension\costosTension.csv';
 
 %% Configuracion de simulacion
 iniEtapa = 1;
-CantHorasEtapa = 1;
+CantHorasEtapa = 5;
 
 Config = [];
 Config.iniEtapa = iniEtapa;
@@ -114,8 +114,9 @@ Config.outFilename = 'PU_example4_all_dist';
 
 Config.Distr.gama_ini = .25;
 Config.Distr.gama_fin = .25;
-Config.Distr.TopIT = 6;
-Config.Distr.tol = 5e-8;
+Config.Distr.TopIT = 25;
+Config.Distr.tolAbs = 5e-8;
+Config.Distr.tolRel = 5e-8;
 
 
 % Centralizado
