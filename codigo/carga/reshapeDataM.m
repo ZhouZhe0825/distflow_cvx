@@ -105,6 +105,8 @@ function [DataM] = reshapeDataM(Data, Config)
 		DataM.Gen.DFIG.uLowF = DataM.Gen.DFIG.uLowF(:,Et);
 		DataM.Gen.DFIG.uTopE = DataM.Gen.DFIG.uTopE(:,Et);
 		DataM.Gen.DFIG.uTopF = DataM.Gen.DFIG.uTopF(:,Et);
+		DataM.Gen.DFIG.qWiLow = DataM.Gen.DFIG.qWiLow(:,Et);
+		DataM.Gen.DFIG.qWiTop = DataM.Gen.DFIG.qWiTop(:,Et);
 	end
 
 	DataM.Gen.Pv.cr = DataM.Gen.Pv.cr * one;

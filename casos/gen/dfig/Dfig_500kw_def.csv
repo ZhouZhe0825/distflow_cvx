@@ -42,3 +42,5 @@ PQnorm_2,2
 PQnorm_3,.5
 C_plb,1
 vv,1
+qWiLow,-.087
+qWiTop,.087

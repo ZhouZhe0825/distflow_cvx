@@ -111,11 +111,14 @@ cvx_begin quiet
 	tfopt_mu = sum(- DistrInfo.muT(indWn,:) .* pWi,1);
 	tfopt_lambda = sum(- DistrInfo.lambdaT(indWn,:) .* qWi,1);
 
-	cqWi >= - Data.Cost.rhomqWi(indWn) .* qWi;
-	cqWi >= Data.Cost.rhoMqWi(indWn) .* qWi;
+	cqWi >= - Data.Cost.rhomqWi(indWn,:) .* qWi;
+	cqWi >= Data.Cost.rhoMqWi(indWn,:) .* qWi;
 
 	pWi == - (PdfigIE + PdfigIF);
 	qWi == - (QdfigIE + QdfigIF);
+
+    qWi <= Data.Gen.DFIG.qWiTop(indWn,:);
+    qWi >= Data.Gen.DFIG.qWiLow(indWn,:);
 
 	% Modelo de Red interna
 	vdfigI == DistrInfo.Dfig.v(indWn,1,:);

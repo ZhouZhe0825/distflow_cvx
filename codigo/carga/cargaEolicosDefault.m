@@ -27,7 +27,8 @@ function [Data] = cargaEolicosDefault(Data,Eolicos)
                 'lW_12_Top','lW_13_Top','lW_45_Top','sW_3_Top','sW_5_Top',...
                 'vmm','vm','vM','vMM','cvW_3','cvW_5','crW_3','crW_5',...
                 'P_nMec','c1','c2','c3','c4','c5','c6','c7','uLow_2',...
-                'uTop_2','uLow_3','uTop_3','PQnorm_2','PQnorm_3','C_plb','vv'...
+                'uTop_2','uLow_3','uTop_3','PQnorm_2','PQnorm_3','C_plb','vv',...
+                'qWiLow','qWiTop'...
                 };
             S = loadCsvDef(Eolicos(i).type(), fields);
 
@@ -91,6 +92,9 @@ function [Data] = cargaEolicosDefault(Data,Eolicos)
 
             Data.Gen.DFIG.xiTopF(Eolicos(i).nod,:) = S.sW_3_Top^2;
             Data.Gen.DFIG.xiTopR(Eolicos(i).nod,:) = S.sW_5_Top^2;
+
+            Data.Gen.DFIG.qWiLow(Eolicos(i).nod,:) = S.qWiLow;
+            Data.Gen.DFIG.qWiTop(Eolicos(i).nod,:) = S.qWiTop;
 
             Data.Gen.DFIG.I(Eolicos(i).nod,:) = 1;
 

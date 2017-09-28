@@ -604,6 +604,10 @@ try
 			pWi(indWn,:) == - (PdfigIE + PdfigIF);
 			qWi(indWn,:) == - (QdfigIE + QdfigIF);
 
+            qWi(indWn,:) <= Data.Gen.DFIG.qWiTop(indWn,:);
+            qWi(indWn,:) >= Data.Gen.DFIG.qWiLow(indWn,:);
+
+            
 			pWi(NindWn,:) == 0;
 			qWi(NindWn,:) == 0;
 

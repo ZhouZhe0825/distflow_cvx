@@ -87,7 +87,7 @@ cvx_begin quiet
 	pStgbD >= 0;
 
 	pStb == pStgb - (Data.St.Bat.cv(St,:).*sStb + Data.St.Bat.cr(St,:).*xiStb);
-	EStb(St,:) == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - pStgbD.*Data.St.Bat.etaD(St,:)*Data.dt + Data.St.Bat.etaC(St,:).*pStgbC*Data.dt;
+	EStb(St,:) == (1-Data.St.Bat.epsilon(St,:)).*EStbAnt - pStgbD./Data.St.Bat.etaD(St,:)*Data.dt + Data.St.Bat.etaC(St,:).*pStgbC*Data.dt;
 
 	StbNorm(:,:,1) = pStgb;
 	StbNorm(:,:,2) = qStb;
