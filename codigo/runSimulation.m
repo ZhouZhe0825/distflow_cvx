@@ -100,9 +100,8 @@ function runSimulation(Data, DflowD, Config)
 
 		diary('off');
 	else
-		[Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, status, DataM, Ev] = llamarDistribuidoM(Data, Config, Var_centr, opt_centr, Var_ini);
-
-		save([Config.outputDirOutputs, '\outputs.mat'],'Var_dist_conE', 'Var_centr', 'Var_F', 'Var_ini', 'opt_dist_conE', 'opt_centr', 'opt_F', 'Ev','Config','Var_m','opt_m','DataM');
+		[Var_dist_conE, Var_centr, Var_F, Var_ini, opt_dist_conE, opt_centr, opt_F, opt_ini, status, DataM, Ev, error] = llamarDistribuidoM(Data, Config, Var_centr, opt_centr, Var_ini);
+		save([Config.outputDirOutputs, '\outputs.mat'],'Var_dist_conE', 'Var_centr', 'Var_F', 'Var_ini', 'opt_dist_conE', 'opt_centr', 'opt_F', 'opt_ini', 'Ev','Config','Var_m','opt_m','DataM');
 
 		diary('off');
 	end
@@ -112,6 +111,7 @@ function runSimulation(Data, DflowD, Config)
 	else
 		printSalidasDistflowM(Var_F,         DataM, Config, [Config.outputDirOutputs, '\output_m'],           Ev.opt, Ev.mu, Ev.lambda, Ev.difPAbs, Ev.difQAbs);
 		printSalidasDistflowM(Var_centr,     DataM, Config, [Config.outputDirOutputs, '\output_centr'],       [],    [],   [],       [],     []);
+		printSalidasDistflowM(Var_ini,       DataM, Config, [Config.outputDirOutputs, '\output_ini'],         [],    [],   [],       [],     []);
 		printSalidasDistflowM(Var_dist_conE, DataM, Config, [Config.outputDirOutputs, '\output_dist_conE'],   [],    [],   [],       [],     []);
 	end
 	

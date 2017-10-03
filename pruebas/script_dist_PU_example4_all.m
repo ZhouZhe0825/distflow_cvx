@@ -112,8 +112,10 @@ Config.iniEtapa = iniEtapa;
 Config.Etapas = 4*CantHorasEtapa;
 Config.outFilename = 'PU_example4_all_dist';
 
-Config.Distr.gama_ini = .25;
-Config.Distr.gama_fin = .25;
+Config.Distr.gama_m_ini = .25;
+Config.Distr.gama_l_ini = .25;
+Config.Distr.gama_m_fin = .25;
+Config.Distr.gama_l_fin = .25;
 Config.Distr.TopIT = 25;
 Config.Distr.tolAbs = 5e-8;
 Config.Distr.tolRel = 5e-8;

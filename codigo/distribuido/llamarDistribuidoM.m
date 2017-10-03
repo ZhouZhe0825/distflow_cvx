@@ -1,4 +1,4 @@
-function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, status, Data_d, Ev, error] = llamarDistribuidoM(Data, Config, Var_centr, opt_centr, Var_ini)
+function [Var_dist_conE, Var_centr, Var_F, Var_ini, opt_dist_conE, opt_centr, opt_F, opt_ini, status, Data_d, Ev, error] = llamarDistribuidoM(Data, Config, Var_centr, opt_centr, Var_ini);
 	
 	error = false;
 	Var_dist_conE = [];
@@ -82,7 +82,8 @@ function [Var_dist_conE, Var_centr, Var_F, opt_dist_conE, opt_centr, opt_F, stat
 	nodos = size(Data.Red.Branch.T,1);
 	arcos = size(DataM.Red.Branch.lTop,1);
 	DistrInfo.Bus = [1:nodos];
-	DistrInfo.Gama = Config.Distr.gama_ini;
+	DistrInfo.Gama_m = Config.Distr.gama_m_ini;
+	DistrInfo.Gama_l = Config.Distr.gama_l_ini;
 
 %	 TrasNodes = find(Data.Gen.Tras.I == 1);
 % 	DfigNodes = find(Data.Gen.DFIG.I == 1);
@@ -352,10 +353,10 @@ function [conv, Ev] = converg(Ev, it, tolAbs, tolRel)
 		Ev.errLambda(:,:,it) = abs(Ev.lambda(:,:,ant) - Ev.lambda(:,:,it)) ./ abs(Ev.lambda(:,:,it));
 		conv = ...
 			all(all( ...
-				abs(Ev.difPAbs(:,:,it)) <= tolAbs | ...
-				abs(Ev.difQAbs(:,:,it)) <= tolAbs | ...
-				abs(Ev.difPRel(:,:,it)) <= tolRel | ...
-				abs(Ev.difQRel(:,:,it)) <= tolRel ...
+				(abs(Ev.difPAbs(:,:,it)) <= tolAbs | ...
+				abs(Ev.difPRel(:,:,it)) <= tolRel) & ...
+				(abs(Ev.difQAbs(:,:,it)) <= tolAbs | ...
+				abs(Ev.difQRel(:,:,it)) <= tolRel) ...
 			));
 	end
 
@@ -376,8 +377,8 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
 		tic
 		opt_curr = zeros(1,4);
 		% 1- Actualizacion del muT y lambdaT
-		DistrInfo.muT = DistrInfo.mu + DistrInfo.Gama * (DistrInfo.Adm.pC - DistrInfo.Adm.pG - DistrInfo.Adm.pN);
-		DistrInfo.lambdaT = DistrInfo.lambda + DistrInfo.Gama * (DistrInfo.Adm.qC - DistrInfo.Adm.qG - DistrInfo.Adm.qN);
+		DistrInfo.muT = DistrInfo.mu + DistrInfo.Gama_m * (DistrInfo.Adm.pC - DistrInfo.Adm.pG - DistrInfo.Adm.pN);
+		DistrInfo.lambdaT = DistrInfo.lambda + DistrInfo.Gama_l * (DistrInfo.Adm.qC - DistrInfo.Adm.qG - DistrInfo.Adm.qN);
 
 		% 2- Invocacion a todos los participantes con lambda y mu
 		[Var_curr, opt_curr, Ev.opt_Tras, Ev.opt_Dfig, Ev.opt_Pv, Ev.opt_ClNI, Ev.opt_ClRes, Ev.opt_Alm, Ev.opt_OpSis, status] = ...
@@ -388,8 +389,8 @@ function [Var_curr, opt_curr, status, it, DistrInfo, Ev, wbSol] = DistrLoop(ini_
 		[DistrInfo] = actualizarDistrInfo(Var_curr, Data, DistrInfo);
 		% gamaEv(print_it) = DistrInfo.Gama;
 
-		DistrInfo.mu = DistrInfo.mu + DistrInfo.Gama * (DistrInfo.Adm.pC - DistrInfo.Adm.pG - DistrInfo.Adm.pN);
-		DistrInfo.lambda = DistrInfo.lambda + DistrInfo.Gama * (DistrInfo.Adm.qC - DistrInfo.Adm.qG - DistrInfo.Adm.qN);
+		DistrInfo.mu = DistrInfo.mu + DistrInfo.Gama_m * (DistrInfo.Adm.pC - DistrInfo.Adm.pG - DistrInfo.Adm.pN);
+		DistrInfo.lambda = DistrInfo.lambda + DistrInfo.Gama_l * (DistrInfo.Adm.qC - DistrInfo.Adm.qG - DistrInfo.Adm.qN);
 
 		Ev.pN(:,:,print_it) = DistrInfo.Adm.pN;
 		Ev.qN(:,:,print_it) = DistrInfo.Adm.qN;
