@@ -1,19 +1,11 @@
 function extraOutput(Var, Data, Config, Header, outFilename)
 
-    n = size(Data.Red.Branch.T,1);
+%     n = size(Data.Red.Branch.T,1);
 
 	VertI = VertIMat(Data.Red.Branch.T);
 	VertJ = VertJMat(Data.Red.Branch.T);
 	
-	
-    G = find(Data.Gen.Tras.I == 1);
-%     NnoG = setdiff((1:n), G)';
-%     TSalientesG = Data.Red.Branch.T;
-%     TEntrantesG = Data.Red.Branch.T;
-%     TnoG = Data.Red.Branch.T;
-%     TnoG(G,:,:) = zeros(length(G),n,Config.Etapas);
-%     TSalientesG = TSalientesG - TnoG;
-%     TnoG(:,G,:) = zeros(n,length(G),Config.Etapas);
+%     G = find(Data.Gen.Tras.I == 1);
 
     P = Var.Red.Branch.P;
     Q = Var.Red.Branch.Q;
@@ -21,17 +13,23 @@ function extraOutput(Var, Data, Config, Header, outFilename)
     z = Var.Red.Branch.z;
     nv = Var.Red.Branch.nv;
     v = Var.Red.Bus.v;
+    pG = Var.Red.Bus.pG;
+    qG = Var.Red.Bus.qG;
+    pC = Var.Red.Bus.pC;
+    qC = Var.Red.Bus.qC;
+    pN = Var.Red.Bus.pN;
+    qN = Var.Red.Bus.qN;
 
     tvEqL = nv - VertJ*v;
     tvEqR = - 2 * (Data.Red.Branch.r .* P + Data.Red.Branch.x .* Q) + (Data.Red.Branch.r.^2 + Data.Red.Branch.x.^2) .* l;
     tvEqz = (VertI*(Data.Red.Bus.uTop.^2 - Data.Red.Bus.uLow.^2)).*(1-z);
-%     l0 = (tvEqL + tvEqR - tvEqz).*TnoG;
-%     G0 = (tvEqL + tvEqR + tvEqz).*TnoG;
     l0 = (tvEqL + tvEqR - tvEqz);
     G0 = (tvEqL + tvEqR + tvEqz);
     
-    h_p = abs((Var.Red.Bus.pC - Var.Red.Bus.pG) ./ Var.Red.Bus.pN);
-    h_q = abs((Var.Red.Bus.qC - Var.Red.Bus.qG) ./ Var.Red.Bus.qN);
+    h_p_rel = abs((pC - pG) ./ pN);
+    h_q_rel = abs((qC - qG) ./ qN);
+    h_p_abs = abs(pC - pG - pN);
+    h_q_abs = abs(qC - qG - qN);
     
 	lzr = l .* Data.Red.Branch.r .* z;
 
@@ -43,8 +41,11 @@ function extraOutput(Var, Data, Config, Header, outFilename)
     lRelz_prob = lRelz*0;
     lRelz_prob(indl) = lRelz(indl);
    
-    printVarMxT(h_p, Header.Bus, Header.Main, outFilename, 'pC - pG div pN');
-    printVarMxT(h_q, Header.Bus, Header.Main, outFilename, 'qC - qG div qN');
+    printVarMxT(h_p_rel, Header.Bus, Header.Main, outFilename, 'pC - pG div pN');
+    printVarMxT(h_q_rel, Header.Bus, Header.Main, outFilename, 'qC - qG div qN');
+
+    printVarMxT(h_p_abs, Header.Bus, Header.Main, outFilename, 'pC - pG - pN');
+    printVarMxT(h_q_abs, Header.Bus, Header.Main, outFilename, 'qC - qG - qN');
 
 	printVarMxT(G0, Header.Branch, Header.Main, outFilename, 'EqV >= 0');
 	printVarMxT(l0, Header.Branch, Header.Main, outFilename, 'EqV <= 0');

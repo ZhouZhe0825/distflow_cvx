@@ -15,7 +15,7 @@ function printBasic(Header, Var, Data, outFilename)
 				rowHeader{1} = 'p';
 				rowHeader{2} = 'q';
 				sheetName = ['GBas_' num2str(nod)];
-				printVarNx1xT(GB, rowHeader, Header, outFilename, sheetName);
+				printVarNx1xT(GB, rowHeader, Header.Main, outFilename, sheetName);
 			end
 		end
 	end

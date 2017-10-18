@@ -311,8 +311,8 @@ function [DistrInfo] = actualizarDistrInfo(Var, Data, DistrInfo)
 	end
 
 	% DistrInfo Trasmision
-	DistrInfo.Tras.P = Var.Red.Bus.PTras;
-	DistrInfo.Tras.Q = Var.Red.Bus.QTras;
+	DistrInfo.Tras.P = Var.Gen.Tras.pTras;
+	DistrInfo.Tras.Q = Var.Gen.Tras.qTras;
 
 	% DistrInfo Clientes Residenciales
 	DistrInfo.ClRes.v = Var.Red.Bus.v;

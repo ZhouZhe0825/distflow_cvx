@@ -21,8 +21,8 @@ function printCost(Header, Var, Data, outFilename)
 	cAC      = zeros(1,et);
 
     cV =       sum(Data.Cost.cdv.*Var.Red.Bus.cDv,1);
-    cPtr =     sum(Data.Cost.piPTras.*Var.Red.Bus.PTras,1);
-    cQtr =     sum(Var.Red.Bus.cQTras,1);
+    cPtr =     sum(Data.Cost.piPTras.*Var.Gen.Tras.pTras,1);
+    cQtr =     sum(Var.Gen.Tras.cqTras,1);
     
     if Data.Util.betaTcuad
         cF = sum(Data.Util.betaT(:,:,1).*((Var.Red.Bus.pCn(:,:,1) - Data.Util.pzCnPref(:,:,1)).^2),1);
@@ -87,5 +87,5 @@ function printCost(Header, Var, Data, outFilename)
 
     Cost = [cV; cPtr; cQtr; cPgen; cQgen; cF; cTr; cSw; cCp; cBatStb; cBatBeta; cPpv; cQpv; cPwi; cQwi; cAC; cClNI];
     sheetName = 'Costos';
-    printVarNx1xT(Cost, rowHeader, Header, outFilename, sheetName);
+    printVarNx1xT(Cost, rowHeader, Header.Main, outFilename, sheetName);
 end

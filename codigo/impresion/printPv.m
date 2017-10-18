@@ -29,7 +29,7 @@ function printPv(Header, Var, Data, outFilename)
 				rowHeader{7} = 'Holgura xiPv';
 				rowHeader{8} = 'cr xiPv';
 				sheetName = ['Pv_' num2str(nod)];
-				printVarNx1xT(Pv, rowHeader, Header, outFilename, sheetName);
+				printVarNx1xT(Pv, rowHeader, Header.Main, outFilename, sheetName);
 			end
 		end
 	end

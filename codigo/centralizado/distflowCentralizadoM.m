@@ -183,7 +183,7 @@ try
 
 		expression lQoL(m, Config.Etapas, 3);
 		expression lNorm(m, Config.Etapas, 3);
-		expression vExpr(n, Config.Etapas);
+		expression vExpr(m, Config.Etapas);
 		expression vApp(n, Config.Etapas, 2);
 		expression NcpDif(n,Config.Etapas);
 		expression NtrDif(m,Config.Etapas);
@@ -792,9 +792,9 @@ Var.Red.Bus.qCp	 = 	qCp	;
 Var.Red.Bus.Ncp	 = 	Ncp	;
 Var.Red.Bus.NcpDif	 = 	NcpDif	;
 
-Var.Red.Bus.PTras	 = 	pGTras	;
-Var.Red.Bus.QTras	 = 	qGTras	;
-Var.Red.Bus.cQTras   =  cqGTras ;
+Var.Gen.Tras.pTras	 = 	pGTras	;
+Var.Gen.Tras.qTras	 = 	qGTras	;
+Var.Gen.Tras.cqTras  =  cqGTras ;
 
 Var.ClRes.pCApp	 = 	pCApp	;
 Var.ClRes.qCApp	 = 	qCApp	;

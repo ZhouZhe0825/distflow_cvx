@@ -82,7 +82,7 @@ cvx_begin quiet
 
 	expression lQoL(m, Config.Etapas, 3);
 	expression lNorm(m, Config.Etapas, 3);
-	expression vExpr(n, Config.Etapas);
+	expression vExpr(m, Config.Etapas);
 	expression NcpDif(n,Config.Etapas);
 	expression NtrDif(m,Config.Etapas);
 	expression yDif(m,Config.Etapas);

@@ -134,7 +134,7 @@ function printDfig(Header, Var, Data, outFilename)
 
 				Dfig = [pWi;qWi;P;Q;l;h_l;r_l;pg;qg;pC;qC;s;h_s;cv_s;xi;h_xi;cr_xi;v;n_;P_mec];
 				sheetName = ['Dfig_' num2str(nod)];
-				printVarNx1xT(Dfig, rowHeader, Header, outFilename, sheetName);
+				printVarNx1xT(Dfig, rowHeader, Header.Main, outFilename, sheetName);
 			end
 		end
 	end

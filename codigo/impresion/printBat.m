@@ -14,10 +14,10 @@ function printBat(Header, Var, Data, outFilename)
 				pStgb = Var.St.Bat.pStgb(nod, :);
 				sStb = Var.St.Bat.sStb(nod, :);
 				h_sStb = sqrt(pStgb.^2 + qStb.^2)./sStb;
-				cv_sStb = Data.St.Bat.cv(nod,1,:).*sStb;
+				cv_sStb = Data.St.Bat.cv(nod, :).*sStb;
 				xiStb = Var.St.Bat.xiStb(nod, :);
 				h_xiStb = (pStgb.^2 + qStb.^2)./xiStb;
-				cr_xiStb = Data.St.Bat.cr(nod,1,:).*xiStb;
+				cr_xiStb = Data.St.Bat.cr(nod, :).*xiStb;
 
 				rowHeader = cell(12,1);
 				rowHeader{1} = 'pStb';
@@ -35,7 +35,7 @@ function printBat(Header, Var, Data, outFilename)
 
 				Bat = [pStb; pStgbC; pStgbD; qStb; EStb; pStgb; sStb; h_sStb; cv_sStb; xiStb; h_xiStb; cr_xiStb];
 				sheetName = ['Bat_' num2str(nod)];
-				printVarNx1xT(Bat, rowHeader, Header, outFilename, sheetName);
+				printVarNx1xT(Bat, rowHeader, Header.Main, outFilename, sheetName);
 			end
 		end
 	end

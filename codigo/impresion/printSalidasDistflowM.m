@@ -25,61 +25,16 @@ function printSalidasDistflowM(Var, Data, Config, outFilename, optEv, muEv, lamb
 	printVarMxT(Var.Red.Bus.qG, Header.Bus, Header.Main, outFilename, 'qG');
 	printVarMxT(Var.Red.Bus.qN, Header.Bus, Header.Main, outFilename, 'qN');
 	printVarMxT(Var.Red.Bus.qC, Header.Bus, Header.Main, outFilename, 'qC');
-	
-	printVarMxT(Var.ClRes.pC, Header.Bus, Header.Main, outFilename, 'pClRes');
-	printVarMxT(Var.ClRes.qC, Header.Bus, Header.Main, outFilename, 'qClRes');
-	if isfield(Var, 'ClRes')
-		if isfield(Var.ClRes, 'Tvar')
-			printVarMxT(Var.ClRes.Tvar, Header.Bus, Header.Main, outFilename, 'Tvar');
-		end
-	end
-	printVarMxT(squeeze(Var.ClRes.pCApp(:,:,1)), Header.Bus, Header.Main, outFilename, 'pCApp_1');
-	printVarMxT(squeeze(Var.ClRes.pCApp(:,:,2)), Header.Bus, Header.Main, outFilename, 'pCApp_2');
-	printVarMxT(squeeze(Var.ClRes.qCApp(:,:,1)), Header.Bus, Header.Main, outFilename, 'qCApp_1');
-	printVarMxT(squeeze(Var.ClRes.qCApp(:,:,2)), Header.Bus, Header.Main, outFilename, 'qCApp_2');
-	printVarMxT(Var.Red.Bus.pN, Header.Bus, Header.Main, outFilename, 'pNRed');
-	printVarMxT(Var.Red.Bus.qN, Header.Bus, Header.Main, outFilename, 'qNRed');
 	printVarMxT(Var.Red.Bus.qCp, Header.Bus, Header.Main, outFilename, 'qCp');
-	printVarMxT(Var.Red.Bus.PTras, Header.Bus, Header.Main, outFilename, 'Ptras');
-	printVarMxT(Var.Red.Bus.QTras, Header.Bus, Header.Main, outFilename, 'Qtras');
 
-    printCost(Header.Main, Var, Data, outFilename);
-    printClNI(Header.Main, Var, Data, outFilename);
-	printBasic(Header.Main, Var, Data, outFilename);
-    printPv(Header.Main, Var, Data, outFilename);
-	printBat(Header.Main, Var, Data, outFilename);
-	printDfig(Header.Main, Var, Data, outFilename);
+    printClRes(Header, Var, Data, outFilename);
+    printCost(Header, Var, Data, outFilename);
+    printClNI(Header, Var, Data, outFilename);
+	printBasic(Header, Var, Data, outFilename);
+    printPv(Header, Var, Data, outFilename);
+	printBat(Header, Var, Data, outFilename);
+	printDfig(Header, Var, Data, outFilename);
 
-
-
-    % if isfield(Data, 'Fixed')
-        % dPnPrint = [Header.Main;num2cell([nodos Output.dPn])];
-        % dQnPrint = [Header.Main;num2cell([nodos Output.dQn])];
-
-        % xlswrite([outFilename, '.xlsx'], dPnPrint, 'dPn');
-        % xlswrite([outFilename, '.xlsx'], dQnPrint, 'dQn');
-    %     end
-
-
-    it = min([size(optEv,1), size(muEv, 3), size(lambdaEv, 3), size(DifPEv, 3), size(DifQEv, 3)]);
-
-    if it > 0
-        xlswrite([outFilename, '.xlsx'],reshape(optEv, [size(optEv,1) size(optEv,2)]), 'optEv');
-        muEvOut = zeros(size(muEv,1)*size(muEv,3)+it-1, size(muEv,2));
-        lambdaEvOut = zeros(size(lambdaEv,1)*size(lambdaEv,3)+it-1, size(lambdaEv,2));
-        DifPEvOut = zeros(size(DifPEv,1)*size(DifPEv,3)+it-1, size(DifPEv,2));
-        DifQEvOut = zeros(size(DifQEv,1)*size(DifQEv,3)+it-1, size(DifQEv,2));
-        for i = 1:it
-            lambdaEvOut((size(lambdaEv,1)*(i-1)+i:size(lambdaEv,1)*i+i-1),:) = reshape(lambdaEv(:,:,i), [size(lambdaEv,1) size(lambdaEv,2)]);
-            DifPEvOut((size(DifPEv,1)*(i-1)+i:size(DifPEv,1)*i+i-1),:) = reshape(DifPEv(:,:,i), [size(DifPEv,1) size(DifPEv,2)]);
-            DifQEvOut((size(DifQEv,1)*(i-1)+i:size(DifQEv,1)*i+i-1),:) = reshape(DifQEv(:,:,i), [size(DifQEv,1) size(DifQEv,2)]);
-            muEvOut((size(muEv,1)*(i-1)+i:size(muEv,1)*i+i-1),:) = reshape(muEv(:,:,i), [size(muEv,1) size(muEv,2)]);
-        end
-        xlswrite([outFilename, '.xlsx'],muEvOut, 'muEv');
-        xlswrite([outFilename, '.xlsx'],lambdaEvOut, 'lambdaEv');
-        xlswrite([outFilename, '.xlsx'],DifPEvOut, 'DifPEv');
-        xlswrite([outFilename, '.xlsx'],DifQEvOut, 'DifQEv');
-    end
     extraOutput(Var, Data, Config, Header, outFilename);
 	
 end

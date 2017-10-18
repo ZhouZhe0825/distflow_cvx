@@ -66,16 +66,16 @@ toc
 
 %% Construccion de la estructura de solucion
 % pasaje a NxNxT
-Var.Red.Bus.PTras = zeros(n, Config.Etapas);
-Var.Red.Bus.QTras = zeros(n, Config.Etapas);
-Var.Red.Bus.cQTras = zeros(n, Config.Etapas);
-Var.Red.Bus.PTras(G,:)	 = 	pGTras	;
-Var.Red.Bus.QTras(G,:)	 = 	qGTras	;
-Var.Red.Bus.cQTras(G,:)  =  cqGTras ;
+Var.Gen.Tras.pTras = zeros(n, Config.Etapas);
+Var.Gen.Tras.qTras = zeros(n, Config.Etapas);
+Var.Gen.Tras.cqTras = zeros(n, Config.Etapas);
+Var.Gen.Tras.pTras(G,:)	 = 	pGTras	;
+Var.Gen.Tras.qTras(G,:)	 = 	qGTras	;
+Var.Gen.Tras.cqTras(G,:)  =  cqGTras ;
 
 
-Var.Red.Bus.pG = Var.Red.Bus.PTras;
-Var.Red.Bus.qG = Var.Red.Bus.QTras;
+Var.Red.Bus.pG = Var.Gen.Tras.pTras;
+Var.Red.Bus.qG = Var.Gen.Tras.qTras;
 
 opt(1,1) = sum(tfopt_expr);
 opt(1,2) = sum(tfopt_mu);

@@ -16,7 +16,7 @@ function printClNI(Header, Var, Data, outFilename)
 			rowHeader{3} = 'on';
 			rowHeader{4} = 'start';
 			sheetName = ['ClNI_' num2str(nod)];
-			printVarNx1xT(ClNI, rowHeader, Header, outFilename, sheetName);
+			printVarNx1xT(ClNI, rowHeader, Header.Main, outFilename, sheetName);
 		end
 	end
 end
